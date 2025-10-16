@@ -21,6 +21,7 @@
   .block .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
   .block.external-block{max-width:720px}
   .external-block textarea{width:100%;min-height:180px;padding:8px;background:#0f0f0f;color:inherit;border:1px solid #555;border-radius:6px;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;font-size:12px}
+  .external-block .runOutput{min-height:120px;resize:vertical}
   .external-block .status-panels{display:flex;flex-wrap:wrap;gap:10px;width:100%}
   .external-block .status-panel{flex:1;min-width:200px;background:var(--card);border:1px solid #555;border-radius:6px;padding:8px}
   .external-block .status-panel strong{display:block;margin-bottom:4px}
@@ -765,6 +766,21 @@ function bootAudio(){
         <label>Sample Rate</label><input type="number" class="sampleRateInput" min="8000" max="96000" step="1000" value="44100">
       </div>
       <div class="row">
+        <label style="width:100%">Executable Path</label>
+        <input type="text" class="exePath" list="externalAppPaths" placeholder="C:\\Path\\to\\app.exe or /path/to/app">
+        <datalist id="externalAppPaths"></datalist>
+      </div>
+      <div class="row">
+        <label style="width:100%">Arguments (optional)</label>
+        <input type="text" class="exeArgs" placeholder="--help or other switches">
+      </div>
+      <div class="row">
+        <label class="small"><input type="checkbox" class="waitToggle" checked> Wait for completion</label>
+        <label>Timeout</label><input type="number" class="timeoutInput" min="1" max="600" step="1" value="30">
+        <div class="spacer"></div>
+        <button class="btn runExternal">🚀 Run External App</button>
+      </div>
+      <div class="row">
         <label style="width:100%">Engine Config (JSON)</label>
         <textarea class="engineConfig" aria-label="Engine configuration JSON"></textarea>
       </div>
@@ -775,6 +791,10 @@ function bootAudio(){
       </div>
       <div class="row">
         <audio class="enginePreview" controls style="width:100%"></audio>
+      </div>
+      <div class="row">
+        <label style="width:100%">Run Output</label>
+        <textarea class="runOutput" readonly placeholder="Captured stdout/stderr or process information"></textarea>
       </div>
     `;
 
@@ -795,6 +815,12 @@ function bootAudio(){
     const configArea = q('.engineConfig');
     const renderInfo = q('.renderInfo');
     const preview = q('.enginePreview');
+    const exePathInput = q('.exePath');
+    const exeArgsInput = q('.exeArgs');
+    const waitToggle = q('.waitToggle');
+    const timeoutInput = q('.timeoutInput');
+    const runOutput = q('.runOutput');
+    const pathList = q('#externalAppPaths');
 
     const defaultConfig = {
       duration: parseFloat(durationInput.value)||8,
@@ -844,6 +870,27 @@ function bootAudio(){
       return parts.join(' · ');
     }
 
+    function pushPathSuggestion(path){
+      if(!pathList || !path) return;
+      const value = String(path);
+      if(!value) return;
+      const exists = Array.from(pathList.children).some(opt=> opt.value === value);
+      if(!exists){
+        const opt = document.createElement('option');
+        opt.value = value;
+        pathList.appendChild(opt);
+      }
+      if(exePathInput && !exePathInput.value){
+        exePathInput.value = value;
+      }
+    }
+
+    function showRunOutput(message){
+      if(!runOutput) return;
+      runOutput.value = message;
+      runOutput.scrollTop = runOutput.scrollHeight;
+    }
+
     async function refreshStatus(){
       statusText.textContent = 'Contacting server…';
       blockEl.classList.remove('server-offline');
@@ -853,6 +900,8 @@ function bootAudio(){
         const data = await res.json();
         modalysStatus.textContent = formatStatus(data.modalys);
         praatStatus.textContent = formatStatus(data.praat);
+        pushPathSuggestion(data.modalys && data.modalys.path);
+        pushPathSuggestion(data.praat && data.praat.path);
         if(data.platform_supported){
           statusText.textContent = 'Server ready — platform supported';
         }else{
@@ -891,10 +940,60 @@ function bootAudio(){
         const data = await res.json();
         if(!data.ok) throw new Error(data.error || 'Installer not found');
         renderInfo.textContent = data.message || (app+' ready');
+        pushPathSuggestion(data.path);
       }catch(err){
         renderInfo.textContent = 'Install failed: '+(err && err.message || err || 'unknown');
       }
       refreshStatus();
+    }
+
+    async function runExternalApp(){
+      const path = exePathInput && exePathInput.value.trim();
+      if(!path){
+        showRunOutput('Please provide a path to an executable.');
+        return;
+      }
+      const argsValue = exeArgsInput ? exeArgsInput.value : '';
+      const payload = {
+        path,
+        args: argsValue,
+        wait: !!(waitToggle && waitToggle.checked),
+      };
+      if(waitToggle && waitToggle.checked){
+        const timeoutVal = parseFloat(timeoutInput && timeoutInput.value);
+        if(!Number.isNaN(timeoutVal) && timeoutVal>0){
+          payload.timeout = timeoutVal;
+        }
+      }
+      showRunOutput('Launching '+path+'…');
+      try{
+        const res = await fetch('/api/run-app',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        if(!res.ok) throw new Error('status '+res.status);
+        const data = await res.json();
+        if(!data.ok){
+          const msg = data.error || data.stderr || 'Launch failed';
+          showRunOutput(msg);
+          return;
+        }
+        if(typeof data.pid === 'number'){
+          showRunOutput(`Launched PID ${data.pid}\nCommand: ${(data.args||[]).join(' ')}`);
+        }else{
+          const stdout = data.stdout || '';
+          const stderr = data.stderr || '';
+          const pieces = [
+            `Return code: ${data.returncode}`,
+            stdout ? `--- stdout ---\n${stdout.trim()}` : null,
+            stderr ? `--- stderr ---\n${stderr.trim()}` : null
+          ].filter(Boolean);
+          showRunOutput(pieces.join('\n\n') || 'Completed with no output.');
+        }
+      }catch(err){
+        showRunOutput('Launch failed: '+(err && err.message || err));
+      }
     }
 
     async function renderEngine(){
@@ -957,6 +1056,7 @@ function bootAudio(){
     q('.installPraat').addEventListener('click', ()=> install('praat'));
     q('.resetConfig').addEventListener('click', ()=> applyDefaultConfig());
     q('.renderNow').addEventListener('click', ()=> renderEngine());
+    q('.runExternal').addEventListener('click', ()=> runExternalApp());
     durationInput.addEventListener('change', ()=> applyDefaultConfig());
     sampleInput.addEventListener('change', ()=> applyDefaultConfig());
 

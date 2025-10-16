@@ -1,3 +1,5 @@
+import sys
+
 from ambiance.integrations.external_apps import ExternalAppManager
 
 
@@ -20,3 +22,45 @@ def test_installation_paths_created_on_extract(tmp_path):
     target.write_bytes(b"")
 
     assert manager.modalys_installation() == target
+
+
+def test_launch_external_waits_and_captures_output(tmp_path):
+    manager = ExternalAppManager(base_dir=tmp_path)
+    script = "print('hello from test')"
+    result = manager.launch_external(
+        sys.executable,
+        args=["-c", script],
+        wait=True,
+        timeout=5,
+    )
+
+    assert result["ok"] is True
+    assert "hello from test" in result["stdout"]
+    assert result["returncode"] == 0
+
+
+def test_launch_external_background_returns_pid(tmp_path):
+    manager = ExternalAppManager(base_dir=tmp_path)
+
+    result = manager.launch_external(
+        sys.executable,
+        args=["-c", "print('background run')"],
+        wait=False,
+    )
+
+    assert result["ok"] is True
+    assert isinstance(result.get("pid"), int)
+
+
+def test_launch_external_with_string_args(tmp_path):
+    manager = ExternalAppManager(base_dir=tmp_path)
+
+    result = manager.launch_external(
+        sys.executable,
+        args='-c "print(123)"',
+        wait=True,
+        timeout=5,
+    )
+
+    assert result["ok"] is True
+    assert "123" in result["stdout"]

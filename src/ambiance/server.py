@@ -130,6 +130,32 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
                 response = render_payload(payload)
                 self._send_json(response)
                 return
+            if path == "/api/run-app":
+                payload = self._read_json()
+                executable = payload.get("path") or payload.get("executable")
+                if not executable:
+                    self._send_json({"ok": False, "error": "Missing 'path'"}, HTTPStatus.BAD_REQUEST)
+                    return
+                args = payload.get("args")
+                wait = bool(payload.get("wait", False))
+                timeout_raw = payload.get("timeout")
+                cwd = payload.get("cwd")
+                timeout_value = None
+                if timeout_raw not in (None, ""):
+                    try:
+                        timeout_value = float(timeout_raw)
+                    except (TypeError, ValueError) as exc:
+                        raise ValueError("Invalid timeout value") from exc
+                result = self.manager.launch_external(
+                    executable,
+                    args=args,
+                    wait=wait,
+                    timeout=timeout_value,
+                    cwd=cwd,
+                )
+                payload = {"ok": bool(result.get("ok", False)), **result}
+                self._send_json(payload)
+                return
         except Exception as exc:  # pylint: disable=broad-except
             self._send_json({"ok": False, "error": str(exc)}, HTTPStatus.BAD_REQUEST)
             return

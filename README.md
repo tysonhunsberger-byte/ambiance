@@ -12,6 +12,8 @@ and ready for CI environments.
 - **Composable audio engine** – Combine any number of sources and effects.
 - **External tool integration** – Modalys and Praat installers are detected, extracted
   into a cache directory on demand, and exposed through Python wrappers.
+- **In-app launcher** – Provide paths to third-party executables and run them from the
+  External Apps Workbench, capturing stdout/stderr without leaving the UI.
 - **Procedural audio sources** – Sine waves, noise beds, Modalys resonators, and
   Praat-inspired vocal timbres.
 - **Signal processing effects** – Reverb, ping-pong delay, and low-pass filtering.
@@ -49,9 +51,10 @@ and ready for CI environments.
 
    The command serves the bundled `noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html`
    interface at `http://127.0.0.1:8000/`. The UI exposes controls for checking Modalys
-   and Praat installers, triggering extractions, and rendering ambience layers through
-   the Python audio engine. If you place a different HTML interface on disk, pass its
-   path via `--ui`.
+   and Praat installers, triggering extractions, launching any executable that you
+   point to (including the extracted Modalys/Praat binaries), and rendering ambience
+   layers through the Python audio engine. If you place a different HTML interface on
+   disk, pass its path via `--ui`.
 
 4. Provide a JSON configuration to customize the engine:
 

@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import platform
+import subprocess
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Sequence
 
 
 @dataclass
@@ -66,6 +67,71 @@ class ExternalAppManager:
 
     def platform_supported(self) -> bool:
         return platform.system() in {"Windows", "Darwin", "Linux"}
+
+    # --- Launching --------------------------------------------------
+    def _normalize_args(self, args: Sequence[str] | str | None) -> list[str]:
+        if args is None:
+            return []
+        if isinstance(args, str):
+            import shlex
+
+            text = args.strip()
+            return shlex.split(text) if text else []
+        return [str(item) for item in args]
+
+    def launch_external(
+        self,
+        executable: str | Path,
+        *,
+        args: Sequence[str] | str | None = None,
+        wait: bool = False,
+        timeout: float | None = None,
+        cwd: str | Path | None = None,
+    ) -> dict[str, object]:
+        """Run an arbitrary executable and return structured results."""
+
+        exe_path = Path(executable).expanduser()
+        if not exe_path.exists():
+            raise FileNotFoundError(f"Executable not found: {exe_path}")
+        if not exe_path.is_file():
+            raise IsADirectoryError(f"Executable must be a file: {exe_path}")
+
+        cmd: list[str] = [str(exe_path)]
+        cmd.extend(self._normalize_args(args))
+
+        working_dir = Path(cwd).expanduser() if cwd else exe_path.parent
+
+        if wait:
+            completed = subprocess.run(  # noqa: S603 - user provided
+                cmd,
+                cwd=str(working_dir),
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                check=False,
+            )
+            return {
+                "ok": completed.returncode == 0,
+                "returncode": completed.returncode,
+                "stdout": completed.stdout,
+                "stderr": completed.stderr,
+                "args": cmd,
+                "cwd": str(working_dir),
+            }
+
+        proc = subprocess.Popen(  # noqa: S603,S607 - user provided
+            cmd,
+            cwd=str(working_dir),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+        return {
+            "ok": True,
+            "pid": proc.pid,
+            "args": cmd,
+            "cwd": str(working_dir),
+        }
 
     def status(self) -> dict[str, object]:
         """Return structured availability information for the bundled apps."""
