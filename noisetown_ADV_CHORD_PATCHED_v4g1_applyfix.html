@@ -506,6 +506,113 @@ body.theme-98 select, body.theme-xp select{background:#fff; color:#000; border:1
 </div>
 
 <script>
+  /* ==== Dark palette util (ColorHunt-inspired, WCAG-aware) ==== */
+  function hexToRgb(hex){
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return m ? [parseInt(m[1],16)/255, parseInt(m[2],16)/255, parseInt(m[3],16)/255] : [0,0,0];
+  }
+  function relLum([r,g,b]){ const f=x=>x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4);
+    const [R,G,B]=[f(r),f(g),f(b)]; return 0.2126*R + 0.7152*G + 0.0722*B; }
+  function contrastRatio(c1, c2){
+    const L1=relLum(hexToRgb(c1)), L2=relLum(hexToRgb(c2));
+    const [a,b]=L1>L2?[L1,L2]:[L2,L1]; return (a+0.05)/(b+0.05);
+  }
+  function ensureTextContrast(bg, text="#eaeaf0"){ return contrastRatio(bg, text) < 4.5 ? "#f2f2f5" : text; }
+  window.DARK_PALETTES = Array.isArray(window.DARK_PALETTES) ? window.DARK_PALETTES : [
+    ["#0F0F0F","#232D3F","#3F4E4F","#A27B5C"],
+    ["#11111B","#1E1E2E","#313244","#89B4FA"],
+    ["#0B0C10","#1F2833","#C5C6C7","#66FCF1"],
+    ["#0D0D0D","#202020","#2F2F2F","#F2A900"],
+    ["#121212","#1E1E1E","#2C2C2C","#A78BFA"],
+    ["#0A0F14","#11171F","#1C2733","#00BCD4"],
+    ["#0E131F","#1A2130","#293349","#E63946"],
+    ["#151515","#222222","#333333","#FF6F61"],
+    ["#0A0A0A","#1A1A1A","#2B2B2B","#6CCFF6"],
+    ["#0C0D0E","#191B1F","#2B2F36","#ED6EA0"]
+  ]
+  window.pickDarkPalette = window.pickDarkPalette || function(){ return window.DARK_PALETTES[Math.floor(Math.random()*window.DARK_PALETTES.length)]; }
+  window.pick2DarkPalette = window.pick2DarkPalette || window.pickDarkPalette;
+  window.applyPaletteToVars = window.applyPaletteToVars || function(p){
+    const [bg, panel, card, accent] = p;
+    const root = document.documentElement;
+    const text = ensureTextContrast(bg, "#eaeaf0");
+    root.style.setProperty('--bg', bg);
+    root.style.setProperty('--panel', panel);
+    root.style.setProperty('--card', card);
+    root.style.setProperty('--accent', accent);
+    root.style.setProperty('--text', text);
+    root.style.setProperty('--muted', "#a0a3a8");
+    root.style.setProperty('--select', accent);
+    root.style.setProperty('--select-border', card);
+  }
+
+  // ==== Expanded Dark Palettes (ColorHunt-inspired) ====
+  window.DARK_PALETTES = window.DARK_PALETTES || [
+    ["#0F0F0F","#232D3F","#3F4E4F","#A27B5C"],
+    ["#11111B","#1E1E2E","#313244","#89B4FA"],
+    ["#0B0C10","#1F2833","#C5C6C7","#66FCF1"],
+    ["#0D0D0D","#202020","#2F2F2F","#F2A900"],
+    ["#121212","#1E1E1E","#2C2C2C","#A78BFA"],
+    ["#0A0F14","#11171F","#1C2733","#00BCD4"],
+    ["#0E131F","#1A2130","#293349","#E63946"],
+    ["#151515","#222222","#333333","#FF6F61"],
+    ["#0A0A0A","#1A1A1A","#2B2B2B","#6CCFF6"],
+    ["#0C0D0E","#191B1F","#2B2F36","#ED6EA0"],
+    ["#111111","#2A2438","#352F44","#5C5470"],
+    ["#0B132B","#1C2541","#3A506B","#5BC0BE"],
+    ["#0D1B2A","#1B263B","#415A77","#E0E1DD"],
+    ["#101418","#1B232E","#2C3A4F","#40C463"],
+    ["#0D0C1D","#161B33","#474973","#A69CAC"],
+    ["#0D1321","#1D2D44","#3E5C76","#748CAB"],
+    ["#0E0F1A","#1B1F3B","#313866","#97A0E0"],
+    ["#0A0E14","#141B2D","#233554","#E43D40"],
+    ["#0F172A","#1E293B","#334155","#F472B6"],
+    ["#130F40","#1E1E60","#30336B","#22A6B3"],
+    ["#0A0908","#22333B","#5E503F","#C6AC8F"],
+    ["#1B1B1B","#2C2C2C","#3D3D3D","#FF7F50"],
+    ["#0B0A07","#1D1A16","#403D39","#E07A5F"],
+    ["#171717","#2D2D2D","#404040","#10B981"],
+    ["#0E0D0D","#1A1A1A","#2D2D2D","#FF4D6D"],
+    ["#09090B","#18181B","#27272A","#22D3EE"],
+    ["#0E141B","#1B2430","#4A6572","#F7C59F"],
+    ["#0B0C10","#1C1F26","#2A2F36","#FF3B30"],
+    ["#0E1E1E","#1A2A2A","#2E3B3B","#F9A826"],
+    ["#141414","#1F1F1F","#2A2A2A","#6EE7B7"],
+    ["#0F0A0A","#1F0E0E","#2F1414","#F25F5C"],
+    ["#0C0A3E","#1B1B6E","#3A0CA3","#FF5D8F"],
+    ["#081C15","#1B4332","#2D6A4F","#95D5B2"],
+    ["#0B0F0C","#1E2B1F","#334D35","#9FE870"],
+    ["#0B090A","#161A1D","#2B2D42","#EF233C"],
+    ["#0C0F0A","#1C2818","#2F3E2C","#8FD694"],
+    ["#0F1020","#171738","#2E2B5F","#E8458B"],
+    ["#12100E","#1D1A16","#2C2622","#E0A96D"],
+    ["#0F0E17","#1A1B26","#232946","#E53170"],
+    ["#0B0D12","#16222A","#2C3E50","#E74C3C"],
+    ["#10141B","#1E2933","#36454F","#F59E0B"],
+    ["#0E1220","#1A1F36","#2E3A59","#32E0C4"],
+    ["#0A0E1A","#141C2F","#253B6E","#60A5FA"],
+    ["#0E0E52","#1C1C7A","#2E2E9A","#FF5470"],
+    ["#0A0D0F","#1D2125","#2F3438","#FF6F00"],
+    ["#0F1021","#191A32","#2A2B45","#64DFDF"],
+    ["#0B1321","#1D2D44","#3E5C76","#D72638"],
+    ["#0D0D0D","#242B2E","#2F3B3E","#66D7D1"],
+    ["#0D0208","#2C0510","#35061A","#FF5E6C"],
+    ["#0E0A0F","#2A1F2D","#3E2C41","#D90368"],
+    ["#0E0D0B","#24221F","#3A3730","#F4A261"],
+    ["#0E0F0C","#1B201C","#2C3639","#A27B5C"],
+    ["#090C08","#132A13","#184E77","#52B788"],
+    ["#0B090A","#191516","#2D2426","#E5383B"],
+    ["#0F0E0E","#1F1B1B","#2E2A2A","#EC8F6A"],
+    ["#0A0A0A","#151515","#212121","#29AB87"],
+    ["#131516","#1E2428","#2D343C","#76E4F7"],
+    ["#0B0E11","#151A1F","#2D3436","#E17055"],
+    ["#0A0718","#1B163F","#2E2A68","#9A4DFF"],
+    ["#0B0A07","#1E2019","#2D3123","#DDB967"],
+    ["#0E131B","#182230","#26364D","#61C0BF"]
+  ];
+  window.pickDarkPalette = window.pickDarkPalette || function(){ return window.DARK_PALETTES[Math.floor(Math.random()*window.DARK_PALETTES.length)]; }
+  window.pick2DarkPalette = window.pick2DarkPalette || window.pickDarkPalette;
+
   /* --- Granular Worklet Source --- */
   ;(function ensureGranularWorklet(){
     if(self._granularWorkletReady) return;
@@ -612,6 +719,83 @@ body.theme-98 select, body.theme-xp select{background:#fff; color:#000; border:1
 
 (function(){
   // ===== Utilities =====
+
+  // ==== Random Dark Theme utilities (ColorHunt-inspired) ====
+  function hexToRgb(hex){
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if(!m) return [0,0,0];
+    return [parseInt(m[1],16)/255, parseInt(m[2],16)/255, parseInt(m[3],16)/255];
+  }
+  function relLum([r,g,b]){ // sRGB to relative luminance
+    const f = x => (x<=0.03928? x/12.92 : Math.pow((x+0.055)/1.055, 2.4));
+    const [R,G,B] = [f(r), f(g), f(b)];
+    return 0.2126*R + 0.7152*G + 0.0722*B;
+  }
+  function contrastRatio(c1, c2){
+    const L1 = relLum(hexToRgb(c1)), L2 = relLum(hexToRgb(c2));
+    const [a,b] = L1>L2 ? [L1,L2] : [L2,L1];
+    return (a+0.05)/(b+0.05);
+  }
+  function ensureTextContrast(bg, text){
+    // if contrast < 4.5, force text to white or very light gray
+    if(contrastRatio(bg, text) < 4.5){
+      return "#f2f2f5";
+    }
+    return text;
+  }
+  // Curated dark palettes (hex) inspired by ColorHunt dark collections
+  /* PALETTES REPLACED */
+  window.pickDarkPalette = window.pickDarkPalette || function(){
+    return window.DARK_PALETTES[Math.floor(Math.random()*window.DARK_PALETTES.length)];
+  }
+  window.applyPaletteToVars = window.applyPaletteToVars || function(p){
+    const [bg, panel, card, accent] = p;
+    // derive text & muted ensuring contrast
+    let text = ensureTextContrast(bg, "#eaeaf0");
+    const muted = "#a0a3a8";
+    const root = document.documentElement;
+    root.style.setProperty('--bg', bg);
+    root.style.setProperty('--panel', panel);
+    root.style.setProperty('--card', card);
+    root.style.setProperty('--accent', accent);
+    root.style.setProperty('--text', text);
+    root.style.setProperty('--muted', muted);
+    root.style.setProperty('--select', accent);
+    root.style.setProperty('--select-border', card);
+  }
+
+  // === Random dark theme generator ===
+  function hsl(h,s,l){ return `hsl(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%)`; }
+  function clamp01(x){ return x<0?0:(x>1?1:x); } // ensure present
+  function randomDarkTheme(seed=Math.random()){
+    // base hue and accent hue (30-330 apart)
+    const baseH = Math.floor(seed*360);
+    const accentH = (baseH + 180 + Math.floor(seed*90)-45 + 360) % 360;
+    // Construct a tasteful dark palette
+    const bgL = 8 + Math.floor(seed*4);          // 8–12
+    const panelL = bgL + 6;                      // panel slightly lighter
+    const cardL = panelL + 6;                    // card lighter
+    const textL = 92;                            // near-white
+    const mutedL = 65;
+    const sAcc = 70;                              // accent saturation
+    const accL = 55;
+    const selL = 20;
+    const selBorL = 35;
+    return {
+      '--bg':        hsl(baseH, 12, bgL),
+      '--panel':     hsl(baseH, 12, panelL),
+      '--card':      hsl(baseH, 12, cardL),
+      '--text':      hsl(baseH, 10, textL),
+      '--muted':     hsl(baseH, 10, mutedL),
+      '--accent':    hsl(accentH, sAcc, accL),
+      '--select':    hsl(accentH, 35, selL),
+      '--select-border': hsl(accentH, 40, selBorL)
+    };
+  }
+  function applyThemeVars(vars){
+    const root = document.documentElement;
+    Object.entries(vars).forEach(([k,v])=> root.style.setProperty(k, v));
+  }
 
   function applyIndepRouting(sample, gA, gB){
     try{
@@ -2236,6 +2420,22 @@ themeFile.addEventListener('change', async (e)=>{
   addBlock();
 })();
 
+  // Toolbar Random Theme
+  const _rtb = document.getElementById('btnRandomTheme');
+  if(_rtb){
+    _rtb.addEventListener('click', ()=>{
+      
+      try{
+        const pal = (typeof window.pickDarkPalette==='function' ? window.pickDarkPalette() : (typeof window.pick2DarkPalette==='function' ? window.pick2DarkPalette() : null));
+        if(!pal) throw new Error('palette fn missing');
+        if(typeof window.applyPaletteToVars!=='function') throw new Error('applyPaletteToVars missing');
+        window.applyPaletteToVars(pal);
+        console.log('Applied dark palette', pal);
+      }catch(err){
+        console.warn('Random Theme failed:', err);
+      }
+    });
+  }
 </script>
 
 // === Style Preset wiring (add 9x themes) ===
