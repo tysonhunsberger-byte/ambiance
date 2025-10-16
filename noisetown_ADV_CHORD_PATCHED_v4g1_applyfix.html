@@ -19,6 +19,17 @@
   .block.dragging{opacity:.95;outline:2px dashed var(--accent)}
   .block h2{margin:0 0 8px}
   .block .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
+  .block.external-block{max-width:720px}
+  .external-block textarea{width:100%;min-height:180px;padding:8px;background:#0f0f0f;color:inherit;border:1px solid #555;border-radius:6px;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;font-size:12px}
+  .external-block .status-panels{display:flex;flex-wrap:wrap;gap:10px;width:100%}
+  .external-block .status-panel{flex:1;min-width:200px;background:var(--card);border:1px solid #555;border-radius:6px;padding:8px}
+  .external-block .status-panel strong{display:block;margin-bottom:4px}
+  .external-block .registry-tags{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+  .external-block .registry-tags span{padding:2px 6px;border:1px solid #555;border-radius:4px;background:var(--card);font-size:12px}
+  .external-block .status-text{font-size:12px;color:var(--muted)}
+  .external-block.server-offline .status-text{color:#ff8585}
+  body.theme-xp .external-block textarea,
+  body.theme-98 .external-block textarea{background:#fff;color:#000;border:1px solid #7b7b7b}
   .scope{flex:1;min-width:220px;height:60px;background:#000;border:1px solid #666;border-radius:6px}
   .stream{background:var(--card);border:1px solid #555;border-radius:8px;padding:10px;margin:8px 0}
   .stream h3{margin:0 0 6px}
@@ -715,6 +726,244 @@ function bootAudio(){
   const streamSpectros = []; // for spectrogram draw loop
 
   let blockCount = 0;
+  const isExternalBlock = (el)=> !!(el && el.dataset && el.dataset.role === 'external-apps');
+
+  function ensureExternalAppsWorkspace(){
+    if(qs('#externalAppsBlock')) return null;
+    const blockEl = ce('div','block external-block');
+    blockEl.id = 'externalAppsBlock';
+    blockEl.dataset.role = 'external-apps';
+    blockEl.innerHTML = `
+      <h2><span class="dragHandle" style="cursor:move">⣿</span> External Apps Workbench</h2>
+      <div class="row">
+        <button class="btn checkStatus">🔄 Check Status</button>
+        <button class="btn installModalys">📦 Extract Modalys</button>
+        <button class="btn installPraat">📦 Extract Praat</button>
+        <button class="btn resetConfig">🧰 Reset Config</button>
+        <div class="spacer"></div>
+        <span class="status-text">Waiting for server…</span>
+      </div>
+      <div class="status-panels">
+        <div class="status-panel">
+          <strong>Modalys</strong>
+          <div class="modalysStatus small">Pending…</div>
+        </div>
+        <div class="status-panel">
+          <strong>Praat</strong>
+          <div class="praatStatus small">Pending…</div>
+        </div>
+        <div class="status-panel">
+          <strong>Registry</strong>
+          <div class="small">Sources</div>
+          <div class="registry-tags registrySources"></div>
+          <div class="small" style="margin-top:6px">Effects</div>
+          <div class="registry-tags registryEffects"></div>
+        </div>
+      </div>
+      <div class="row">
+        <label>Duration (s)</label><input type="number" class="durationInput" min="1" max="120" step="1" value="8">
+        <label>Sample Rate</label><input type="number" class="sampleRateInput" min="8000" max="96000" step="1000" value="44100">
+      </div>
+      <div class="row">
+        <label style="width:100%">Engine Config (JSON)</label>
+        <textarea class="engineConfig" aria-label="Engine configuration JSON"></textarea>
+      </div>
+      <div class="row">
+        <button class="btn renderNow">🎧 Render with Engine</button>
+        <div class="spacer"></div>
+        <span class="small renderInfo">Idle.</span>
+      </div>
+      <div class="row">
+        <audio class="enginePreview" controls style="width:100%"></audio>
+      </div>
+    `;
+
+    main.appendChild(blockEl);
+    wireExternalAppsWorkspace(blockEl);
+    return blockEl;
+  }
+
+  function wireExternalAppsWorkspace(blockEl){
+    const q = (sel)=> blockEl.querySelector(sel);
+    const statusText = q('.status-text');
+    const modalysStatus = q('.modalysStatus');
+    const praatStatus = q('.praatStatus');
+    const registrySources = q('.registrySources');
+    const registryEffects = q('.registryEffects');
+    const durationInput = q('.durationInput');
+    const sampleInput = q('.sampleRateInput');
+    const configArea = q('.engineConfig');
+    const renderInfo = q('.renderInfo');
+    const preview = q('.enginePreview');
+
+    const defaultConfig = {
+      duration: parseFloat(durationInput.value)||8,
+      sample_rate: parseInt(sampleInput.value)||44100,
+      sources: [
+        { name:'sine', frequency:432, amplitude:0.18 },
+        { name:'modalys', preset:'string-resonator', amplitude:0.22 },
+        { name:'praat', vowel:'o', amplitude:0.16, vibrato_rate:5.5, vibrato_depth:0.004 }
+      ],
+      effects: [
+        { name:'reverb', decay:0.45, mix:0.3 },
+        { name:'delay', time:0.32, feedback:0.22 },
+        { name:'lowpass', cutoff:4600 }
+      ]
+    };
+
+    function applyDefaultConfig(){
+      const payload = JSON.parse(JSON.stringify(defaultConfig));
+      payload.duration = parseFloat(durationInput.value)||payload.duration;
+      payload.sample_rate = parseInt(sampleInput.value)||payload.sample_rate;
+      configArea.value = JSON.stringify(payload, null, 2);
+    }
+
+    function renderTags(container, items){
+      container.innerHTML='';
+      if(!items || !items.length){
+        const span=document.createElement('span');
+        span.className='small';
+        span.textContent='Unavailable';
+        container.appendChild(span);
+        return;
+      }
+      items.forEach(name=>{
+        const tag=document.createElement('span');
+        tag.textContent=name;
+        container.appendChild(tag);
+      });
+    }
+
+    function formatStatus(data){
+      if(!data) return 'Unavailable';
+      const parts=[];
+      parts.push(data.zip_present ? 'Installer found' : 'Installer missing');
+      if(data.installed) parts.push('Extracted');
+      else if(data.zip_present) parts.push('Not extracted');
+      if(data.path) parts.push(data.path);
+      return parts.join(' · ');
+    }
+
+    async function refreshStatus(){
+      statusText.textContent = 'Contacting server…';
+      blockEl.classList.remove('server-offline');
+      try{
+        const res = await fetch('/api/status');
+        if(!res.ok) throw new Error('status '+res.status);
+        const data = await res.json();
+        modalysStatus.textContent = formatStatus(data.modalys);
+        praatStatus.textContent = formatStatus(data.praat);
+        if(data.platform_supported){
+          statusText.textContent = 'Server ready — platform supported';
+        }else{
+          statusText.textContent = 'Server ready — platform unverified';
+        }
+      }catch(err){
+        statusText.innerHTML = 'Server offline — run <code>python -m ambiance.server</code>';
+        modalysStatus.textContent = 'Unavailable';
+        praatStatus.textContent = 'Unavailable';
+        blockEl.classList.add('server-offline');
+      }
+    }
+
+    async function refreshRegistry(){
+      try{
+        const res = await fetch('/api/registry');
+        if(!res.ok) throw new Error('status '+res.status);
+        const data = await res.json();
+        renderTags(registrySources, data.sources);
+        renderTags(registryEffects, data.effects);
+      }catch(_err){
+        renderTags(registrySources, []);
+        renderTags(registryEffects, []);
+      }
+    }
+
+    async function install(app){
+      renderInfo.textContent = 'Extracting '+app+'…';
+      try{
+        const res = await fetch('/api/install',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({app})
+        });
+        if(!res.ok) throw new Error('status '+res.status);
+        const data = await res.json();
+        if(!data.ok) throw new Error(data.error || 'Installer not found');
+        renderInfo.textContent = data.message || (app+' ready');
+      }catch(err){
+        renderInfo.textContent = 'Install failed: '+(err && err.message || err || 'unknown');
+      }
+      refreshStatus();
+    }
+
+    async function renderEngine(){
+      let payload;
+      try{
+        payload = JSON.parse(configArea.value || '{}');
+      }catch(err){
+        renderInfo.textContent = 'Invalid JSON: '+(err && err.message || err);
+        return;
+      }
+      if(!payload.duration) payload.duration = parseFloat(durationInput.value)||defaultConfig.duration;
+      if(!payload.sample_rate) payload.sample_rate = parseInt(sampleInput.value)||defaultConfig.sample_rate;
+      renderInfo.textContent = 'Rendering…';
+      try{
+        const res = await fetch('/api/render',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        if(!res.ok) throw new Error('status '+res.status);
+        const data = await res.json();
+        if(!data.ok) throw new Error(data.error || 'Render failed');
+        preview.src = data.audio;
+        renderInfo.textContent = `Rendered ${data.duration.toFixed(2)}s @ ${data.sample_rate} Hz`;
+        try{ preview.play(); }catch(_){ /* ignore autoplay errors */ }
+      }catch(err){
+        renderInfo.textContent = 'Render failed: '+(err && err.message || err);
+      }
+    }
+
+    const dragHandle = blockEl.querySelector('.dragHandle');
+    let drag = null;
+    dragHandle.addEventListener('mousedown', (e)=>{
+      if(!editMode) return;
+      const r = blockEl.getBoundingClientRect();
+      const parentR = main.getBoundingClientRect();
+      drag = {dx:e.clientX - r.left, dy:e.clientY - r.top, parentR, w:r.width};
+      blockEl.classList.add('dragging');
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e)=>{
+      if(!drag) return;
+      let x = e.clientX - drag.parentR.left - drag.dx + main.scrollLeft;
+      let y = e.clientY - drag.parentR.top - drag.dy + main.scrollTop;
+      x = Math.round(x / GRID) * GRID;
+      y = Math.round(y / GRID) * GRID;
+      blockEl.style.left = x + 'px';
+      blockEl.style.top = y + 'px';
+      blockEl.style.position = 'absolute';
+      blockEl.style.width = Math.max(520, Math.floor(drag.w)) + 'px';
+    });
+    window.addEventListener('mouseup', ()=>{
+      if(!drag) return;
+      drag=null;
+      blockEl.classList.remove('dragging');
+    });
+
+    q('.checkStatus').addEventListener('click', ()=>{ refreshStatus(); refreshRegistry(); });
+    q('.installModalys').addEventListener('click', ()=> install('modalys'));
+    q('.installPraat').addEventListener('click', ()=> install('praat'));
+    q('.resetConfig').addEventListener('click', ()=> applyDefaultConfig());
+    q('.renderNow').addEventListener('click', ()=> renderEngine());
+    durationInput.addEventListener('change', ()=> applyDefaultConfig());
+    sampleInput.addEventListener('change', ()=> applyDefaultConfig());
+
+    applyDefaultConfig();
+    refreshRegistry();
+    refreshStatus();
+  }
 
   function addBlock(){
     if(!ACTX){ bootAudio(); /* resume only on Start Audio click */ }
@@ -1687,9 +1936,12 @@ return blockModel;
   function gatherSession(){
     const data = { blocks:[] };
     qsa('.block', main).forEach(blk=>{
+      if(isExternalBlock(blk)) return;
+      const volEl = qs('.blockVol', blk);
+      if(!volEl) return;
       const b = {
         pos: { left: blk.style.left, top: blk.style.top, width: blk.style.width, position: blk.style.position },
-        vol: parseFloat(qs('.blockVol', blk).value)||1,
+        vol: parseFloat(volEl.value)||1,
         streams: []
       };
       qsa('.stream', blk).forEach(st=>{
@@ -1715,7 +1967,7 @@ return blockModel;
     return data;
   }
   function applySession(data){
-    qsa('.block', main).forEach(b=>b.remove());
+    qsa('.block', main).forEach(b=>{ if(isExternalBlock(b)) return; b.remove(); });
     if(!ACTX){ bootAudio(); ACTX.resume(); }
     (data.blocks||[]).forEach(b=>{
       const blk = addBlock();
@@ -1835,7 +2087,7 @@ return blockModel;
   async function gatherPresetWithAudio(){
     const session = gatherSession();
     let blockIdx = 0;
-    const blockEls = qsa('.block', main);
+    const blockEls = qsa('.block', main).filter(blk=> !isExternalBlock(blk));
     for (const blk of blockEls){
       const streams = qsa('.stream', blk);
       let sidx = 0;
@@ -2242,7 +2494,8 @@ themeFile.addEventListener('change', async (e)=>{
   _editBtn.addEventListener('click', ()=> enableEditReorder(editMode));
 
   // Also enable on newly created streams
-  // Start with one block for convenience
+  // Start with one block for convenience and keep the external workspace present
+  ensureExternalAppsWorkspace();
   addBlock();
 })();
 

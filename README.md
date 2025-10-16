@@ -40,7 +40,20 @@ and ready for CI environments.
    the native binaries. On other platforms, the Python fallbacks generate similar sounds
    so your workflows stay portable.
 
-3. Provide a JSON configuration to customize the engine:
+3. Launch the interactive UI server to use the Noisetown interface together with the
+   Python engine:
+
+   ```bash
+   python -m ambiance.server
+   ```
+
+   The command serves the bundled `noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html`
+   interface at `http://127.0.0.1:8000/`. The UI exposes controls for checking Modalys
+   and Praat installers, triggering extractions, and rendering ambience layers through
+   the Python audio engine. If you place a different HTML interface on disk, pass its
+   path via `--ui`.
+
+4. Provide a JSON configuration to customize the engine:
 
    ```json
    {

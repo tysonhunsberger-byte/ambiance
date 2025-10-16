@@ -157,7 +157,9 @@ def abs(array_like):
 
 def clip(array_like: Sequence[float], min_value: float, max_value: float) -> SimpleArray:
     dtype = getattr(array_like, "dtype", float32)
-    return SimpleArray([min(max(v, min_value), max_value) for v in array_like], dtype=dtype)
+    return SimpleArray([
+        builtins_min(builtins_max(v, min_value), max_value) for v in array_like
+    ], dtype=dtype)
 
 
 def copy(array_like: Sequence[float]) -> SimpleArray:
@@ -205,4 +207,5 @@ def sqrt(x: float) -> float:
 
 
 builtins_max = builtins.max
+builtins_min = builtins.min
 builtins_abs = builtins.abs

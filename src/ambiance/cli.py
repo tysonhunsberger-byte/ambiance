@@ -16,6 +16,7 @@ from . import (
     ReverbEffect,
     SineWaveSource,
 )
+from .core.registry import registry
 from .utils.audio import write_wav
 
 
@@ -28,14 +29,24 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _create_from_config(kind: str, config: dict) -> object:
+    payload = dict(config)
+    name = payload.pop("name", payload.pop("type", None))
+    if not name:
+        raise ValueError(f"Missing identifier for {kind}")
+    if kind == "source":
+        return registry.create_source(name, **payload)
+    if kind == "effect":
+        return registry.create_effect(name, **payload)
+    raise ValueError(f"Unsupported kind '{kind}'")
+
+
 def run_from_config(engine: AudioEngine, config_path: Path) -> None:
     data = json.loads(config_path.read_text())
     for source_conf in data.get("sources", []):
-        source_type = source_conf.pop("type")
-        engine.add_source(globals()[source_type](**source_conf))
+        engine.add_source(_create_from_config("source", source_conf))
     for effect_conf in data.get("effects", []):
-        effect_type = effect_conf.pop("type")
-        engine.add_effect(globals()[effect_type](**effect_conf))
+        engine.add_effect(_create_from_config("effect", effect_conf))
 
 
 def main(argv: list[str] | None = None) -> None:

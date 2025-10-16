@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import wave
 from pathlib import Path
 from typing import Iterable
@@ -20,6 +21,20 @@ def write_wav(path: Path | str, buffer: np.ndarray, sample_rate: int) -> None:
         wf.setsampwidth(2)
         wf.setframerate(sample_rate)
         wf.writeframes(pcm.tobytes())
+
+
+def encode_wav_bytes(buffer: np.ndarray, sample_rate: int) -> bytes:
+    """Return WAV-formatted bytes for an in-memory buffer."""
+
+    scaled = np.clip(buffer, -1.0, 1.0)
+    pcm = (scaled * 32767).astype(np.int16)
+    with io.BytesIO() as bio:
+        with wave.open(bio, "wb") as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(sample_rate)
+            wf.writeframes(pcm.tobytes())
+        return bio.getvalue()
 
 
 def normalize(buffers: Iterable[np.ndarray]) -> Iterable[np.ndarray]:
