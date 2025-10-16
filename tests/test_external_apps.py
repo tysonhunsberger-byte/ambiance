@@ -1,50 +1,51 @@
+import stat
 import sys
-import zipfile
 
 from ambiance.integrations.external_apps import ExternalAppManager
 
 
-def test_status_handles_missing_installers(tmp_path):
+def test_status_reports_workspace(tmp_path):
     manager = ExternalAppManager(base_dir=tmp_path)
 
     status = manager.status()
 
-    assert status["modalys"]["zip_present"] is False
-    assert status["modalys"]["installed"] is False
-    assert status["modalys"]["installer_only"] is False
-    assert status["modalys"]["path"] is None
-    assert status["praat"]["zip_present"] is False
+    assert status["workspace"] == str(manager.workspace_path())
+    assert status["workspace_exists"] is True
+    assert status["executables"] == []
+    assert status["count"] == 0
     assert status["platform_supported"] in {True, False}
 
 
-def test_installation_paths_created_on_extract(tmp_path):
+def test_discover_workspace_finds_executables(tmp_path):
     manager = ExternalAppManager(base_dir=tmp_path)
-    modalys_folder = tmp_path / ".cache" / "external_apps" / "modalys"
-    modalys_folder.mkdir(parents=True)
-    target = modalys_folder / manager.modalys_executable_name
-    target.write_bytes(b"")
+    workspace = manager.workspace_path()
+    exe = workspace / "tool.exe"
+    exe.write_bytes(b"")
+    exe.chmod(exe.stat().st_mode | stat.S_IXUSR)
 
-    assert manager.modalys_installation() == target
+    script = workspace / "run.sh"
+    script.write_bytes(b"#!/bin/sh\nexit 0\n")
+    script.chmod(script.stat().st_mode | stat.S_IXUSR)
+
+    nested_dir = workspace / "Something.app"
+    (nested_dir / "Contents").mkdir(parents=True)
+
+    entries = manager.discover_workspace()
+    names = {entry["name"] for entry in entries}
+
+    assert "tool.exe" in names
+    assert "run.sh" in names
+    assert "Something.app" in names
 
 
-def test_status_detects_installer_only(tmp_path):
-    archive = tmp_path / "Modalys 3.9.0 for Windows.zip"
-    installer_name = "Modalys for Max 3.9.0 Installer.exe"
-    with zipfile.ZipFile(archive, "w") as zf:
-        zf.writestr(installer_name, b"")
-
+def test_non_executables_are_skipped(tmp_path):
     manager = ExternalAppManager(base_dir=tmp_path)
+    workspace = manager.workspace_path()
+    (workspace / "README.txt").write_text("not executable")
 
-    # Extraction should yield the installer path.
-    located = manager.ensure_modalys_installed()
-    assert located is not None
-    assert located.name == installer_name
+    entries = manager.discover_workspace()
 
-    status = manager.status()
-    assert status["modalys"]["zip_present"] is True
-    assert status["modalys"]["installer_only"] is True
-    assert status["modalys"]["installed"] is False
-    assert "installer" in (status["modalys"]["kind"] or "")
+    assert entries == []
 
 
 def test_launch_external_waits_and_captures_output(tmp_path):

@@ -1,144 +1,100 @@
-"""Utility helpers to expose bundled third-party audio tools."""
+"""Utility helpers to work with user-supplied external executables."""
 
 from __future__ import annotations
 
+import os
 import platform
+import stat
 import subprocess
-import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Sequence, Tuple
+from typing import Iterable, Sequence
 
 
 @dataclass
 class ExternalAppManager:
-    """Manage extraction and discovery of bundled installers/binaries."""
+    """Manage discovery and execution for external tools dropped into a workspace."""
 
     base_dir: Path = Path(__file__).resolve().parents[2]
-    cache_dir: Path | None = None
-
-    modalys_executable_name: str = "Modalys for Max 3.9.0 Installer.exe"
-    praat_executable_name: str = "Praat.exe"
+    workspace_dir: Path | None = None
 
     def __post_init__(self) -> None:
         self.base_dir = Path(self.base_dir)
-        if self.cache_dir is None:
-            self.cache_dir = self.base_dir / ".cache" / "external_apps"
+        if self.workspace_dir is None:
+            self.workspace_dir = self.base_dir / ".cache" / "external_apps"
         else:
-            self.cache_dir = Path(self.cache_dir)
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.modalys_zip = self._find_zip("Modalys 3.9.0 for Windows.zip")
-        self.praat_zip = self._find_zip("praat6445_win-intel64.zip")
+            self.workspace_dir = Path(self.workspace_dir)
+        self.workspace_dir.mkdir(parents=True, exist_ok=True)
 
-    # --- Discovery helpers -------------------------------------------------
-    def _app_target(self, name: str) -> Path:
-        return self.cache_dir / name
+    # --- Workspace helpers -----------------------------------------
+    def workspace_path(self) -> Path:
+        """Return the directory where executables should be stored."""
 
-    def _discover_executable(
-        self, target_dir: Path, preferred: Optional[str] = None
-    ) -> Tuple[Optional[Path], Optional[str]]:
-        """Inspect ``target_dir`` and return a candidate executable.
+        return Path(self.workspace_dir)
 
-        The returned tuple contains the discovered path (if any) and a string
-        describing the kind of file that was found.  The ``kind`` value is one
-        of ``"executable"`` or ``"installer"``.  ``None`` is returned if the
-        directory does not contain an executable.
-        """
+    def _candidate_paths(self) -> Iterable[Path]:
+        """Yield likely executable candidates from the workspace."""
 
-        def classify(path: Path) -> str:
-            name = path.name.lower()
-            if "installer" in name or "setup" in name:
-                return "installer"
-            return "executable"
+        root = self.workspace_path()
+        if not root.exists():
+            return []
 
-        if preferred:
-            candidate = target_dir / preferred
-            if candidate.exists():
-                return candidate, classify(candidate)
+        def walker() -> Iterable[Path]:
+            for dirpath, dirnames, filenames in os.walk(root):
+                current = Path(dirpath)
+                for dirname in list(dirnames):
+                    candidate = current / dirname
+                    if candidate.suffix.lower() == ".app":
+                        yield candidate
+                        dirnames.remove(dirname)
+                for filename in filenames:
+                    yield current / filename
 
-        patterns = ("*.exe", "*.bat", "*.cmd")
-        candidates: list[Path] = []
-        for pattern in patterns:
-            candidates.extend(target_dir.glob(pattern))
-            candidates.extend(target_dir.rglob(pattern))
+        return walker()
 
-        unique: list[Path] = []
-        seen: set[Path] = set()
-        for candidate in sorted(candidates):
-            if candidate in seen or not candidate.is_file():
+    @staticmethod
+    def _looks_executable(path: Path) -> bool:
+        if path.is_dir():
+            return path.suffix.lower() == ".app"
+
+        suffix = path.suffix.lower()
+        if suffix in {".exe", ".bat", ".cmd", ".com", ".ps1", ".sh", ".bin", ".command"}:
+            return True
+
+        try:
+            mode = path.stat().st_mode
+        except OSError:
+            return False
+
+        return bool(mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
+
+    def discover_workspace(self, limit: int = 128) -> list[dict[str, object]]:
+        """Return metadata for executables living inside the workspace."""
+
+        entries: list[dict[str, object]] = []
+        for candidate in self._candidate_paths():
+            if not self._looks_executable(candidate):
                 continue
-            seen.add(candidate)
-            unique.append(candidate)
-
-        # Prefer non-installer executables when multiple files exist.
-        for candidate in unique:
-            kind = classify(candidate)
-            if kind == "executable":
-                return candidate, kind
-
-        if unique:
-            candidate = unique[0]
-            return candidate, classify(candidate)
-
-        return None, None
-
-    def _find_zip(self, name: str) -> Optional[Path]:
-        candidate = self.base_dir / name
-        return candidate if candidate.exists() else None
-
-    def ensure_modalys_installed(self) -> Optional[Path]:
-        if not self.modalys_zip:
-            return None
-        target = self._app_target("modalys")
-        executable, _ = self._prepare_app("modalys", target, self.modalys_zip, self.modalys_executable_name)
-        return executable
-
-    def ensure_praat_installed(self) -> Optional[Path]:
-        if not self.praat_zip:
-            return None
-        target = self._app_target("praat")
-        executable, _ = self._prepare_app("praat", target, self.praat_zip, self.praat_executable_name)
-        return executable
-
-    def modalys_installation(self) -> Optional[Path]:
-        target_dir = self._app_target("modalys")
-        if not target_dir.exists():
-            return None
-        executable, _ = self._discover_executable(target_dir, self.modalys_executable_name)
-        return executable
-
-    def praat_installation(self) -> Optional[Path]:
-        target_dir = self._app_target("praat")
-        if not target_dir.exists():
-            return None
-        executable, _ = self._discover_executable(target_dir, self.praat_executable_name)
-        return executable
-
-    def _extract(self, archive: Path, target_dir: Path) -> None:
-        target_dir.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(archive, "r") as zf:
-            zf.extractall(target_dir)
-
-    def _prepare_app(
-        self,
-        name: str,
-        target_dir: Path,
-        archive: Optional[Path],
-        preferred_name: Optional[str],
-    ) -> Tuple[Optional[Path], Optional[str]]:
-        if not archive:
-            return None, None
-        needs_extract = False
-        if not target_dir.exists():
-            needs_extract = True
-        else:
             try:
-                needs_extract = not any(target_dir.iterdir())
-            except OSError:
-                needs_extract = True
-        if needs_extract:
-            self._extract(archive, target_dir)
-        return self._discover_executable(target_dir, preferred_name)
+                relative = candidate.relative_to(self.workspace_path())
+            except ValueError:
+                relative = candidate.name
+            entry = {
+                "name": candidate.name,
+                "path": str(candidate),
+                "relative_path": str(relative),
+                "type": "bundle" if candidate.is_dir() else "file",
+            }
+            if candidate.is_file():
+                try:
+                    entry["size"] = candidate.stat().st_size
+                except OSError:
+                    entry["size"] = None
+            entries.append(entry)
+            if len(entries) >= limit:
+                break
+        entries.sort(key=lambda item: item["relative_path"].lower())
+        return entries
 
     def platform_supported(self) -> bool:
         return platform.system() in {"Windows", "Darwin", "Linux"}
@@ -209,62 +165,20 @@ class ExternalAppManager:
         }
 
     def status(self) -> dict[str, object]:
-        """Return structured availability information for the bundled apps."""
+        """Return structured availability information for the workspace."""
 
-        modalys_info = self._status_entry(
-            "modalys",
-            self.modalys_zip,
-            self.modalys_executable_name,
-        )
-        praat_info = self._status_entry(
-            "praat",
-            self.praat_zip,
-            self.praat_executable_name,
-        )
-        return {
-            "modalys": modalys_info,
-            "praat": praat_info,
-            "platform_supported": self.platform_supported(),
-        }
-
-    def _status_entry(
-        self,
-        name: str,
-        archive: Optional[Path],
-        preferred_name: Optional[str],
-    ) -> dict[str, object]:
-        target_dir = self._app_target(name)
-        if target_dir.exists():
-            try:
-                extracted = any(target_dir.iterdir())
-            except OSError:
-                extracted = False
-        else:
-            extracted = False
-        executable: Optional[Path] = None
-        kind: Optional[str] = None
-        if extracted:
-            executable, kind = self._discover_executable(target_dir, preferred_name)
-
-        installed = bool(executable and kind != "installer")
-        installer_only = bool(executable and kind == "installer")
-        note: Optional[str] = None
-        if installer_only:
-            note = (
-                "Only an installer was found. Provide extracted runtime files "
-                "to launch the application directly."
+        workspace = self.workspace_path()
+        executables = self.discover_workspace()
+        notes: list[str] = []
+        if not executables:
+            notes.append(
+                "Place executables in the workspace folder to have them appear in the UI."
             )
-        elif not archive:
-            note = "Bundle archive is missing."
-        elif archive and not extracted:
-            note = "Archive located. Extract to prepare the application."
-
         return {
-            "zip_present": bool(archive),
-            "installed": installed,
-            "installer_only": installer_only,
-            "kind": kind,
-            "path": str(executable) if executable else None,
-            "workspace": str(target_dir),
-            "note": note,
+            "workspace": str(workspace),
+            "workspace_exists": workspace.exists(),
+            "executables": executables,
+            "count": len(executables),
+            "platform_supported": self.platform_supported(),
+            "notes": notes,
         }

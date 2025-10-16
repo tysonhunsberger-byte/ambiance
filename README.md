@@ -1,21 +1,19 @@
 # Ambiance
 
 Ambiance is a modular audio generation toolkit that blends procedural synthesis with
-external acoustic modeling tools. The repository ships with the Windows installers for
-**Modalys 3.9.0** and **Praat 6.4.45** so that sound designers who run on Windows can
-hook directly into those environments. The Python code offers drop-in simulations when
-those executables are not available, which keeps the package cross-platform friendly
-and ready for CI environments.
+launch hooks for native audio tools. Drop any executable into the workspace directory
+and the system exposes it through the UI and Python helpers while providing fallbacks
+for cross-platform development and CI.
 
 ## Features
 
 - **Composable audio engine** – Combine any number of sources and effects.
-- **External tool integration** – Modalys and Praat installers are detected, extracted
-  into a cache directory on demand, and exposed through Python wrappers.
+- **External tool integration** – Executables placed in the workspace directory are
+  discovered automatically and can be launched from the UI or Python helpers.
 - **In-app launcher** – Provide paths to third-party executables and run them from the
   External Apps Workbench, capturing stdout/stderr without leaving the UI.
-- **Procedural audio sources** – Sine waves, noise beds, Modalys resonators, and
-  Praat-inspired vocal timbres.
+- **Procedural audio sources** – Sine waves, noise beds, resonant instrument models,
+  and formant-inspired vocal timbres.
 - **Signal processing effects** – Reverb, ping-pong delay, and low-pass filtering.
 - **Command line renderer** – Render ambience tracks directly to WAV files.
 - **Upgradeable architecture** – New sources/effects can be registered by importing a
@@ -37,10 +35,9 @@ and ready for CI environments.
    python -m ambiance.cli output.wav --duration 10
    ```
 
-   If you run the command on Windows and keep the bundled installers in the repository
-   root, the wrappers will extract them into `.cache/external_apps` and allow you to use
-   the native binaries. On other platforms, the Python fallbacks generate similar sounds
-   so your workflows stay portable.
+   The command renders using the built-in procedural sources. To hook in an external
+   tool, drop its executable inside `.cache/external_apps` (created on demand) and
+   launch it with the workspace UI or the REST API.
 
 3. Launch the interactive UI server to use the Noisetown interface together with the
    Python engine:
@@ -50,11 +47,10 @@ and ready for CI environments.
    ```
 
    The command serves the bundled `noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html`
-   interface at `http://127.0.0.1:8000/`. The UI exposes controls for checking Modalys
-   and Praat installers, triggering extractions, launching any executable that you
-   point to (including the extracted Modalys/Praat binaries), and rendering ambience
-   layers through the Python audio engine. If you place a different HTML interface on
-   disk, pass its path via `--ui`.
+   interface at `http://127.0.0.1:8000/`. The UI exposes the external tools workspace,
+   lets you launch any executable stored there, and renders ambience layers through the
+   Python audio engine. If you place a different HTML interface on disk, pass its path
+   via `--ui`.
 
 4. Provide a JSON configuration to customize the engine:
 
@@ -62,7 +58,7 @@ and ready for CI environments.
    {
      "sources": [
        {"type": "SineWaveSource", "frequency": 523.25, "amplitude": 0.15},
-       {"type": "PraatSource", "vowel": "i", "amplitude": 0.2}
+       {"type": "VocalFormantSource", "vowel": "i", "amplitude": 0.2}
      ],
      "effects": [
        {"type": "ReverbEffect", "decay": 0.4, "mix": 0.25}

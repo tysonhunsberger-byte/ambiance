@@ -25,17 +25,24 @@
   .external-block .studio-header .tagline{font-size:13px;color:var(--muted)}
   .external-block .studio-header .status-text{margin-left:auto;padding:6px 12px;border-radius:999px;background:rgba(89,167,255,.16);border:1px solid rgba(89,167,255,.35);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
   .external-block.server-offline .studio-header .status-text{color:#ff8b8b;border-color:rgba(255,139,139,.6);background:rgba(255,139,139,.12)}
-  .external-block .studio-grid{display:grid;gap:18px;grid-template-columns:minmax(240px,280px) minmax(260px,1fr);align-items:start}
+  .external-block .studio-grid{display:grid;gap:18px;grid-template-columns:minmax(260px,320px) minmax(320px,1fr);align-items:start}
   @media (max-width:1100px){.external-block .studio-grid{grid-template-columns:1fr}}
-  .external-block .app-deck{display:flex;flex-direction:column;gap:12px}
-  .external-block .app-card{position:relative;padding:16px;border-radius:12px;background:linear-gradient(155deg,rgba(30,34,45,.94),rgba(16,19,27,.92));border:1px solid rgba(89,167,255,.4);box-shadow:0 18px 32px rgba(0,0,0,.35);overflow:hidden}
-  .external-block .app-card::before{content:"";position:absolute;inset:-45% auto auto -20%;width:160px;height:160px;background:radial-gradient(circle,rgba(89,167,255,.28),rgba(89,167,255,0));pointer-events:none}
-  .external-block .app-card header{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-  .external-block .app-card h3{margin:0;font-size:16px}
-  .external-block .app-card .badge{font-size:11px;padding:3px 8px;border-radius:999px;background:rgba(89,167,255,.18);border:1px solid rgba(89,167,255,.45);text-transform:uppercase;letter-spacing:.45px}
-  .external-block .app-card p{position:relative;z-index:1;margin:0;font-size:13px;color:var(--muted);line-height:1.6}
-  .external-block .app-card .card-actions{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-  .external-block .registry-panel{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;background:rgba(12,16,24,.9);border:1px solid rgba(255,255,255,.08);box-shadow:0 16px 28px rgba(0,0,0,.3)}
+  .external-block .workspace-panel{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:12px;background:rgba(12,16,24,.9);border:1px solid rgba(255,255,255,.08);box-shadow:0 16px 28px rgba(0,0,0,.3)}
+  .external-block .workspace-panel header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .external-block .workspace-panel h3{margin:0;font-size:16px}
+  .external-block .workspaceHint{font-size:12px;color:var(--muted)}
+  .external-block .workspacePathRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .external-block .workspacePath{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+  .external-block .workspaceList{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .external-block .workspaceList li{border-radius:10px;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px}
+  .external-block .workspaceList li strong{font-size:14px}
+  .external-block .workspaceList li .path{font-size:12px;color:var(--muted);word-break:break-all}
+  .external-block .workspaceList li .actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .external-block .workspaceList li.empty{font-size:13px;color:var(--muted);background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.12);text-align:center}
+  .external-block .workspaceNotes{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+  .external-block .workspaceNotes span{display:block}
+  .external-block .session-stack{display:flex;flex-direction:column;gap:18px}
+  .external-block .registry-panel{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;background:rgba(9,12,19,.92);border:1px solid rgba(255,255,255,.06);box-shadow:0 16px 28px rgba(0,0,0,.3)}
   .external-block .registry-panel strong{font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
   .external-block .registry-tags{display:flex;flex-wrap:wrap;gap:6px}
   .external-block .registry-tags span{padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
@@ -755,43 +762,31 @@ function bootAudio(){
     blockEl.dataset.role = 'external-apps';
     blockEl.innerHTML = `
       <div class="studio-header">
-        <h2><span class="dragHandle" style="cursor:move">⣿</span> External Instruments Studio</h2>
-        <span class="tagline">Plug Modalys & Praat straight into your Noisetown patches.</span>
-        <div class="studio-actions" style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn checkStatus">🔄 Refresh Status</button>
-          <button class="btn resetConfig">🧰 Reset Config</button>
-        </div>
+        <h2><span class="dragHandle" style="cursor:move">⣿</span> External Tools Workspace</h2>
+        <span class="tagline">Launch native tools directly alongside your Noisetown patches.</span>
         <span class="status-text">Waiting for server…</span>
       </div>
       <div class="studio-grid">
-        <div class="app-deck">
-          <article class="app-card" data-app="modalys">
-            <header>
-              <h3>Modalys Suite</h3>
-              <span class="badge">Instrument Builder</span>
-            </header>
-            <p class="modalysStatus small">Pending…</p>
-            <div class="card-actions">
-              <button class="btn installModalys">📦 Extract Modalys</button>
-            </div>
-          </article>
-          <article class="app-card" data-app="praat">
-            <header>
-              <h3>Praat Lab</h3>
-              <span class="badge">Spectral Sculptor</span>
-            </header>
-            <p class="praatStatus small">Pending…</p>
-            <div class="card-actions">
-              <button class="btn installPraat">📦 Extract Praat</button>
-            </div>
-          </article>
+        <section class="workspace-panel">
+          <header>
+            <h3>Workspace</h3>
+            <button class="btn refreshStatus">🔄 Refresh</button>
+          </header>
+          <p class="workspaceHint">Drop executables into this folder to keep them within reach.</p>
+          <div class="workspacePathRow">
+            <code class="workspacePath">Not available</code>
+            <button class="btn copyWorkspace">📋 Copy Path</button>
+          </div>
+          <ul class="workspaceList"></ul>
+          <div class="workspaceNotes"></div>
           <section class="registry-panel">
             <strong>Available Sources</strong>
             <div class="registry-tags registrySources"></div>
             <strong>Available Effects</strong>
             <div class="registry-tags registryEffects"></div>
           </section>
-        </div>
+        </section>
+        <div class="session-stack">
         <section class="session-panel">
           <div class="row" style="gap:12px">
             <label>Duration (s)</label><input type="number" class="durationInput" min="1" max="120" step="1" value="8">
@@ -818,8 +813,9 @@ function bootAudio(){
             <label style="width:100%">Engine Config (JSON)</label>
             <textarea class="engineConfig" aria-label="Engine configuration JSON"></textarea>
           </div>
-          <div class="row">
+          <div class="row" style="gap:8px">
             <button class="btn renderNow">🎧 Render with Engine</button>
+            <button class="btn resetConfig">🧹 Reset Config</button>
             <div class="spacer"></div>
             <span class="small renderInfo">Idle.</span>
           </div>
@@ -831,6 +827,7 @@ function bootAudio(){
             <textarea class="runOutput" readonly placeholder="Captured stdout/stderr or process information"></textarea>
           </div>
         </section>
+        </div>
       </div>
     `;
 
@@ -842,8 +839,11 @@ function bootAudio(){
   function wireExternalAppsWorkspace(blockEl){
     const q = (sel)=> blockEl.querySelector(sel);
     const statusText = q('.status-text');
-    const modalysStatus = q('.modalysStatus');
-    const praatStatus = q('.praatStatus');
+    const workspacePathLabel = q('.workspacePath');
+    const workspaceList = q('.workspaceList');
+    const workspaceNotes = q('.workspaceNotes');
+    const copyWorkspaceBtn = q('.copyWorkspace');
+    const refreshButtons = blockEl.querySelectorAll('.refreshStatus');
     const registrySources = q('.registrySources');
     const registryEffects = q('.registryEffects');
     const durationInput = q('.durationInput');
@@ -863,8 +863,8 @@ function bootAudio(){
       sample_rate: parseInt(sampleInput.value)||44100,
       sources: [
         { name:'sine', frequency:432, amplitude:0.18 },
-        { name:'modalys', preset:'string-resonator', amplitude:0.22 },
-        { name:'praat', vowel:'o', amplitude:0.16, vibrato_rate:5.5, vibrato_depth:0.004 }
+        { name:'resonant-instrument', frequency:196, decay:3.2, amplitude:0.24 },
+        { name:'vocal-formant', vowel:'o', amplitude:0.18, vibrato_rate:5.5, vibrato_depth:0.004 }
       ],
       effects: [
         { name:'reverb', decay:0.45, mix:0.3 },
@@ -881,6 +881,7 @@ function bootAudio(){
     }
 
     function renderTags(container, items){
+      if(!container) return;
       container.innerHTML='';
       if(!items || !items.length){
         const span=document.createElement('span');
@@ -896,28 +897,79 @@ function bootAudio(){
       });
     }
 
-    function formatStatus(data){
-      if(!data) return 'Unavailable';
-      const parts=[];
-      parts.push(data.zip_present ? 'Installer found' : 'Installer missing');
-      if(data.installed) parts.push('Extracted');
-      else if(data.zip_present) parts.push('Not extracted');
-      if(data.path) parts.push(data.path);
-      return parts.join(' · ');
+    function renderWorkspaceList(entries, emptyMessage){
+      if(!workspaceList) return;
+      workspaceList.innerHTML='';
+      const message = emptyMessage || 'No executables discovered yet.';
+      if(!entries || !entries.length){
+        const li=document.createElement('li');
+        li.className='empty';
+        li.textContent=message;
+        workspaceList.appendChild(li);
+        return;
+      }
+      entries.forEach(entry=>{
+        const li=document.createElement('li');
+        li.className='workspace-item';
+        const title=document.createElement('strong');
+        title.textContent = entry.name || 'Executable';
+        li.appendChild(title);
+        const pathLine=document.createElement('span');
+        pathLine.className='path';
+        pathLine.textContent = entry.relative_path || entry.path || '';
+        li.appendChild(pathLine);
+        const actions=document.createElement('div');
+        actions.className='actions';
+        const useBtn=document.createElement('button');
+        useBtn.className='btn btn-xs useExecutable';
+        useBtn.type='button';
+        useBtn.dataset.path = entry.path || '';
+        useBtn.textContent='Use Path';
+        actions.appendChild(useBtn);
+        if(entry.type === 'bundle'){
+          const badge=document.createElement('span');
+          badge.className='small';
+          badge.textContent='Bundle';
+          actions.appendChild(badge);
+        }
+        if(typeof entry.size === 'number' && entry.size >= 0){
+          const size=document.createElement('span');
+          size.className='small';
+          const kb = Math.max(1, Math.round(entry.size/1024));
+          size.textContent = kb+' KB';
+          actions.appendChild(size);
+        }
+        li.appendChild(actions);
+        workspaceList.appendChild(li);
+      });
     }
 
-    function pushPathSuggestion(path){
-      if(!pathList || !path) return;
-      const value = String(path);
-      if(!value) return;
-      const exists = Array.from(pathList.children).some(opt=> opt.value === value);
-      if(!exists){
-        const opt = document.createElement('option');
-        opt.value = value;
+    function renderWorkspaceNotes(notes){
+      if(!workspaceNotes) return;
+      workspaceNotes.innerHTML='';
+      if(!notes || !notes.length) return;
+      notes.forEach(note=>{
+        const span=document.createElement('span');
+        span.textContent=note;
+        workspaceNotes.appendChild(span);
+      });
+    }
+
+    function updatePathSuggestions(paths){
+      if(!pathList) return;
+      pathList.innerHTML='';
+      const seen=new Set();
+      (paths||[]).forEach(path=>{
+        if(!path) return;
+        const value=String(path);
+        if(!value || seen.has(value)) return;
+        seen.add(value);
+        const opt=document.createElement('option');
+        opt.value=value;
         pathList.appendChild(opt);
-      }
-      if(exePathInput && !exePathInput.value){
-        exePathInput.value = value;
+      });
+      if(exePathInput && !exePathInput.value && seen.size){
+        exePathInput.value = [...seen][0];
       }
     }
 
@@ -934,10 +986,12 @@ function bootAudio(){
         const res = await fetch('/api/status');
         if(!res.ok) throw new Error('status '+res.status);
         const data = await res.json();
-        modalysStatus.textContent = formatStatus(data.modalys);
-        praatStatus.textContent = formatStatus(data.praat);
-        pushPathSuggestion(data.modalys && data.modalys.path);
-        pushPathSuggestion(data.praat && data.praat.path);
+        if(workspacePathLabel){
+          workspacePathLabel.textContent = data.workspace || 'Not available';
+        }
+        renderWorkspaceList(data.executables || []);
+        renderWorkspaceNotes(data.notes || []);
+        updatePathSuggestions((data.executables || []).map(item=>item.path));
         if(data.platform_supported){
           statusText.textContent = 'Server ready — platform supported';
         }else{
@@ -945,8 +999,12 @@ function bootAudio(){
         }
       }catch(err){
         statusText.innerHTML = 'Server offline — run <code>python -m ambiance.server</code>';
-        modalysStatus.textContent = 'Unavailable';
-        praatStatus.textContent = 'Unavailable';
+        renderWorkspaceList([], 'Server offline — workspace unavailable.');
+        renderWorkspaceNotes(['Workspace status unavailable.']);
+        updatePathSuggestions([]);
+        if(workspacePathLabel){
+          workspacePathLabel.textContent = 'Unavailable';
+        }
         blockEl.classList.add('server-offline');
       }
     }
@@ -962,25 +1020,6 @@ function bootAudio(){
         renderTags(registrySources, []);
         renderTags(registryEffects, []);
       }
-    }
-
-    async function install(app){
-      renderInfo.textContent = 'Extracting '+app+'…';
-      try{
-        const res = await fetch('/api/install',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({app})
-        });
-        if(!res.ok) throw new Error('status '+res.status);
-        const data = await res.json();
-        if(!data.ok) throw new Error(data.error || 'Installer not found');
-        renderInfo.textContent = data.message || (app+' ready');
-        pushPathSuggestion(data.path);
-      }catch(err){
-        renderInfo.textContent = 'Install failed: '+(err && err.message || err || 'unknown');
-      }
-      refreshStatus();
     }
 
     async function runExternalApp(){
@@ -1029,6 +1068,8 @@ function bootAudio(){
         }
       }catch(err){
         showRunOutput('Launch failed: '+(err && err.message || err));
+      }finally{
+        refreshStatus();
       }
     }
 
@@ -1087,12 +1128,64 @@ function bootAudio(){
       blockEl.classList.remove('dragging');
     });
 
-    q('.checkStatus').addEventListener('click', ()=>{ refreshStatus(); refreshRegistry(); });
-    q('.installModalys').addEventListener('click', ()=> install('modalys'));
-    q('.installPraat').addEventListener('click', ()=> install('praat'));
-    q('.resetConfig').addEventListener('click', ()=> applyDefaultConfig());
-    q('.renderNow').addEventListener('click', ()=> renderEngine());
-    q('.runExternal').addEventListener('click', ()=> runExternalApp());
+    refreshButtons.forEach(btn=>{
+      btn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        refreshStatus();
+        refreshRegistry();
+      });
+    });
+
+    if(copyWorkspaceBtn){
+      copyWorkspaceBtn.addEventListener('click', async ()=>{
+        const text = workspacePathLabel ? (workspacePathLabel.textContent || '').trim() : '';
+        if(!text || text === 'Not available' || text === 'Unavailable'){
+          showRunOutput('Workspace path unavailable.');
+          return;
+        }
+        if(!navigator.clipboard || !navigator.clipboard.writeText){
+          showRunOutput('Clipboard access is not available in this browser.');
+          return;
+        }
+        const original = copyWorkspaceBtn.textContent;
+        try{
+          await navigator.clipboard.writeText(text);
+          copyWorkspaceBtn.textContent = 'Copied!';
+          setTimeout(()=>{ copyWorkspaceBtn.textContent = original; }, 1500);
+        }catch(err){
+          copyWorkspaceBtn.textContent = 'Copy failed';
+          setTimeout(()=>{ copyWorkspaceBtn.textContent = original; }, 2000);
+          showRunOutput('Copy failed: '+(err && err.message || err));
+        }
+      });
+    }
+
+    if(workspaceList){
+      workspaceList.addEventListener('click', (event)=>{
+        const target = event.target;
+        if(target && target.classList && target.classList.contains('useExecutable')){
+          event.preventDefault();
+          const value = target.dataset.path || '';
+          if(value && exePathInput){
+            exePathInput.value = value;
+            showRunOutput('Loaded path from workspace list.');
+          }
+        }
+      });
+    }
+
+    const resetButton = q('.resetConfig');
+    if(resetButton){
+      resetButton.addEventListener('click', ()=> applyDefaultConfig());
+    }
+    const renderButton = q('.renderNow');
+    if(renderButton){
+      renderButton.addEventListener('click', ()=> renderEngine());
+    }
+    const runButton = q('.runExternal');
+    if(runButton){
+      runButton.addEventListener('click', ()=> runExternalApp());
+    }
     durationInput.addEventListener('change', ()=> applyDefaultConfig());
     sampleInput.addEventListener('change', ()=> applyDefaultConfig());
 
