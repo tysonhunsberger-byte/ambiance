@@ -2,6 +2,7 @@
 
 from .core.engine import AudioEngine
 from .core.registry import registry
+from .integrations.plugins import PluginRackManager
 from .server import serve
 from .sources.basic import NoiseSource, SineWaveSource
 from .sources.integrated import ResonantInstrumentSource, VocalFormantSource
@@ -17,5 +18,6 @@ __all__ = [
     "ReverbEffect",
     "DelayEffect",
     "LowPassFilterEffect",
+    "PluginRackManager",
     "serve",
 ]

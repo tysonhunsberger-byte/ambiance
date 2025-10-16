@@ -1,17 +1,17 @@
 # Ambiance
 
 Ambiance is a modular audio generation toolkit that blends procedural synthesis with
-launch hooks for native audio tools. Drop any executable into the workspace directory
-and the system exposes it through the UI and Python helpers while providing fallbacks
-for cross-platform development and CI.
+a plugin rack for native sound design tools. Drop VST, VST3, Audio Unit, or mc.svt
+devices into the workspace directory and the system exposes them inside the UI for
+lane-based routing, A/B comparisons, and lightweight session management.
 
 ## Features
 
 - **Composable audio engine** – Combine any number of sources and effects.
-- **External tool integration** – Executables placed in the workspace directory are
-  discovered automatically and can be launched from the UI or Python helpers.
-- **In-app launcher** – Provide paths to third-party executables and run them from the
-  External Apps Workbench, capturing stdout/stderr without leaving the UI.
+- **Plugin rack integration** – Drop plugins into the workspace directory and assign
+  them to streams with dedicated A/B lanes.
+- **In-rack management** – Route plugins to stream lanes, copy workspace paths, and
+  switch lanes instantly for comparative listening.
 - **Procedural audio sources** – Sine waves, noise beds, resonant instrument models,
   and formant-inspired vocal timbres.
 - **Signal processing effects** – Reverb, ping-pong delay, and low-pass filtering.
@@ -35,9 +35,9 @@ for cross-platform development and CI.
    python -m ambiance.cli output.wav --duration 10
    ```
 
-   The command renders using the built-in procedural sources. To hook in an external
-   tool, drop its executable inside `.cache/external_apps` (created on demand) and
-   launch it with the workspace UI or the REST API.
+   The command renders using the built-in procedural sources. To hook in a native
+   plugin, drop its files inside `.cache/plugins` (created on demand) and map them to
+   streams through the plugin rack UI.
 
 3. Launch the interactive UI server to use the Noisetown interface together with the
    Python engine:
@@ -47,10 +47,10 @@ for cross-platform development and CI.
    ```
 
    The command serves the bundled `noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html`
-   interface at `http://127.0.0.1:8000/`. The UI exposes the external tools workspace,
-   lets you launch any executable stored there, and renders ambience layers through the
-   Python audio engine. If you place a different HTML interface on disk, pass its path
-   via `--ui`.
+   interface at `http://127.0.0.1:8000/`. The UI exposes the plugin rack, lets you
+   assign plugins to stream lanes for instant A/B comparison, and renders ambience
+   layers through the Python audio engine. If you place a different HTML interface on
+   disk, pass its path via `--ui`.
 
 4. Provide a JSON configuration to customize the engine:
 

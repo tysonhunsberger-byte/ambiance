@@ -8,11 +8,6 @@ __pycache__/
 .venv
 .envrc
 .cache/
-external_apps/
+plugins/
 *.wav
 
-# Installer artifacts
-Modalys*/
-Praat*/
-Modalys 3.9.0 for Windows.zip
-praat6445_win-intel64.zip

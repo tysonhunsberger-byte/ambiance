@@ -19,44 +19,51 @@
   .block.dragging{opacity:.95;outline:2px dashed var(--accent)}
   .block h2{margin:0 0 8px}
   .block .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
-  .block.external-block{min-width:720px;padding:18px;border-radius:12px;border:1px solid #353f52;background:linear-gradient(160deg,rgba(20,22,30,.94),rgba(10,12,18,.92));box-shadow:0 26px 48px rgba(0,0,0,.4)}
-  .external-block .studio-header{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
-  .external-block .studio-header h2{margin:0;font-size:22px;display:flex;align-items:center;gap:8px}
-  .external-block .studio-header .tagline{font-size:13px;color:var(--muted)}
-  .external-block .studio-header .status-text{margin-left:auto;padding:6px 12px;border-radius:999px;background:rgba(89,167,255,.16);border:1px solid rgba(89,167,255,.35);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
-  .external-block.server-offline .studio-header .status-text{color:#ff8b8b;border-color:rgba(255,139,139,.6);background:rgba(255,139,139,.12)}
-  .external-block .studio-grid{display:grid;gap:18px;grid-template-columns:minmax(260px,320px) minmax(320px,1fr);align-items:start}
-  @media (max-width:1100px){.external-block .studio-grid{grid-template-columns:1fr}}
-  .external-block .workspace-panel{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:12px;background:rgba(12,16,24,.9);border:1px solid rgba(255,255,255,.08);box-shadow:0 16px 28px rgba(0,0,0,.3)}
-  .external-block .workspace-panel header{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .external-block .workspace-panel h3{margin:0;font-size:16px}
-  .external-block .workspaceHint{font-size:12px;color:var(--muted)}
-  .external-block .workspacePathRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .external-block .workspacePath{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
-  .external-block .workspaceList{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-  .external-block .workspaceList li{border-radius:10px;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px}
-  .external-block .workspaceList li strong{font-size:14px}
-  .external-block .workspaceList li .path{font-size:12px;color:var(--muted);word-break:break-all}
-  .external-block .workspaceList li .actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .external-block .workspaceList li.empty{font-size:13px;color:var(--muted);background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.12);text-align:center}
-  .external-block .workspaceNotes{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
-  .external-block .workspaceNotes span{display:block}
-  .external-block .session-stack{display:flex;flex-direction:column;gap:18px}
-  .external-block .registry-panel{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;background:rgba(9,12,19,.92);border:1px solid rgba(255,255,255,.06);box-shadow:0 16px 28px rgba(0,0,0,.3)}
-  .external-block .registry-panel strong{font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
-  .external-block .registry-tags{display:flex;flex-wrap:wrap;gap:6px}
-  .external-block .registry-tags span{padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
-  .external-block .session-panel{display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:14px;background:rgba(9,12,19,.92);border:1px solid rgba(255,255,255,.06);box-shadow:0 20px 36px rgba(0,0,0,.35)}
-  .external-block .session-panel .row{margin:0}
-  .external-block .session-panel label{font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
-  .external-block textarea{width:100%;min-height:200px;padding:10px;background:#090b10;color:inherit;border:1px solid rgba(89,167,255,.35);border-radius:10px;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;font-size:12px;box-shadow:0 14px 28px rgba(0,0,0,.32) inset}
-  .external-block .render-panel{display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:14px;background:rgba(9,12,19,.92);border:1px solid rgba(255,255,255,.06);box-shadow:0 20px 36px rgba(0,0,0,.35)}
-  .external-block .render-panel .row{margin:0}
-  .external-block .runOutput{min-height:140px;resize:vertical}
-  .external-block .audio-preview{display:flex;flex-direction:column;gap:6px}
-  .external-block .renderInfo{font-size:12px;color:var(--muted)}
-  body.theme-xp .external-block textarea,
-  body.theme-98 .external-block textarea{background:#fff;color:#000;border:1px solid #7b7b7b}
+  .block.plugin-block{min-width:720px;padding:18px;border-radius:12px;border:1px solid #353f52;background:linear-gradient(160deg,rgba(20,22,30,.94),rgba(10,12,18,.92));box-shadow:0 26px 48px rgba(0,0,0,.4)}
+  .plugin-block .studio-header{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+  .plugin-block .studio-header h2{margin:0;font-size:22px;display:flex;align-items:center;gap:8px}
+  .plugin-block .studio-header .tagline{font-size:13px;color:var(--muted)}
+  .plugin-block .studio-header .status-text{margin-left:auto;padding:6px 12px;border-radius:999px;background:rgba(89,167,255,.16);border:1px solid rgba(89,167,255,.35);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .plugin-block.server-offline .studio-header .status-text{color:#ff8b8b;border-color:rgba(255,139,139,.6);background:rgba(255,139,139,.12)}
+  .plugin-block .studio-grid{display:grid;gap:18px;grid-template-columns:minmax(260px,320px) minmax(320px,1fr);align-items:start}
+  @media (max-width:1100px){.plugin-block .studio-grid{grid-template-columns:1fr}}
+  .plugin-block .workspace-panel{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:12px;background:rgba(12,16,24,.9);border:1px solid rgba(255,255,255,.08);box-shadow:0 16px 28px rgba(0,0,0,.3)}
+  .plugin-block .workspace-panel header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .plugin-block .workspace-panel h3{margin:0;font-size:16px}
+  .plugin-block .workspaceHint{font-size:12px;color:var(--muted)}
+  .plugin-block .workspacePathRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .plugin-block .workspacePath{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+  .plugin-block .workspaceList{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .plugin-block .workspaceList li{border-radius:10px;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px}
+  .plugin-block .workspaceList li strong{font-size:14px}
+  .plugin-block .workspaceList li .path{font-size:12px;color:var(--muted);word-break:break-all}
+  .plugin-block .workspaceList li .actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .plugin-block .workspaceList li.empty{font-size:13px;color:var(--muted);background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.12);text-align:center}
+  .plugin-block .workspaceNotes{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+  .plugin-block .workspaceNotes span{display:block}
+  .plugin-block .pluginLibrary li.selected{outline:2px solid rgba(89,167,255,.6);outline-offset:2px}
+  .plugin-block .rack-panel{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:12px;background:rgba(9,12,19,.92);border:1px solid rgba(255,255,255,.06);box-shadow:0 20px 36px rgba(0,0,0,.35)}
+  .plugin-block .rack-header{display:flex;flex-direction:column;gap:6px}
+  .plugin-block .streamsContainer{display:flex;flex-direction:column;gap:14px}
+  .plugin-block .rackStream{border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 18px 32px rgba(0,0,0,.28)}
+  .plugin-block .rackHead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .plugin-block .rackHead h4{margin:0;font-size:16px}
+  .plugin-block .rackButtons{margin-left:auto;display:flex;gap:8px}
+  .plugin-block .laneWrap{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .plugin-block .laneCard{border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.2);padding:12px;display:flex;flex-direction:column;gap:10px}
+  .plugin-block .laneHeader{display:flex;align-items:center;gap:8px}
+  .plugin-block .laneHeader h5{margin:0;font-size:14px}
+  .plugin-block .laneBadge{padding:2px 8px;border-radius:999px;background:rgba(89,167,255,.18);border:1px solid rgba(89,167,255,.35);font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+  .plugin-block .slotList{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .plugin-block .slotList .slot{border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.05);padding:10px;display:flex;flex-direction:column;gap:6px}
+  .plugin-block .slotList .slotTitle{display:flex;align-items:center;gap:6px;font-size:13px}
+  .plugin-block .slotList .slot strong{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+  .plugin-block .slotList .slot .actions{display:flex;justify-content:flex-end}
+  .plugin-block .slotList .empty{border:1px dashed rgba(255,255,255,.12);padding:12px;text-align:center;color:var(--muted);background:rgba(255,255,255,.02)}
+  .plugin-block .laneControls{display:flex;justify-content:flex-end}
+  .plugin-block .rack-log textarea{width:100%;min-height:140px;padding:10px;background:#090b10;color:inherit;border:1px solid rgba(89,167,255,.35);border-radius:10px;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;font-size:12px;box-shadow:0 14px 28px rgba(0,0,0,.32) inset}
+  body.theme-xp .plugin-block .rack-log textarea,
+  body.theme-98 .plugin-block .rack-log textarea{background:#fff;color:#000;border:1px solid #7b7b7b}
   .scope{flex:1;min-width:220px;height:60px;background:#000;border:1px solid #666;border-radius:6px}
   .stream{background:var(--card);border:1px solid #555;border-radius:8px;padding:10px;margin:8px 0}
   .stream h3{margin:0 0 6px}
@@ -753,352 +760,386 @@ function bootAudio(){
   const streamSpectros = []; // for spectrogram draw loop
 
   let blockCount = 0;
-  const isExternalBlock = (el)=> !!(el && el.dataset && el.dataset.role === 'external-apps');
 
-  function ensureExternalAppsWorkspace(){
-    if(qs('#externalAppsBlock')) return null;
-    const blockEl = ce('div','block external-block');
-    blockEl.id = 'externalAppsBlock';
-    blockEl.dataset.role = 'external-apps';
+  const pluginState = { status: null, selected: null };
+  const LANE_KEYS = ['A', 'B'];
+
+  const isPluginBlock = (el)=> !!(el && el.dataset && el.dataset.role === 'plugin-rack');
+
+  function ensurePluginRack(){
+    if(qs('#pluginRackBlock')) return null;
+    const blockEl = ce('div','block plugin-block');
+    blockEl.id = 'pluginRackBlock';
+    blockEl.dataset.role = 'plugin-rack';
     blockEl.innerHTML = `
       <div class="studio-header">
-        <h2><span class="dragHandle" style="cursor:move">⣿</span> External Tools Workspace</h2>
-        <span class="tagline">Launch native tools directly alongside your Noisetown patches.</span>
-        <span class="status-text">Waiting for server…</span>
+        <h2><span class="dragHandle" style="cursor:move">⣿</span> Plugin Rack</h2>
+        <span class="tagline">Route native plugins directly alongside your Noisetown sessions.</span>
+        <span class="status-text">Library pending…</span>
       </div>
-      <div class="studio-grid">
+      <div class="studio-grid plugin-layout">
         <section class="workspace-panel">
           <header>
-            <h3>Workspace</h3>
-            <button class="btn refreshStatus">🔄 Refresh</button>
+            <h3>Plugin Library</h3>
+            <button class="btn refreshPlugins">🔄 Refresh</button>
           </header>
-          <p class="workspaceHint">Drop executables into this folder to keep them within reach.</p>
+          <p class="workspaceHint">Drop VST, VST3, Audio Unit, or mc.svt plugins into this folder.</p>
           <div class="workspacePathRow">
             <code class="workspacePath">Not available</code>
             <button class="btn copyWorkspace">📋 Copy Path</button>
           </div>
-          <ul class="workspaceList"></ul>
+          <ul class="workspaceList pluginLibrary"></ul>
           <div class="workspaceNotes"></div>
-          <section class="registry-panel">
-            <strong>Available Sources</strong>
-            <div class="registry-tags registrySources"></div>
-            <strong>Available Effects</strong>
-            <div class="registry-tags registryEffects"></div>
-          </section>
         </section>
-        <div class="session-stack">
-        <section class="session-panel">
-          <div class="row" style="gap:12px">
-            <label>Duration (s)</label><input type="number" class="durationInput" min="1" max="120" step="1" value="8">
-            <label>Sample Rate</label><input type="number" class="sampleRateInput" min="8000" max="96000" step="1000" value="44100">
-          </div>
-          <div class="row" style="flex-direction:column;align-items:flex-start;gap:8px">
-            <label style="width:100%">Executable Path</label>
-            <input type="text" class="exePath" list="externalAppPaths" placeholder="C:\\Path\\to\\app.exe or /path/to/app" style="width:100%">
-            <datalist id="externalAppPaths"></datalist>
-          </div>
-          <div class="row" style="flex-direction:column;align-items:flex-start;gap:8px">
-            <label style="width:100%">Arguments (optional)</label>
-            <input type="text" class="exeArgs" placeholder="--help or other switches" style="width:100%">
-          </div>
-          <div class="row">
-            <label class="small"><input type="checkbox" class="waitToggle" checked> Wait for completion</label>
-            <label>Timeout</label><input type="number" class="timeoutInput" min="1" max="600" step="1" value="30">
-            <div class="spacer"></div>
-            <button class="btn runExternal">🚀 Run External App</button>
-          </div>
+        <section class="rack-panel">
+          <header class="rack-header">
+            <h3>Streams &amp; Lanes</h3>
+            <div class="selectedPlugin small">Select a plugin to assign it to a lane.</div>
+          </header>
+          <div class="streamsContainer"></div>
+          <div class="rackNotes small"></div>
         </section>
-        <section class="render-panel">
-          <div class="row" style="flex-direction:column;align-items:flex-start;gap:8px">
-            <label style="width:100%">Engine Config (JSON)</label>
-            <textarea class="engineConfig" aria-label="Engine configuration JSON"></textarea>
-          </div>
-          <div class="row" style="gap:8px">
-            <button class="btn renderNow">🎧 Render with Engine</button>
-            <button class="btn resetConfig">🧹 Reset Config</button>
-            <div class="spacer"></div>
-            <span class="small renderInfo">Idle.</span>
-          </div>
-          <div class="audio-preview">
-            <audio class="enginePreview" controls style="width:100%"></audio>
-          </div>
-          <div class="row" style="flex-direction:column;align-items:flex-start;gap:8px">
-            <label style="width:100%">Run Output</label>
-            <textarea class="runOutput" readonly placeholder="Captured stdout/stderr or process information"></textarea>
-          </div>
-        </section>
-        </div>
       </div>
+      <section class="rack-log">
+        <label style="display:block;margin-bottom:6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Rack Activity</label>
+        <textarea class="rackOutput" readonly placeholder="Status updates from the plugin rack will appear here."></textarea>
+      </section>
     `;
 
     main.appendChild(blockEl);
-    wireExternalAppsWorkspace(blockEl);
+    wirePluginRack(blockEl);
     return blockEl;
   }
 
-  function wireExternalAppsWorkspace(blockEl){
+  function wirePluginRack(blockEl){
     const q = (sel)=> blockEl.querySelector(sel);
     const statusText = q('.status-text');
     const workspacePathLabel = q('.workspacePath');
-    const workspaceList = q('.workspaceList');
+    const pluginList = q('.pluginLibrary');
     const workspaceNotes = q('.workspaceNotes');
     const copyWorkspaceBtn = q('.copyWorkspace');
-    const refreshButtons = blockEl.querySelectorAll('.refreshStatus');
-    const registrySources = q('.registrySources');
-    const registryEffects = q('.registryEffects');
-    const durationInput = q('.durationInput');
-    const sampleInput = q('.sampleRateInput');
-    const configArea = q('.engineConfig');
-    const renderInfo = q('.renderInfo');
-    const preview = q('.enginePreview');
-    const exePathInput = q('.exePath');
-    const exeArgsInput = q('.exeArgs');
-    const waitToggle = q('.waitToggle');
-    const timeoutInput = q('.timeoutInput');
-    const runOutput = q('.runOutput');
-    const pathList = q('#externalAppPaths');
+    const refreshButtons = blockEl.querySelectorAll('.refreshPlugins');
+    const rackOutput = q('.rackOutput');
+    const selectedLabel = q('.selectedPlugin');
+    const streamsContainer = q('.streamsContainer');
+    const rackNotes = q('.rackNotes');
 
-    const defaultConfig = {
-      duration: parseFloat(durationInput.value)||8,
-      sample_rate: parseInt(sampleInput.value)||44100,
-      sources: [
-        { name:'sine', frequency:432, amplitude:0.18 },
-        { name:'resonant-instrument', frequency:196, decay:3.2, amplitude:0.24 },
-        { name:'vocal-formant', vowel:'o', amplitude:0.18, vibrato_rate:5.5, vibrato_depth:0.004 }
-      ],
-      effects: [
-        { name:'reverb', decay:0.45, mix:0.3 },
-        { name:'delay', time:0.32, feedback:0.22 },
-        { name:'lowpass', cutoff:4600 }
-      ]
-    };
-
-    function applyDefaultConfig(){
-      const payload = JSON.parse(JSON.stringify(defaultConfig));
-      payload.duration = parseFloat(durationInput.value)||payload.duration;
-      payload.sample_rate = parseInt(sampleInput.value)||payload.sample_rate;
-      configArea.value = JSON.stringify(payload, null, 2);
+    function log(message){
+      if(!rackOutput) return;
+      const timestamp = new Date().toLocaleTimeString();
+      const next = `[${timestamp}] ${message}`;
+      rackOutput.value = next + (rackOutput.value ? '\n' + rackOutput.value : '');
+      rackOutput.scrollTop = 0;
     }
 
-    function renderTags(container, items){
-      if(!container) return;
-      container.innerHTML='';
-      if(!items || !items.length){
-        const span=document.createElement('span');
-        span.className='small';
-        span.textContent='Unavailable';
-        container.appendChild(span);
-        return;
+    function setSelected(plugin){
+      pluginState.selected = plugin || null;
+      if(selectedLabel){
+        selectedLabel.textContent = plugin
+          ? `Selected: ${plugin.name}${plugin.format ? ' · ' + plugin.format : ''}`
+          : 'Select a plugin to assign it to a lane.';
       }
-      items.forEach(name=>{
-        const tag=document.createElement('span');
-        tag.textContent=name;
-        container.appendChild(tag);
+      if(!pluginList) return;
+      Array.from(pluginList.children).forEach((li)=>{
+        if(!(li instanceof HTMLElement)) return;
+        li.classList.toggle('selected', !!plugin && li.dataset.path === (plugin.path || ''));
       });
     }
 
-    function renderWorkspaceList(entries, emptyMessage){
-      if(!workspaceList) return;
-      workspaceList.innerHTML='';
-      const message = emptyMessage || 'No executables discovered yet.';
-      if(!entries || !entries.length){
-        const li=document.createElement('li');
-        li.className='empty';
-        li.textContent=message;
-        workspaceList.appendChild(li);
-        return;
-      }
-      entries.forEach(entry=>{
-        const li=document.createElement('li');
-        li.className='workspace-item';
-        const title=document.createElement('strong');
-        title.textContent = entry.name || 'Executable';
-        li.appendChild(title);
-        const pathLine=document.createElement('span');
-        pathLine.className='path';
-        pathLine.textContent = entry.relative_path || entry.path || '';
-        li.appendChild(pathLine);
-        const actions=document.createElement('div');
-        actions.className='actions';
-        const useBtn=document.createElement('button');
-        useBtn.className='btn btn-xs useExecutable';
-        useBtn.type='button';
-        useBtn.dataset.path = entry.path || '';
-        useBtn.textContent='Use Path';
-        actions.appendChild(useBtn);
-        if(entry.type === 'bundle'){
-          const badge=document.createElement('span');
-          badge.className='small';
-          badge.textContent='Bundle';
-          actions.appendChild(badge);
-        }
-        if(typeof entry.size === 'number' && entry.size >= 0){
-          const size=document.createElement('span');
-          size.className='small';
-          const kb = Math.max(1, Math.round(entry.size/1024));
-          size.textContent = kb+' KB';
-          actions.appendChild(size);
-        }
-        li.appendChild(actions);
-        workspaceList.appendChild(li);
-      });
-    }
-
-    function renderWorkspaceNotes(notes){
+    function renderWorkspaceNotes(status){
       if(!workspaceNotes) return;
-      workspaceNotes.innerHTML='';
-      if(!notes || !notes.length) return;
-      notes.forEach(note=>{
-        const span=document.createElement('span');
-        span.textContent=note;
+      workspaceNotes.innerHTML = '';
+      (status.notes || []).forEach((note)=>{
+        const span = document.createElement('span');
+        span.textContent = note;
         workspaceNotes.appendChild(span);
       });
     }
 
-    function updatePathSuggestions(paths){
-      if(!pathList) return;
-      pathList.innerHTML='';
-      const seen=new Set();
-      (paths||[]).forEach(path=>{
-        if(!path) return;
-        const value=String(path);
-        if(!value || seen.has(value)) return;
-        seen.add(value);
-        const opt=document.createElement('option');
-        opt.value=value;
-        pathList.appendChild(opt);
-      });
-      if(exePathInput && !exePathInput.value && seen.size){
-        exePathInput.value = [...seen][0];
+    function renderPluginLibrary(status){
+      if(!pluginList) return;
+      pluginList.innerHTML = '';
+      const plugins = status.plugins || [];
+      if(!plugins.length){
+        const li = document.createElement('li');
+        li.className = 'empty';
+        li.textContent = 'Drop plugins into the workspace to begin building a rack.';
+        pluginList.appendChild(li);
+        setSelected(null);
+        return;
       }
+      plugins.forEach((plugin)=>{
+        const li = document.createElement('li');
+        li.dataset.path = plugin.path || '';
+        const title = document.createElement('strong');
+        title.textContent = plugin.name;
+        li.appendChild(title);
+        const pathSpan = document.createElement('span');
+        pathSpan.className = 'path';
+        pathSpan.textContent = plugin.relative_path || plugin.path;
+        li.appendChild(pathSpan);
+        const meta = document.createElement('div');
+        meta.className = 'meta small';
+        const parts = [];
+        if(plugin.format) parts.push(plugin.format);
+        if(plugin.size){
+          const sizeKb = (plugin.size / 1024).toFixed(1);
+          parts.push(`${sizeKb} KB`);
+        }
+        meta.textContent = parts.join(' · ');
+        li.appendChild(meta);
+        li.addEventListener('click', ()=>{
+          setSelected(plugin);
+          log(`Selected ${plugin.name}`);
+        });
+        pluginList.appendChild(li);
+        if(pluginState.selected && pluginState.selected.path === plugin.path){
+          setSelected(plugin);
+        }
+      });
     }
 
-    function showRunOutput(message){
-      if(!runOutput) return;
-      runOutput.value = message;
-      runOutput.scrollTop = runOutput.scrollHeight;
+    function removePlugin(stream, lane, slot){
+      return fetch('/api/plugins/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stream, lane, slot }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Remove failed');
+          pluginState.status = payload.status;
+          renderPluginLibrary(payload.status);
+          renderStreams(payload.status);
+          log(`Removed slot ${slot + 1} from ${stream} lane ${lane}.`);
+        })
+        .catch((err)=>{
+          log('Remove failed: ' + (err && err.message || err));
+        });
     }
 
-    async function refreshStatus(){
-      statusText.textContent = 'Contacting server…';
+    function assignSelected(stream, lane){
+      const plugin = pluginState.selected;
+      if(!plugin){
+        log('Select a plugin from the library first.');
+        return Promise.resolve();
+      }
+      return fetch('/api/plugins/assign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stream, lane, path: plugin.path }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Assign failed');
+          pluginState.status = payload.status;
+          renderPluginLibrary(payload.status);
+          renderStreams(payload.status);
+          log(`Assigned ${plugin.name} to ${stream} lane ${lane}.`);
+        })
+        .catch((err)=>{
+          log('Assign failed: ' + (err && err.message || err));
+        });
+    }
+
+    function toggleLane(stream){
+      return fetch('/api/plugins/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stream }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Toggle failed');
+          pluginState.status = payload.status;
+          renderPluginLibrary(payload.status);
+          renderStreams(payload.status);
+          const active = payload.toggle && payload.toggle.active_lane;
+          log(`Switched ${stream} to lane ${active}.`);
+        })
+        .catch((err)=>{
+          log('Toggle failed: ' + (err && err.message || err));
+        });
+    }
+
+    function renderStreams(status){
+      if(!streamsContainer) return;
+      streamsContainer.innerHTML = '';
+      const plugins = status.plugins || [];
+      const pluginLookup = new Map(plugins.map((p)=> [p.path, p]));
+      const streams = status.streams || {};
+      const names = Object.keys(streams);
+      if(!names.length){
+        const empty = ce('div', 'emptyStreams small');
+        empty.textContent = 'Assign a plugin to create your first stream lane.';
+        streamsContainer.appendChild(empty);
+        return;
+      }
+      names.sort();
+      names.forEach((streamName)=>{
+        const streamData = streams[streamName] || {};
+        const activeLane = (streamData.active_lane || 'A').toUpperCase();
+        const card = ce('section', 'rackStream');
+        const head = ce('header', 'rackHead');
+        const title = ce('h4');
+        title.textContent = streamName;
+        head.appendChild(title);
+        const statusBadge = ce('span', 'laneStatus small');
+        statusBadge.textContent = `Active lane: ${activeLane}`;
+        head.appendChild(statusBadge);
+        const buttons = ce('div', 'rackButtons');
+        const toggleButton = ce('button', 'btn toggleLane');
+        toggleButton.textContent = '⇆ Toggle Lane';
+        toggleButton.addEventListener('click', (event)=>{
+          event.preventDefault();
+          toggleLane(streamName);
+        });
+        buttons.appendChild(toggleButton);
+        head.appendChild(buttons);
+        card.appendChild(head);
+
+        const lanesWrap = ce('div', 'laneWrap');
+        LANE_KEYS.forEach((laneKey)=>{
+          const laneData = ((streamData.lanes || {})[laneKey]) || [];
+          const laneEl = ce('div', 'laneCard');
+          laneEl.dataset.lane = laneKey;
+          const laneHeader = ce('header', 'laneHeader');
+          const laneTitle = ce('h5');
+          laneTitle.textContent = `Lane ${laneKey}`;
+          laneHeader.appendChild(laneTitle);
+          if(activeLane === laneKey){
+            const badge = ce('span', 'laneBadge');
+            badge.textContent = 'Live';
+            laneHeader.appendChild(badge);
+          }
+          laneEl.appendChild(laneHeader);
+
+          const list = ce('ul', 'slotList');
+          if(!laneData.length){
+            const empty = ce('li', 'empty');
+            empty.textContent = 'No plugins assigned.';
+            list.appendChild(empty);
+          }else{
+            laneData.forEach((assignment)=>{
+              const li = ce('li', 'slot');
+              const slotIndex = typeof assignment.slot === 'number'
+                ? assignment.slot
+                : parseInt(assignment.slot || '0', 10);
+              const pluginInfo = assignment.plugin || pluginLookup.get(assignment.path);
+              const titleRow = ce('div', 'slotTitle');
+              const slotLabel = ce('strong');
+              slotLabel.textContent = `Slot ${slotIndex + 1}`;
+              titleRow.appendChild(slotLabel);
+              const label = document.createTextNode(' ' + (pluginInfo ? pluginInfo.name : assignment.path));
+              titleRow.appendChild(label);
+              li.appendChild(titleRow);
+              const metaRow = ce('div', 'slotMeta small');
+              const details = [];
+              if(pluginInfo && pluginInfo.format) details.push(pluginInfo.format);
+              const rel = pluginInfo && pluginInfo.relative_path ? pluginInfo.relative_path : assignment.path;
+              if(rel) details.push(rel);
+              metaRow.textContent = details.join(' · ');
+              li.appendChild(metaRow);
+              const actions = ce('div', 'actions');
+              const removeBtn = ce('button', 'btn btn-xs removePlugin');
+              removeBtn.textContent = '✖ Remove';
+              removeBtn.addEventListener('click', (event)=>{
+                event.preventDefault();
+                removePlugin(streamName, laneKey, slotIndex);
+              });
+              actions.appendChild(removeBtn);
+              li.appendChild(actions);
+              list.appendChild(li);
+            });
+          }
+          laneEl.appendChild(list);
+          const controls = ce('div', 'laneControls');
+          const assignBtn = ce('button', 'btn btn-xs assignBtn');
+          assignBtn.textContent = '＋ Assign selected';
+          assignBtn.addEventListener('click', (event)=>{
+            event.preventDefault();
+            assignSelected(streamName, laneKey);
+          });
+          controls.appendChild(assignBtn);
+          laneEl.appendChild(controls);
+          lanesWrap.appendChild(laneEl);
+        });
+        card.appendChild(lanesWrap);
+        streamsContainer.appendChild(card);
+      });
+    }
+
+    async function refreshRack(logRefresh = false){
+      if(statusText) statusText.textContent = 'Refreshing…';
       blockEl.classList.remove('server-offline');
       try{
-        const res = await fetch('/api/status');
-        if(!res.ok) throw new Error('status '+res.status);
+        const res = await fetch('/api/plugins');
+        if(!res.ok) throw new Error('status ' + res.status);
         const data = await res.json();
+        pluginState.status = data;
+        const count = (data.plugins || []).length;
+        if(statusText){
+          statusText.textContent = count ? `${count} plugin${count === 1 ? '' : 's'} available` : 'No plugins found';
+        }
         if(workspacePathLabel){
-          workspacePathLabel.textContent = data.workspace || 'Not available';
+          workspacePathLabel.textContent = data.workspace || 'Unavailable';
         }
-        renderWorkspaceList(data.executables || []);
-        renderWorkspaceNotes(data.notes || []);
-        updatePathSuggestions((data.executables || []).map(item=>item.path));
-        if(data.platform_supported){
-          statusText.textContent = 'Server ready — platform supported';
-        }else{
-          statusText.textContent = 'Server ready — platform unverified';
+        renderWorkspaceNotes(data);
+        renderPluginLibrary(data);
+        renderStreams(data);
+        if(rackNotes){
+          rackNotes.textContent = count
+            ? 'Select a plugin and choose a lane to start routing.'
+            : 'Drop plugins into the library to start building a rack.';
         }
+        if(logRefresh) log('Rack refreshed.');
       }catch(err){
-        statusText.innerHTML = 'Server offline — run <code>python -m ambiance.server</code>';
-        renderWorkspaceList([], 'Server offline — workspace unavailable.');
-        renderWorkspaceNotes(['Workspace status unavailable.']);
-        updatePathSuggestions([]);
-        if(workspacePathLabel){
-          workspacePathLabel.textContent = 'Unavailable';
-        }
+        if(statusText) statusText.textContent = 'Rack offline';
+        if(workspacePathLabel) workspacePathLabel.textContent = 'Unavailable';
         blockEl.classList.add('server-offline');
+        if(logRefresh) log('Refresh failed: ' + (err && err.message || err));
       }
     }
 
-    async function refreshRegistry(){
-      try{
-        const res = await fetch('/api/registry');
-        if(!res.ok) throw new Error('status '+res.status);
-        const data = await res.json();
-        renderTags(registrySources, data.sources);
-        renderTags(registryEffects, data.effects);
-      }catch(_err){
-        renderTags(registrySources, []);
-        renderTags(registryEffects, []);
-      }
-    }
+    refreshButtons.forEach((btn)=>{
+      btn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        refreshRack(true);
+      });
+    });
 
-    async function runExternalApp(){
-      const path = exePathInput && exePathInput.value.trim();
-      if(!path){
-        showRunOutput('Please provide a path to an executable.');
-        return;
-      }
-      const argsValue = exeArgsInput ? exeArgsInput.value : '';
-      const payload = {
-        path,
-        args: argsValue,
-        wait: !!(waitToggle && waitToggle.checked),
-      };
-      if(waitToggle && waitToggle.checked){
-        const timeoutVal = parseFloat(timeoutInput && timeoutInput.value);
-        if(!Number.isNaN(timeoutVal) && timeoutVal>0){
-          payload.timeout = timeoutVal;
-        }
-      }
-      showRunOutput('Launching '+path+'…');
-      try{
-        const res = await fetch('/api/run-app',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(payload)
-        });
-        if(!res.ok) throw new Error('status '+res.status);
-        const data = await res.json();
-        if(!data.ok){
-          const msg = data.error || data.stderr || 'Launch failed';
-          showRunOutput(msg);
+    if(copyWorkspaceBtn){
+      copyWorkspaceBtn.addEventListener('click', async ()=>{
+        const text = workspacePathLabel ? (workspacePathLabel.textContent || '').trim() : '';
+        if(!text || text === 'Not available' || text === 'Unavailable'){
+          log('Workspace path unavailable.');
           return;
         }
-        if(typeof data.pid === 'number'){
-          showRunOutput(`Launched PID ${data.pid}\nCommand: ${(data.args||[]).join(' ')}`);
-        }else{
-          const stdout = data.stdout || '';
-          const stderr = data.stderr || '';
-          const pieces = [
-            `Return code: ${data.returncode}`,
-            stdout ? `--- stdout ---\n${stdout.trim()}` : null,
-            stderr ? `--- stderr ---\n${stderr.trim()}` : null
-          ].filter(Boolean);
-          showRunOutput(pieces.join('\n\n') || 'Completed with no output.');
+        if(!navigator.clipboard || !navigator.clipboard.writeText){
+          log('Clipboard access is not available in this browser.');
+          return;
         }
-      }catch(err){
-        showRunOutput('Launch failed: '+(err && err.message || err));
-      }finally{
-        refreshStatus();
-      }
-    }
-
-    async function renderEngine(){
-      let payload;
-      try{
-        payload = JSON.parse(configArea.value || '{}');
-      }catch(err){
-        renderInfo.textContent = 'Invalid JSON: '+(err && err.message || err);
-        return;
-      }
-      if(!payload.duration) payload.duration = parseFloat(durationInput.value)||defaultConfig.duration;
-      if(!payload.sample_rate) payload.sample_rate = parseInt(sampleInput.value)||defaultConfig.sample_rate;
-      renderInfo.textContent = 'Rendering…';
-      try{
-        const res = await fetch('/api/render',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(payload)
-        });
-        if(!res.ok) throw new Error('status '+res.status);
-        const data = await res.json();
-        if(!data.ok) throw new Error(data.error || 'Render failed');
-        preview.src = data.audio;
-        renderInfo.textContent = `Rendered ${data.duration.toFixed(2)}s @ ${data.sample_rate} Hz`;
-        try{ preview.play(); }catch(_){ /* ignore autoplay errors */ }
-      }catch(err){
-        renderInfo.textContent = 'Render failed: '+(err && err.message || err);
-      }
+        const original = copyWorkspaceBtn.textContent;
+        try{
+          await navigator.clipboard.writeText(text);
+          copyWorkspaceBtn.textContent = 'Copied!';
+          setTimeout(()=>{ copyWorkspaceBtn.textContent = original; }, 1500);
+          log('Workspace path copied to clipboard.');
+        }catch(err){
+          copyWorkspaceBtn.textContent = 'Copy failed';
+          setTimeout(()=>{ copyWorkspaceBtn.textContent = original; }, 2000);
+          log('Copy failed: ' + (err && err.message || err));
+        }
+      });
     }
 
     const dragHandle = blockEl.querySelector('.dragHandle');
@@ -1128,70 +1169,7 @@ function bootAudio(){
       blockEl.classList.remove('dragging');
     });
 
-    refreshButtons.forEach(btn=>{
-      btn.addEventListener('click', (event)=>{
-        event.preventDefault();
-        refreshStatus();
-        refreshRegistry();
-      });
-    });
-
-    if(copyWorkspaceBtn){
-      copyWorkspaceBtn.addEventListener('click', async ()=>{
-        const text = workspacePathLabel ? (workspacePathLabel.textContent || '').trim() : '';
-        if(!text || text === 'Not available' || text === 'Unavailable'){
-          showRunOutput('Workspace path unavailable.');
-          return;
-        }
-        if(!navigator.clipboard || !navigator.clipboard.writeText){
-          showRunOutput('Clipboard access is not available in this browser.');
-          return;
-        }
-        const original = copyWorkspaceBtn.textContent;
-        try{
-          await navigator.clipboard.writeText(text);
-          copyWorkspaceBtn.textContent = 'Copied!';
-          setTimeout(()=>{ copyWorkspaceBtn.textContent = original; }, 1500);
-        }catch(err){
-          copyWorkspaceBtn.textContent = 'Copy failed';
-          setTimeout(()=>{ copyWorkspaceBtn.textContent = original; }, 2000);
-          showRunOutput('Copy failed: '+(err && err.message || err));
-        }
-      });
-    }
-
-    if(workspaceList){
-      workspaceList.addEventListener('click', (event)=>{
-        const target = event.target;
-        if(target && target.classList && target.classList.contains('useExecutable')){
-          event.preventDefault();
-          const value = target.dataset.path || '';
-          if(value && exePathInput){
-            exePathInput.value = value;
-            showRunOutput('Loaded path from workspace list.');
-          }
-        }
-      });
-    }
-
-    const resetButton = q('.resetConfig');
-    if(resetButton){
-      resetButton.addEventListener('click', ()=> applyDefaultConfig());
-    }
-    const renderButton = q('.renderNow');
-    if(renderButton){
-      renderButton.addEventListener('click', ()=> renderEngine());
-    }
-    const runButton = q('.runExternal');
-    if(runButton){
-      runButton.addEventListener('click', ()=> runExternalApp());
-    }
-    durationInput.addEventListener('change', ()=> applyDefaultConfig());
-    sampleInput.addEventListener('change', ()=> applyDefaultConfig());
-
-    applyDefaultConfig();
-    refreshRegistry();
-    refreshStatus();
+    refreshRack();
   }
 
   function addBlock(){
@@ -2165,7 +2143,7 @@ return blockModel;
   function gatherSession(){
     const data = { blocks:[] };
     qsa('.block', main).forEach(blk=>{
-      if(isExternalBlock(blk)) return;
+      if(isPluginBlock(blk)) return;
       const volEl = qs('.blockVol', blk);
       if(!volEl) return;
       const b = {
@@ -2196,7 +2174,7 @@ return blockModel;
     return data;
   }
   function applySession(data){
-    qsa('.block', main).forEach(b=>{ if(isExternalBlock(b)) return; b.remove(); });
+    qsa('.block', main).forEach(b=>{ if(isPluginBlock(b)) return; b.remove(); });
     if(!ACTX){ bootAudio(); ACTX.resume(); }
     (data.blocks||[]).forEach(b=>{
       const blk = addBlock();
@@ -2316,7 +2294,7 @@ return blockModel;
   async function gatherPresetWithAudio(){
     const session = gatherSession();
     let blockIdx = 0;
-    const blockEls = qsa('.block', main).filter(blk=> !isExternalBlock(blk));
+    const blockEls = qsa('.block', main).filter(blk=> !isPluginBlock(blk));
     for (const blk of blockEls){
       const streams = qsa('.stream', blk);
       let sidx = 0;
@@ -2724,7 +2702,7 @@ themeFile.addEventListener('change', async (e)=>{
 
   // Also enable on newly created streams
   // Start with one block for convenience and keep the external workspace present
-  ensureExternalAppsWorkspace();
+  ensurePluginRack();
   addBlock();
 })();
 
