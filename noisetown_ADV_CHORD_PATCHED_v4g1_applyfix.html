@@ -33,13 +33,28 @@
   .external-block .registry-tags span{padding:2px 6px;border:1px solid #555;border-radius:4px;background:var(--card);font-size:12px}
   .external-block .status-text{font-size:12px;color:var(--muted)}
   .external-block.server-offline .status-text{color:#ff8585}
-  #externalDesktop{background:var(--panel);border:1px solid #444;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
-  #externalDesktop.collapsed{padding:8px}
-  #externalDesktop.collapsed .desktopShelf,#externalDesktop.collapsed .desktopEmpty{display:none}
-  #externalDesktop .desktopHdr{display:flex;align-items:center;gap:8px;font-weight:700}
-  #externalDesktop .desktopShelf{display:flex;flex-wrap:wrap;gap:12px}
-  #externalDesktop .desktopEmpty{display:none;font-style:italic;color:var(--muted)}
-  #externalDesktop.empty .desktopEmpty{display:block}
+  .pluginWorkbench .rackRow{align-items:flex-start;gap:16px}
+  .pluginWorkbench .rackControls{display:flex;flex-direction:column;gap:8px;min-width:240px}
+  .pluginWorkbench .bankSwitch{display:flex;align-items:center;gap:6px}
+  .pluginWorkbench .bankSwitch .btn{padding:4px 8px;font-size:12px}
+  .pluginWorkbench .rackDisplay{flex:1;min-width:260px;display:flex;flex-direction:column;gap:8px}
+  .rackChains{display:flex;flex-wrap:wrap;gap:12px}
+  .rackBank{flex:1 1 240px;background:var(--card);border:1px solid #555;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:8px}
+  .rackBank.active{border-color:var(--accent)}
+  .rackBank .bankHeader{font-weight:700;font-size:13px}
+  .rackStream{display:flex;flex-direction:column;gap:4px;padding:6px;background:rgba(0,0,0,0.15);border-radius:6px}
+  .rackStream .streamTitle{font-weight:600;font-size:12px;color:var(--muted)}
+  .slotList{display:flex;flex-wrap:wrap;gap:6px}
+  .slotChip{display:inline-flex;align-items:center;gap:4px;background:rgba(89,167,255,0.15);border:1px solid rgba(89,167,255,0.35);border-radius:12px;padding:2px 8px;font-size:12px}
+  .slotChip .chipRemove{background:transparent;border:0;color:inherit;cursor:pointer;font-size:12px;padding:0 2px}
+  .slotChip .chipRemove:hover{color:#fff}
+  #pluginDesktop{background:var(--panel);border:1px solid #444;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+  #pluginDesktop.collapsed{padding:8px}
+  #pluginDesktop.collapsed .desktopShelf,#pluginDesktop.collapsed .desktopEmpty{display:none}
+  #pluginDesktop .desktopHdr{display:flex;align-items:center;gap:8px;font-weight:700}
+  #pluginDesktop .desktopShelf{display:flex;flex-wrap:wrap;gap:12px}
+  #pluginDesktop .desktopEmpty{display:none;font-style:italic;color:var(--muted)}
+  #pluginDesktop.empty .desktopEmpty{display:block}
   .external-block .workbenchPanel{display:flex;flex-direction:column;gap:14px}
   .fileInputRow{display:flex;align-items:center;gap:8px;width:100%;flex-wrap:wrap}
   .fileInputRow input[type="text"]{flex:1 1 auto;min-width:180px}
@@ -62,7 +77,7 @@
   .workspaceRow .workspaceMeta{font-size:12px;color:var(--muted)}
   .workspaceRow .workspaceActions{display:flex;flex-wrap:wrap;gap:6px}
   .workspaceRow button{padding:4px 8px;font-size:12px}
-  body.theme-xp #externalDesktop, body.theme-98 #externalDesktop{background:linear-gradient(#f9f9ff,#dee6fb);border:1px solid #8aa8d8}
+  body.theme-xp #pluginDesktop, body.theme-98 #pluginDesktop{background:linear-gradient(#f9f9ff,#dee6fb);border:1px solid #8aa8d8}
   body.theme-xp .appBubble, body.theme-98 .appBubble{background:#fff;border-color:#9ab4e0}
   body.theme-xp .bubbleLog, body.theme-98 .bubbleLog{background:#fff;border-color:#9ab4e0;color:#000}
   body.theme-xp .workspaceList, body.theme-98 .workspaceList{background:#fff;border-color:#9ab4e0}
@@ -764,45 +779,49 @@ function bootAudio(){
   const streamSpectros = []; // for spectrogram draw loop
 
   let blockCount = 0;
-  const isExternalBlock = (el)=> !!(el && el.dataset && el.dataset.role === 'external-apps');
+
+  const isExternalBlock = (el)=> !!(el && el.dataset && el.dataset.role === 'plugin-rack');
 
   function ensureExternalAppsWorkspace(){
-    if(qs('#externalAppsBlock')) return null;
+    if(qs('#pluginRackBlock')) return null;
     const blockEl = ce('div','block external-block');
-    blockEl.id = 'externalAppsBlock';
-    blockEl.dataset.role = 'external-apps';
+    blockEl.id = 'pluginRackBlock';
+    blockEl.dataset.role = 'plugin-rack';
     blockEl.innerHTML = `
-      <h2><span class="dragHandle" style="cursor:move">⣿</span> External Apps Workbench</h2>
-      <div id="externalDesktop" class="empty" aria-label="External app desktop">
+      <h2><span class="dragHandle" style="cursor:move">⣿</span> Plugin Rack</h2>
+      <div id="pluginDesktop" class="empty" aria-label="Plugin desktop">
         <div class="desktopHdr">
-          <span class="desktopTitle">External App Desktop</span>
+          <span class="desktopTitle">Plugin Desktop</span>
           <div class="spacer"></div>
           <button type="button" class="btn btn-xs toggleDesktop">⬇️ Collapse</button>
         </div>
-        <div class="desktopEmpty small">No workspace bubbles yet. Register a workspace to view them here.</div>
+        <div class="desktopEmpty small">No plugin editors yet. Launch a plug-in to pin it here.</div>
         <div class="desktopShelf"></div>
       </div>
-      <div class="workbenchPanel">
-        <div class="row">
-          <button class="btn checkStatus">🔄 Check Status</button>
-          <button class="btn resetConfig">🧰 Reset Config</button>
+      <div class="workbenchPanel pluginWorkbench">
+        <div class="row statusRow">
+          <button class="btn refreshPlugins">🔄 Refresh</button>
+          <button class="btn rescanPlugins">🔍 Rescan</button>
           <div class="spacer"></div>
           <span class="status-text">Waiting for server…</span>
         </div>
-        <div class="status-panels">
+        <div class="status-panels libraryRow">
           <div class="status-panel">
-            <strong>Bundled Installers</strong>
-            <div class="bundledStatus statusList">
-              <div class="statusItem"><span>Pending…</span></div>
-            </div>
+            <strong>Registered Plug-ins</strong>
+            <div class="pluginList statusList"></div>
           </div>
           <div class="status-panel">
-            <strong>Workspace Executables</strong>
-            <div class="workspaceExecs statusList">
-              <div class="statusItem"><span>Pending…</span></div>
+            <strong>Add Plug-in</strong>
+            <div class="fileInputRow">
+              <input type="text" class="pluginPath" list="pluginPathHints" placeholder="C:\\Path\\to\\plugin.vst3 or /Library/Audio/...">
+              <button type="button" class="btn btn-xs browsePlugin">📁 Choose File…</button>
+              <input type="file" class="pluginPicker" accept=".vst3,.vst,.dll,.component,.svt,.mc.svt,.so,.dylib" style="display:none">
             </div>
+            <input type="text" class="pluginName" placeholder="Display name (optional)">
+            <button class="btn registerPlugin">➕ Add Plug-in</button>
+            <datalist id="pluginPathHints"></datalist>
           </div>
-          <div class="status-panel">
+          <div class="status-panel registryPanel">
             <strong>Registry</strong>
             <div class="small">Sources</div>
             <div class="registry-tags registrySources"></div>
@@ -810,67 +829,40 @@ function bootAudio(){
             <div class="registry-tags registryEffects"></div>
           </div>
         </div>
-      <div class="row">
-        <label>Duration (s)</label><input type="number" class="durationInput" min="1" max="120" step="1" value="8">
-        <label>Sample Rate</label><input type="number" class="sampleRateInput" min="8000" max="96000" step="1000" value="44100">
-      </div>
-      <div class="row">
-        <label style="width:100%">Executable Path</label>
-        <div class="fileInputRow">
-          <input type="text" class="exePath" list="externalAppPaths" placeholder="C:\\Path\\to\\app.exe or /path/to/app">
-          <button type="button" class="btn btn-xs browseExe">📁 Choose File…</button>
-          <input type="file" class="exePicker" accept=".exe,.bat,.cmd,.com,.sh" style="display:none">
+        <div class="row rackRow">
+          <div class="rackControls">
+            <label>Stream</label>
+            <input type="text" class="streamName" placeholder="sine, noise, master…">
+            <label>Plug-in</label>
+            <select class="pluginSelect"></select>
+            <button class="btn addToStream">➕ Add to Bank</button>
+            <div class="bankSwitch">
+              <span>Active Bank:</span>
+              <button class="btn btn-xs bankToggle" data-bank="A">A</button>
+              <button class="btn btn-xs bankToggle" data-bank="B">B</button>
+            </div>
+          </div>
+          <div class="rackDisplay">
+            <strong>Chains</strong>
+            <div class="rackChains"></div>
+          </div>
         </div>
-        <datalist id="externalAppPaths"></datalist>
-      </div>
-      <div class="row">
-        <label style="width:100%">Arguments (optional)</label>
-        <input type="text" class="exeArgs" placeholder="--help or other switches">
-      </div>
-      <div class="row">
-        <label class="small"><input type="checkbox" class="waitToggle" checked> Wait for completion</label>
-        <label>Timeout</label><input type="number" class="timeoutInput" min="1" max="600" step="1" value="30">
-        <div class="spacer"></div>
-        <button class="btn runExternal">🚀 Run External App</button>
-      </div>
-      <div class="row">
-        <label style="width:100%">Engine Config (JSON)</label>
-        <textarea class="engineConfig" aria-label="Engine configuration JSON"></textarea>
-      </div>
-      <div class="row">
-        <button class="btn renderNow">🎧 Render with Engine</button>
-        <div class="spacer"></div>
-        <span class="small renderInfo">Idle.</span>
-      </div>
-      <div class="row">
-        <audio class="enginePreview" controls style="width:100%"></audio>
-      </div>
-      <div class="row">
-        <label style="width:100%">Run Output</label>
-        <textarea class="runOutput" readonly placeholder="Captured stdout/stderr or process information"></textarea>
-      </div>
-      <div class="row">
-        <label style="width:100%">Workspace Source (zip or folder)</label>
-        <div class="fileInputRow">
-          <input type="text" class="workspaceSource" placeholder="C:\\Path\\to\\archive.zip or extracted folder">
-          <button type="button" class="btn btn-xs browseWorkspaceFile">📁 Choose File…</button>
-          <button type="button" class="btn btn-xs browseWorkspaceFolder">📂 Choose Folder…</button>
-          <input type="file" class="workspaceFilePicker" style="display:none">
-          <input type="file" class="workspaceFolderPicker" style="display:none" webkitdirectory directory>
+        <div class="row renderRow">
+          <label>Duration (s)</label><input type="number" class="durationInput" min="1" max="120" step="1" value="8">
+          <label>Sample Rate</label><input type="number" class="sampleRateInput" min="8000" max="96000" step="1000" value="44100">
         </div>
-      </div>
-      <div class="row">
-        <input type="text" class="workspaceName" placeholder="Workspace name (optional)">
-        <input type="text" class="workspaceEntry" placeholder="Entry HTML (optional)">
-        <input type="text" class="workspaceExecutable" placeholder="Executable (optional)">
-        <input type="text" class="workspaceArgs" placeholder="Default args (optional)">
-        <button class="btn registerWorkspace">📂 Add Workspace</button>
-      </div>
-      <div class="row">
-        <div class="workspaceList empty">
-          <div class="small">No workspaces registered yet. Provide a source above to add one.</div>
+        <div class="row">
+          <label style="width:100%">Engine Config (JSON)</label>
+          <textarea class="engineConfig" aria-label="Engine configuration JSON"></textarea>
         </div>
-      </div>
+        <div class="row">
+          <button class="btn renderNow">🎧 Render with Engine</button>
+          <div class="spacer"></div>
+          <span class="small renderInfo">Idle.</span>
+        </div>
+        <div class="row">
+          <audio class="enginePreview" controls style="width:100%"></audio>
+        </div>
       </div>
     `;
 
@@ -882,718 +874,398 @@ function bootAudio(){
   function wireExternalAppsWorkspace(blockEl){
     const q = (sel)=> blockEl.querySelector(sel);
     const statusText = q('.status-text');
-    const bundledStatus = q('.bundledStatus');
-    const workspaceExecStatus = q('.workspaceExecs');
-    const registrySources = q('.registrySources');
-    const registryEffects = q('.registryEffects');
+    const pluginList = q('.pluginList');
+    const pluginSelect = q('.pluginSelect');
+    const pluginPathInput = q('.pluginPath');
+    const pluginNameInput = q('.pluginName');
+    const pluginPicker = q('.pluginPicker');
+    const browsePluginBtn = q('.browsePlugin');
+    const rescanBtn = q('.rescanPlugins');
+    const refreshBtn = q('.refreshPlugins');
+    const addBtn = q('.addToStream');
+    const streamInput = q('.streamName');
+    const bankButtons = Array.from(blockEl.querySelectorAll('.bankToggle'));
+    const rackChains = q('.rackChains');
     const durationInput = q('.durationInput');
     const sampleInput = q('.sampleRateInput');
     const configArea = q('.engineConfig');
     const renderInfo = q('.renderInfo');
     const preview = q('.enginePreview');
-    const exePathInput = q('.exePath');
-    const exePicker = q('.exePicker');
-    const browseExeBtn = q('.browseExe');
-    const exeArgsInput = q('.exeArgs');
-    const waitToggle = q('.waitToggle');
-    const timeoutInput = q('.timeoutInput');
-    const runOutput = q('.runOutput');
-    const workspaceSourceInput = q('.workspaceSource');
-    const workspaceFilePicker = q('.workspaceFilePicker');
-    const workspaceFolderPicker = q('.workspaceFolderPicker');
-    const browseWorkspaceFileBtn = q('.browseWorkspaceFile');
-    const browseWorkspaceFolderBtn = q('.browseWorkspaceFolder');
-    const workspaceNameInput = q('.workspaceName');
-    const workspaceEntryInput = q('.workspaceEntry');
-    const workspaceExecutableInput = q('.workspaceExecutable');
-    const workspaceArgsInput = q('.workspaceArgs');
-    const workspaceList = q('.workspaceList');
-    const registerWorkspaceBtn = q('.registerWorkspace');
-    const desktop = document.getElementById('externalDesktop');
+    const desktop = blockEl.querySelector('#pluginDesktop');
     const desktopShelf = desktop ? desktop.querySelector('.desktopShelf') : null;
     const desktopToggle = desktop ? desktop.querySelector('.toggleDesktop') : null;
-    const statusExecutables = new Set();
-    const workspaceExecutables = new Set();
-    let lastWorkspaces = [];
+    const registrySources = q('.registrySources');
+    const registryEffects = q('.registryEffects');
+    const pathList = blockEl.querySelector('#pluginPathHints');
+
     const bubbleMap = new Map();
+    let currentStatus = null;
+    let currentRack = { active_bank: 'A', banks: {} };
 
     function derivePathFromFile(file){
       if(!file) return '';
       if(file.path) return file.path;
       if(file.webkitRelativePath){
-        const parts = file.webkitRelativePath.split(/[/\\]/).filter(Boolean);
-        if(parts.length > 1){
-          return parts.slice(0, -1).join('/');
-        }
-        if(parts.length){
-          return parts[0];
-        }
+        const parts = file.webkitRelativePath.split(/[\\/]/).filter(Boolean);
+        if(parts.length > 1) return parts.slice(0, -1).join('/');
+        if(parts.length) return parts[0];
       }
       return file.name || '';
     }
 
-    if(browseExeBtn && exePicker){
-      browseExeBtn.addEventListener('click', ()=> exePicker.click());
-      exePicker.addEventListener('change', ()=>{
-        const file = exePicker.files && exePicker.files[0];
-        const value = derivePathFromFile(file);
-        if(exePathInput && value){
-          exePathInput.value = value;
-          pushPathSuggestion(value);
-        }
-      });
+    function pushPathSuggestion(path){
+      if(!pathList || !path) return;
+      const exists = Array.from(pathList.options || []).some(opt=> opt.value === path);
+      if(exists) return;
+      const opt = document.createElement('option');
+      opt.value = path;
+      pathList.appendChild(opt);
     }
 
-    if(browseWorkspaceFileBtn && workspaceFilePicker){
-      browseWorkspaceFileBtn.addEventListener('click', ()=> workspaceFilePicker.click());
-      workspaceFilePicker.addEventListener('change', ()=>{
-        const file = workspaceFilePicker.files && workspaceFilePicker.files[0];
-        const value = derivePathFromFile(file);
-        if(workspaceSourceInput && value){
-          workspaceSourceInput.value = value;
-        }
-      });
-    }
-
-    if(browseWorkspaceFolderBtn && workspaceFolderPicker){
-      browseWorkspaceFolderBtn.addEventListener('click', ()=> workspaceFolderPicker.click());
-      workspaceFolderPicker.addEventListener('change', ()=>{
-        const files = workspaceFolderPicker.files;
-        const file = files && files.length ? files[0] : null;
-        const value = derivePathFromFile(file);
-        if(workspaceSourceInput && value){
-          workspaceSourceInput.value = value;
-        }
-      });
+    function setDesktopEmptyState(state){
+      if(!desktop) return;
+      desktop.classList.toggle('empty', state);
     }
 
     function updateDesktopToggleLabel(){
-      if(!desktopToggle || !desktop) return;
+      if(!desktop || !desktopToggle) return;
       const collapsed = desktop.classList.contains('collapsed');
       desktopToggle.textContent = collapsed ? '⬆️ Expand' : '⬇️ Collapse';
     }
 
-    function setDesktopEmptyState(isEmpty){
-      if(!desktop) return;
-      desktop.classList.toggle('empty', isEmpty);
-    }
-
-    function renderBundledStatusList(items){
-      if(!bundledStatus) return;
-      bundledStatus.innerHTML = '';
-      const payload = Array.isArray(items) ? items : [];
-      if(!payload.length){
-        const empty = ce('div','statusItem');
-        const span = ce('span');
-        span.textContent = 'No installers detected.';
-        empty.appendChild(span);
-        bundledStatus.appendChild(empty);
-        return;
-      }
-      payload.forEach((item)=>{
-        if(!item) return;
-        const statusItem = ce('div','statusItem');
-        const header = ce('div','statusHeader');
-        header.style.display = 'flex';
-        header.style.alignItems = 'center';
-        header.style.justifyContent = 'space-between';
-        header.style.gap = '8px';
-        const title = ce('strong');
-        title.textContent = item.title || item.key || 'Installer';
-        header.appendChild(title);
-        if(item.zip_present){
-          const installBtn = ce('button','btn btn-xs');
-          installBtn.textContent = item.installed ? '♻️ Reinstall' : '📦 Install';
-          installBtn.addEventListener('click', ()=> installBundled(item.key));
-          header.appendChild(installBtn);
-        }
-        statusItem.appendChild(header);
-        const summary = ce('span');
-        const parts = [];
-        if(item.zip_present) parts.push('Installer found');
-        else parts.push('Installer missing');
-        if(item.installed) parts.push('Extracted');
-        else if(item.zip_present) parts.push('Not extracted');
-        if(item.path) parts.push(item.path);
-        else if(item.root) parts.push(item.root);
-        summary.textContent = parts.join(' · ');
-        statusItem.appendChild(summary);
-        if(item.source){
-          const src = ce('span');
-          src.className = 'status-text';
-          src.textContent = item.source;
-          statusItem.appendChild(src);
-        }
-        bundledStatus.appendChild(statusItem);
-        if(item.path) pushPathSuggestion(item.path);
-      });
-    }
-
-    function updateExecutableStatus(){
-      if(!workspaceExecStatus) return;
-      workspaceExecStatus.innerHTML = '';
-      const combined = Array.from(new Set([
-        ...Array.from(statusExecutables),
-        ...Array.from(workspaceExecutables),
-      ]))
-        .filter(Boolean)
-        .map(String)
-        .sort((a,b)=> a.localeCompare(b));
-      if(!combined.length){
-        const empty = ce('div','statusItem');
-        const span = ce('span');
-        span.textContent = 'No executables registered yet.';
-        empty.appendChild(span);
-        workspaceExecStatus.appendChild(empty);
-        return;
-      }
-      combined.forEach((path)=>{
-        const item = ce('div','statusItem');
-        const span = ce('span');
-        span.textContent = path;
-        item.appendChild(span);
-        workspaceExecStatus.appendChild(item);
-        pushPathSuggestion(path);
-      });
-    }
-
-    if(desktopToggle){
-      desktopToggle.addEventListener('click', ()=>{
-        if(!desktop) return;
-        desktop.classList.toggle('collapsed');
-        updateDesktopToggleLabel();
-      });
-      updateDesktopToggleLabel();
-    }
-
-    function appendBubbleLog(record, message){
-      if(!record) return;
-      if(!record.logEl){
-        record.logEl = ce('pre','bubbleLog');
-        record.bodyEl && record.bodyEl.appendChild(record.logEl);
-      }
-      const stamp = new Date().toLocaleTimeString();
-      const text = `[${stamp}] ${message}`;
-      record.logEl.textContent = record.logEl.textContent ? `${record.logEl.textContent}\n${text}` : text;
-      record.logEl.scrollTop = record.logEl.scrollHeight;
-    }
-
-    function getOrCreateBubble(workspace){
-      if(!workspace || !workspace.slug || !desktopShelf) return null;
-      let record = bubbleMap.get(workspace.slug);
+    function ensureBubble(slug, name){
+      if(!desktopShelf || !slug) return null;
+      let record = bubbleMap.get(slug);
       if(record) return record;
       const bubble = ce('div','appBubble');
-      bubble.dataset.slug = workspace.slug;
-      const closeBtn = ce('button','bubbleClose');
-      closeBtn.type = 'button';
-      closeBtn.setAttribute('aria-label','Close workspace bubble');
-      closeBtn.textContent = '✖';
+      bubble.dataset.slug = slug;
+      const closeBtn = ce('button','bubbleClose'); closeBtn.type='button'; closeBtn.textContent='✖';
       const titleRow = ce('div','bubbleTitle');
-      const nameEl = ce('span','bubbleName');
-      const kindEl = ce('span','bubbleKind');
+      const nameEl = ce('span','bubbleName'); nameEl.textContent = name || slug;
       titleRow.appendChild(nameEl);
-      titleRow.appendChild(kindEl);
-      const actionsEl = ce('div','bubbleActions');
       const bodyEl = ce('div','bubbleContent');
       bubble.appendChild(closeBtn);
       bubble.appendChild(titleRow);
-      bubble.appendChild(actionsEl);
       bubble.appendChild(bodyEl);
-      closeBtn.addEventListener('click', ()=>{
-        bubbleMap.delete(workspace.slug);
-        bubble.remove();
-        setDesktopEmptyState(!lastWorkspaces.length);
-      });
+      closeBtn.addEventListener('click', ()=>{ bubbleMap.delete(slug); bubble.remove(); setDesktopEmptyState(!bubbleMap.size); });
       desktopShelf.appendChild(bubble);
-      record = {
-        el: bubble,
-        nameEl,
-        kindEl,
-        actionsEl,
-        bodyEl,
-        workspace: null,
-        iframe: null,
-        logEl: null,
-        infoEl: null,
-        argsInput: null,
-        waitInput: null,
-      };
-      bubbleMap.set(workspace.slug, record);
+      record = { el:bubble, bodyEl, logEl:null };
+      bubbleMap.set(slug, record);
+      setDesktopEmptyState(false);
       return record;
     }
 
-    function updateBubble(record, workspace, refreshFrame){
-      if(!record || !workspace) return;
-      record.workspace = workspace;
-      record.nameEl.textContent = workspace.title || workspace.slug;
-      record.kindEl.textContent = (workspace.kind || 'native').toUpperCase();
-      record.kindEl.dataset.kind = workspace.kind || 'native';
-
-      record.actionsEl.innerHTML = '';
-      const hasExecutable = Boolean(workspace.executable_path);
-      const hasEntry = Boolean(workspace.entry_url);
-
-      if(hasEntry){
-        if(!record.iframe){
-          const frame = document.createElement('iframe');
-          frame.loading = 'lazy';
-          frame.dataset.src = workspace.entry_url;
-          record.bodyEl.appendChild(frame);
-          record.iframe = frame;
-        }
-        if(refreshFrame || !record.iframe.src || record.iframe.dataset.src !== workspace.entry_url){
-          record.iframe.dataset.src = workspace.entry_url;
-          record.iframe.src = workspace.entry_url;
-        }
-        const reloadBtn = ce('button','btn btn-xs');
-        reloadBtn.textContent = '🔁 Reload';
-        reloadBtn.addEventListener('click', ()=>{
-          if(!record.iframe) return;
-          const base = record.iframe.dataset.src || workspace.entry_url;
-          record.iframe.src = `${base}${base.includes('?') ? '&' : '?'}t=${Date.now()}`;
-        });
-        record.actionsEl.appendChild(reloadBtn);
-      }else if(record.iframe){
-        record.iframe.remove();
-        record.iframe = null;
-      }
-
-      if(hasExecutable){
-        const argsInput = ce('input','bubbleArgs');
-        argsInput.type = 'text';
-        argsInput.placeholder = 'Args (optional)';
-        if(Array.isArray(workspace.args) && workspace.args.length){
-          argsInput.value = workspace.args.join(' ');
-        }else if(typeof workspace.args === 'string'){
-          argsInput.value = workspace.args;
-        }
-        record.actionsEl.appendChild(argsInput);
-        record.argsInput = argsInput;
-
-        const waitLabel = ce('label');
-        waitLabel.className = 'small';
-        const waitBox = document.createElement('input');
-        waitBox.type = 'checkbox';
-        waitBox.className = 'bubbleWait';
-        waitLabel.appendChild(waitBox);
-        waitLabel.appendChild(document.createTextNode(' Wait for exit'));
-        record.actionsEl.appendChild(waitLabel);
-        record.waitInput = waitBox;
-
-        const launchBtn = ce('button','btn btn-xs');
-        launchBtn.textContent = '🚀 Launch';
-        launchBtn.addEventListener('click', ()=> launchWorkspaceFromBubble(workspace, record));
-        record.actionsEl.appendChild(launchBtn);
-
-        if(!record.logEl){
-          record.logEl = ce('pre','bubbleLog');
-          record.bodyEl.appendChild(record.logEl);
-        }
-      }else{
-        record.argsInput = null;
-        record.waitInput = null;
-        if(record.logEl){
-          record.logEl.remove();
-          record.logEl = null;
-        }
-      }
-
-      if(!hasEntry && !hasExecutable){
-        if(!record.infoEl){
-          record.infoEl = ce('div','bubbleInfo');
-          record.bodyEl.appendChild(record.infoEl);
-        }
-        record.infoEl.textContent = 'Workspace ready — no embedded UI or executable detected.';
-      }else if(record.infoEl){
-        record.infoEl.remove();
-        record.infoEl = null;
-      }
-    }
-
-    function openWorkspaceBubble(workspace, refreshFrame=true){
-      const record = getOrCreateBubble(workspace);
+    function logBubble(slug, name, message){
+      const record = ensureBubble(slug, name);
       if(!record) return;
-      updateBubble(record, workspace, refreshFrame);
+      if(!record.logEl){
+        record.logEl = ce('pre','bubbleLog');
+        record.bodyEl.appendChild(record.logEl);
+      }
+      const stamp = new Date().toLocaleTimeString();
+      const line = `[${stamp}] ${message}`;
+      record.logEl.textContent = record.logEl.textContent ? `${record.logEl.textContent}
+${line}` : line;
+      record.logEl.scrollTop = record.logEl.scrollHeight;
       if(desktop){
         desktop.classList.remove('collapsed');
         updateDesktopToggleLabel();
       }
-      requestAnimationFrame(()=>{
-        record.el.scrollIntoView({behavior:'smooth', block:'nearest', inline:'nearest'});
-      });
     }
 
-    function syncBubbles(workspaces){
-      const map = new Map((workspaces || []).map(ws=>[ws.slug, ws]));
-      map.forEach((ws)=>{
-        const record = bubbleMap.get(ws.slug);
-        if(record){
-          updateBubble(record, ws, false);
+    function renderPlugins(status){
+      const plugins = (status && status.plugins) || [];
+      if(pluginList){
+        pluginList.innerHTML = '';
+        if(!plugins.length){
+          const empty = ce('div','statusItem');
+          empty.textContent = 'No plug-ins registered yet.';
+          pluginList.appendChild(empty);
         }
-      });
-      for(const [slug, record] of Array.from(bubbleMap.entries())){
-        if(!map.has(slug)){
-          record.el.remove();
-          bubbleMap.delete(slug);
-        }
-      }
-    }
-
-    async function launchWorkspaceFromBubble(workspace, record){
-      if(!workspace || !workspace.slug) return;
-      const payload = {};
-      if(record && record.argsInput){
-        const argsText = record.argsInput.value.trim();
-        if(argsText) payload.args = argsText;
-      }
-      if(record && record.waitInput && record.waitInput.checked){
-        payload.wait = true;
-        const timeoutVal = parseFloat(timeoutInput && timeoutInput.value);
-        if(!Number.isNaN(timeoutVal) && timeoutVal>0){
-          payload.timeout = timeoutVal;
-        }
-      }
-      appendBubbleLog(record, `Launching ${workspace.title || workspace.slug}…`);
-      try{
-        const res = await fetch(`/api/workspaces/${encodeURIComponent(workspace.slug)}/launch`,{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(payload)
+        plugins.forEach((plugin)=>{
+          if(!plugin) return;
+          const row = ce('div','statusItem');
+          const header = ce('div','statusHeader');
+          header.style.display = 'flex';
+          header.style.justifyContent = 'space-between';
+          header.style.alignItems = 'center';
+          const title = ce('strong');
+          title.textContent = plugin.name || plugin.slug;
+          header.appendChild(title);
+          if(plugin.kind !== 'builtin'){
+            const removeBtn = ce('button','btn btn-xs');
+            removeBtn.textContent = '🗑 Remove';
+            removeBtn.addEventListener('click', ()=> removePlugin(plugin.slug));
+            header.appendChild(removeBtn);
+          }
+          if(plugin.kind !== 'builtin' && plugin.available && status.editor_commands && status.editor_commands.length){
+            const openBtn = ce('button','btn btn-xs');
+            openBtn.textContent = '🪟 Open';
+            openBtn.addEventListener('click', ()=> openPluginEditor(plugin.slug, plugin.name));
+            header.appendChild(openBtn);
+          }
+          row.appendChild(header);
+          const meta = ce('div','small');
+          const pieces = [plugin.format?.toUpperCase() || 'UNKNOWN'];
+          if(plugin.path) pieces.push(plugin.path);
+          row.appendChild(meta);
+          meta.textContent = pieces.join(' · ');
+          pluginList.appendChild(row);
+          if(plugin.path) pushPathSuggestion(plugin.path);
         });
-        if(!res.ok) throw new Error('status '+res.status);
-        const data = await res.json();
-        if(!data.ok){
-          const msg = data.error || data.stderr || 'Launch failed';
-          appendBubbleLog(record, msg);
-          renderInfo.textContent = msg;
-          return;
-        }
-        if(typeof data.pid === 'number'){
-          appendBubbleLog(record, `Started PID ${data.pid}`);
-          renderInfo.textContent = `Launched ${workspace.title || workspace.slug} (PID ${data.pid})`;
-        }else{
-          appendBubbleLog(record, `Completed with code ${data.returncode}`);
-          if(data.stdout) appendBubbleLog(record, `stdout:\n${data.stdout.trim()}`);
-          if(data.stderr) appendBubbleLog(record, `stderr:\n${data.stderr.trim()}`);
-          renderInfo.textContent = `Completed ${workspace.title || workspace.slug}`;
-        }
-      }catch(err){
-        const msg = err && err.message ? err.message : String(err);
-        appendBubbleLog(record, `Launch failed: ${msg}`);
-        renderInfo.textContent = `Launch failed: ${msg}`;
       }
-    }
-
-    function renderWorkspaceRows(workspaces){
-      if(!workspaceList) return;
-      workspaceList.innerHTML = '';
-      workspaceList.classList.toggle('empty', !workspaces || !workspaces.length);
-      workspaceExecutables.clear();
-      if(!workspaces || !workspaces.length){
-        const empty = ce('div','small');
-        empty.textContent = 'No workspaces registered yet. Provide a source above to add one.';
-        workspaceList.appendChild(empty);
-        updateExecutableStatus();
-        return;
-      }
-      workspaces.forEach((ws)=>{
-        const row = ce('div','workspaceRow');
-        const name = document.createElement('strong');
-        name.textContent = ws.title || ws.slug;
-        row.appendChild(name);
-        const meta = ce('div','workspaceMeta');
-        meta.textContent = `${(ws.kind || 'native').toUpperCase()} · ${ws.path || ''}`.trim();
-        row.appendChild(meta);
-        if(ws.entry){
-          const entryMeta = ce('div','workspaceMeta');
-          entryMeta.textContent = `Entry: ${ws.entry}`;
-          row.appendChild(entryMeta);
-        }
-        if(ws.executable){
-          const execMeta = ce('div','workspaceMeta');
-          execMeta.textContent = `Executable: ${ws.executable}`;
-          row.appendChild(execMeta);
-        }
-        const actions = ce('div','workspaceActions');
-        const openBtn = ce('button','btn btn-xs');
-        openBtn.textContent = '🪟 Open';
-        openBtn.addEventListener('click', ()=> openWorkspaceBubble(ws, false));
-        actions.appendChild(openBtn);
-        if(ws.executable_path){
-          workspaceExecutables.add(ws.executable_path);
-          const launchBtn = ce('button','btn btn-xs');
-          launchBtn.textContent = '🚀 Launch';
-          launchBtn.addEventListener('click', ()=>{
-            openWorkspaceBubble(ws, false);
-            const record = bubbleMap.get(ws.slug);
-            launchWorkspaceFromBubble(ws, record);
+      if(pluginSelect){
+        pluginSelect.innerHTML = '';
+        plugins
+          .filter(Boolean)
+          .forEach((plugin)=>{
+            const opt = document.createElement('option');
+            opt.value = plugin.slug;
+            opt.textContent = `${plugin.name || plugin.slug} (${plugin.format || plugin.kind})`;
+            pluginSelect.appendChild(opt);
           });
-          actions.appendChild(launchBtn);
+      }
+    }
+
+    function renderRack(status){
+      currentRack = status && status.rack ? status.rack : { active_bank: 'A', banks: {} };
+      if(!currentRack.active_bank) currentRack.active_bank = 'A';
+      if(!currentRack.banks) currentRack.banks = {};
+      if(rackChains){
+        rackChains.innerHTML = '';
+        const entries = Object.entries(currentRack.banks);
+        if(!entries.length){
+          const empty = ce('div','small');
+          empty.textContent = 'No chains configured. Choose a stream and add a plug-in.';
+          rackChains.appendChild(empty);
         }
-        const removeBtn = ce('button','btn btn-xs');
-        removeBtn.textContent = '🗑 Remove';
-        removeBtn.addEventListener('click', ()=> removeWorkspace(ws.slug));
-        actions.appendChild(removeBtn);
-        row.appendChild(actions);
-        workspaceList.appendChild(row);
-      });
-      updateExecutableStatus();
-    }
-
-    function renderWorkspaces(workspaces){
-      lastWorkspaces = Array.isArray(workspaces) ? workspaces : [];
-      setDesktopEmptyState(!lastWorkspaces.length);
-      renderWorkspaceRows(lastWorkspaces);
-      syncBubbles(lastWorkspaces);
-      lastWorkspaces.forEach(ws=>{
-        if(ws.executable_path) pushPathSuggestion(ws.executable_path);
-      });
-    }
-
-    async function refreshWorkspaces(){
-      try{
-        const res = await fetch('/api/workspaces');
-        if(!res.ok) throw new Error('status '+res.status);
-        const data = await res.json();
-        renderWorkspaces(data.workspaces || []);
-        return data.workspaces || [];
-      }catch(_err){
-        renderWorkspaces([]);
-        return [];
-      }
-    }
-
-    async function removeWorkspace(slug){
-      if(!slug) return;
-      renderInfo.textContent = `Removing ${slug}…`;
-      try{
-        const res = await fetch(`/api/workspaces/${encodeURIComponent(slug)}`,{ method:'DELETE' });
-        if(!res.ok) throw new Error('status '+res.status);
-        renderInfo.textContent = `Removed workspace ${slug}.`;
-      }catch(err){
-        renderInfo.textContent = 'Remove failed: '+(err && err.message || err);
-      }
-      await refreshWorkspaces();
-      refreshStatus();
-    }
-
-    async function createWorkspace(){
-      const sourceValue = workspaceSourceInput && workspaceSourceInput.value.trim();
-      if(!sourceValue){
-        renderInfo.textContent = 'Provide a workspace source path first.';
-        return;
-      }
-      const payload = { source: sourceValue };
-      if(workspaceNameInput && workspaceNameInput.value.trim()) payload.name = workspaceNameInput.value.trim();
-      if(workspaceEntryInput && workspaceEntryInput.value.trim()) payload.entry = workspaceEntryInput.value.trim();
-      if(workspaceExecutableInput && workspaceExecutableInput.value.trim()) payload.executable = workspaceExecutableInput.value.trim();
-      if(workspaceArgsInput && workspaceArgsInput.value.trim()) payload.args = workspaceArgsInput.value.trim();
-      renderInfo.textContent = 'Registering workspace…';
-      try{
-        const res = await fetch('/api/workspaces',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(payload)
+        entries.forEach(([bank, info])=>{
+          const bankEl = ce('div','rackBank');
+          if(bank === currentRack.active_bank) bankEl.classList.add('active');
+          const heading = ce('div','bankHeader');
+          heading.textContent = `Bank ${bank}`;
+          bankEl.appendChild(heading);
+          const streams = info && info.streams ? info.streams : {};
+          if(!Object.keys(streams).length){
+            const emptyStream = ce('div','small');
+            emptyStream.textContent = 'No streams assigned.';
+            bankEl.appendChild(emptyStream);
+          }
+          Object.entries(streams).forEach(([stream, slots])=>{
+            const streamEl = ce('div','rackStream');
+            const title = ce('div','streamTitle');
+            title.textContent = stream;
+            streamEl.appendChild(title);
+            const slotList = ce('div','slotList');
+            (slots || []).forEach((slot, idx)=>{
+              const chip = ce('span','slotChip');
+              chip.textContent = slot && slot.slug ? slot.slug : 'plugin';
+              const removeBtn = ce('button','chipRemove');
+              removeBtn.type = 'button';
+              removeBtn.textContent = '✖';
+              removeBtn.addEventListener('click', ()=> removeSlot(bank, stream, idx));
+              chip.appendChild(removeBtn);
+              slotList.appendChild(chip);
+            });
+            streamEl.appendChild(slotList);
+            bankEl.appendChild(streamEl);
+          });
+          rackChains.appendChild(bankEl);
         });
-        if(!res.ok) throw new Error('status '+res.status);
-        const data = await res.json();
-        if(!data.ok){
-          throw new Error(data.error || 'Workspace creation failed');
-        }
-        const created = data.workspace;
-        renderInfo.textContent = `Workspace ${(created && (created.title || created.slug)) || 'created'} ready.`;
-        if(created && created.executable_path) pushPathSuggestion(created.executable_path);
-        if(workspaceSourceInput) workspaceSourceInput.value = '';
-        if(workspaceNameInput) workspaceNameInput.value = '';
-        if(workspaceEntryInput) workspaceEntryInput.value = '';
-        if(workspaceExecutableInput) workspaceExecutableInput.value = '';
-        if(workspaceArgsInput) workspaceArgsInput.value = '';
-        const list = await refreshWorkspaces();
-        const resolved = list.find(ws=> created && ws.slug === created.slug);
-        if(resolved) openWorkspaceBubble(resolved, true);
-        refreshStatus();
-      }catch(err){
-        renderInfo.textContent = 'Workspace failed: '+(err && err.message || err);
       }
-    }
-    const pathList = q('#externalAppPaths');
-
-    const defaultConfig = {
-      duration: parseFloat(durationInput.value)||8,
-      sample_rate: parseInt(sampleInput.value)||44100,
-      sources: [
-        { name:'sine', frequency:432, amplitude:0.18 },
-        { name:'bundled-resonator', preset:'string-resonator', amplitude:0.22 },
-        { name:'formant-voice', vowel:'o', amplitude:0.16, vibrato_rate:5.5, vibrato_depth:0.004 }
-      ],
-      effects: [
-        { name:'reverb', decay:0.45, mix:0.3 },
-        { name:'delay', time:0.32, feedback:0.22 },
-        { name:'lowpass', cutoff:4600 }
-      ]
-    };
-
-    function applyDefaultConfig(){
-      const payload = JSON.parse(JSON.stringify(defaultConfig));
-      payload.duration = parseFloat(durationInput.value)||payload.duration;
-      payload.sample_rate = parseInt(sampleInput.value)||payload.sample_rate;
-      configArea.value = JSON.stringify(payload, null, 2);
+      bankButtons.forEach(btn=>{
+        const bank = btn.dataset.bank;
+        btn.classList.toggle('active', bank === currentRack.active_bank);
+      });
+      applyDefaultConfig();
     }
 
     function renderTags(container, items){
-      container.innerHTML='';
-      if(!items || !items.length){
-        const span=document.createElement('span');
-        span.className='small';
-        span.textContent='Unavailable';
-        container.appendChild(span);
+      if(!container) return;
+      container.innerHTML = '';
+      const list = Array.isArray(items) ? items : [];
+      if(!list.length){
+        const empty = ce('span','tag empty');
+        empty.textContent = '—';
+        container.appendChild(empty);
         return;
       }
-      items.forEach(name=>{
-        const tag=document.createElement('span');
-        tag.textContent=name;
+      list.forEach((item)=>{
+        const tag = ce('span','tag');
+        tag.textContent = item;
         container.appendChild(tag);
       });
     }
 
-    function pushPathSuggestion(path){
-      if(!pathList || !path) return;
-      const value = String(path);
-      if(!value) return;
-      const exists = Array.from(pathList.children).some(opt=> opt.value === value);
-      if(!exists){
-        const opt = document.createElement('option');
-        opt.value = value;
-        pathList.appendChild(opt);
-      }
-      if(exePathInput && !exePathInput.value){
-        exePathInput.value = value;
-      }
-    }
-
-    function showRunOutput(message){
-      if(!runOutput) return;
-      runOutput.value = message;
-      runOutput.scrollTop = runOutput.scrollHeight;
+    function renderRegistry(tags){
+      const sources = (tags && tags.sources) || [];
+      const effects = (tags && tags.effects) || [];
+      renderTags(registrySources, sources);
+      renderTags(registryEffects, effects);
     }
 
     async function refreshStatus(){
-      statusText.textContent = 'Contacting server…';
-      blockEl.classList.remove('server-offline');
       try{
         const res = await fetch('/api/status');
         if(!res.ok) throw new Error('status '+res.status);
         const data = await res.json();
-        const bundledItems = Array.isArray(data.bundled) ? data.bundled : [];
-        renderBundledStatusList(bundledItems);
-        statusExecutables.clear();
-        if(Array.isArray(data.executables)){
-          data.executables.forEach((path)=>{
-            if(path!=null && path!=="") statusExecutables.add(String(path));
-          });
-        }
-        const workspaces = Array.isArray(data.workspaces) ? data.workspaces : [];
-        renderWorkspaces(workspaces);
-        updateExecutableStatus();
-        if(data.platform_supported){
-          statusText.textContent = 'Server ready — platform supported';
-        }else{
-          statusText.textContent = 'Server ready — platform unverified';
+        currentStatus = data.plugins || null;
+        renderPlugins(currentStatus);
+        renderRack(currentStatus);
+        renderRegistry(data.registry || {});
+        if(statusText){
+          const pieces = [];
+          if(currentStatus && currentStatus.editor_commands && currentStatus.editor_commands.length){
+            pieces.push('Editor host available');
+          }else{
+            pieces.push('No editor host detected');
+          }
+          if(currentStatus && currentStatus.pedalboard_available){
+            pieces.push('Offline processing ready');
+          }else{
+            pieces.push('Install pedalboard for VST processing');
+          }
+          statusText.textContent = pieces.join(' · ');
         }
       }catch(err){
-        statusText.innerHTML = 'Server offline — run <code>python -m ambiance.server</code>';
-        renderBundledStatusList([]);
-        statusExecutables.clear();
-        updateExecutableStatus();
-        blockEl.classList.add('server-offline');
-        renderWorkspaces([]);
+        if(statusText) statusText.textContent = 'Status unavailable: '+(err && err.message || err);
+        renderPlugins(null);
+        renderRack(null);
+        renderRegistry({});
       }
     }
 
-    async function refreshRegistry(){
+    async function rescanPlugins(){
+      if(statusText) statusText.textContent = 'Rescanning plug-in folders…';
       try{
-        const res = await fetch('/api/registry');
+        const res = await fetch('/api/plugins/rescan',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({}) });
         if(!res.ok) throw new Error('status '+res.status);
-        const data = await res.json();
-        renderTags(registrySources, data.sources);
-        renderTags(registryEffects, data.effects);
-      }catch(_err){
-        renderTags(registrySources, []);
-        renderTags(registryEffects, []);
-      }
-    }
-
-    async function installBundled(slug){
-      if(!slug) return;
-      renderInfo.textContent = 'Preparing installer…';
-      try{
-        const res = await fetch('/api/install',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({slug})
-        });
-        if(!res.ok) throw new Error('status '+res.status);
-        const data = await res.json();
-        if(!data.ok) throw new Error(data.error || 'Installer not found');
-        const status = data.status || {};
-        if(status.path) pushPathSuggestion(status.path);
-        renderInfo.textContent = status.installed ? 'Installer extracted.' : 'Installer ready.';
       }catch(err){
-        renderInfo.textContent = 'Install failed: '+(err && err.message || err || 'unknown');
+        if(statusText) statusText.textContent = 'Rescan failed: '+(err && err.message || err);
       }
       refreshStatus();
     }
 
-    async function runExternalApp(){
-      const path = exePathInput && exePathInput.value.trim();
+    async function registerPlugin(){
+      const path = pluginPathInput && pluginPathInput.value.trim();
       if(!path){
-        showRunOutput('Please provide a path to an executable.');
+        statusText && (statusText.textContent = 'Provide a plug-in path first.');
         return;
       }
-      const argsValue = exeArgsInput ? exeArgsInput.value : '';
-      const payload = {
-        path,
-        args: argsValue,
-        wait: !!(waitToggle && waitToggle.checked),
-      };
-      if(waitToggle && waitToggle.checked){
-        const timeoutVal = parseFloat(timeoutInput && timeoutInput.value);
-        if(!Number.isNaN(timeoutVal) && timeoutVal>0){
-          payload.timeout = timeoutVal;
-        }
-      }
-      showRunOutput('Launching '+path+'…');
       try{
-        const res = await fetch('/api/run-app',{
+        const res = await fetch('/api/plugins/register',{
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ path, name: pluginNameInput && pluginNameInput.value.trim() || undefined })
         });
         if(!res.ok) throw new Error('status '+res.status);
-        const data = await res.json();
-        if(!data.ok){
-          const msg = data.error || data.stderr || 'Launch failed';
-          showRunOutput(msg);
-          return;
-        }
-        if(typeof data.pid === 'number'){
-          showRunOutput(`Launched PID ${data.pid}\nCommand: ${(data.args||[]).join(' ')}`);
-        }else{
-          const stdout = data.stdout || '';
-          const stderr = data.stderr || '';
-          const pieces = [
-            `Return code: ${data.returncode}`,
-            stdout ? `--- stdout ---\n${stdout.trim()}` : null,
-            stderr ? `--- stderr ---\n${stderr.trim()}` : null
-          ].filter(Boolean);
-          showRunOutput(pieces.join('\n\n') || 'Completed with no output.');
+        pluginNameInput && (pluginNameInput.value = '');
+        pushPathSuggestion(path);
+      }catch(err){
+        statusText && (statusText.textContent = 'Register failed: '+(err && err.message || err));
+      }
+      refreshStatus();
+    }
+
+    async function removePlugin(slug){
+      if(!slug) return;
+      await fetch(`/api/plugins/${encodeURIComponent(slug)}`,{ method:'DELETE' });
+      refreshStatus();
+    }
+
+    async function saveRack(){
+      if(!currentRack) return;
+      try{
+        await fetch('/api/plugins/rack',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ rack: currentRack })
+        });
+      }catch(_err){ /* ignore */ }
+    }
+
+    async function addSlot(){
+      const stream = streamInput && streamInput.value.trim();
+      const slug = pluginSelect && pluginSelect.value;
+      if(!stream || !slug){
+        statusText && (statusText.textContent = 'Pick a stream and plug-in first.');
+        return;
+      }
+      try{
+        const res = await fetch('/api/plugins/add',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ bank: currentRack.active_bank || 'A', stream, slot: { slug } })
+        });
+        if(res.ok){
+          const data = await res.json();
+          currentRack = data.rack || currentRack;
+          renderRack({ rack: currentRack });
         }
       }catch(err){
-        showRunOutput('Launch failed: '+(err && err.message || err));
+        statusText && (statusText.textContent = 'Add failed: '+(err && err.message || err));
+      }
+      streamInput && (streamInput.value = '');
+    }
+
+    async function removeSlot(bank, stream, index){
+      try{
+        const res = await fetch('/api/plugins/remove',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ bank, stream, index })
+        });
+        if(res.ok){
+          const data = await res.json();
+          currentRack = data.rack || currentRack;
+          renderRack({ rack: currentRack });
+        }
+      }catch(err){
+        statusText && (statusText.textContent = 'Remove failed: '+(err && err.message || err));
       }
     }
 
+    async function openPluginEditor(slug, name){
+      try{
+        const res = await fetch('/api/plugins/open',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ slug })
+        });
+        if(!res.ok) throw new Error('status '+res.status);
+        const data = await res.json();
+        if(data.ok){
+          logBubble(slug, name || slug, `Launched editor (PID ${data.pid || 'unknown'})`);
+        }else{
+          logBubble(slug, name || slug, data.error || 'Launch failed');
+        }
+      }catch(err){
+        logBubble(slug, name || slug, 'Launch failed: '+(err && err.message || err));
+      }
+    }
+
+    function applyDefaultConfig(){
+      if(!configArea) return;
+      const payload = {
+        duration: parseFloat(durationInput && durationInput.value) || 8,
+        sample_rate: parseInt(sampleInput && sampleInput.value) || 44100,
+        sources: [
+          { name:'sine', frequency:432, amplitude:0.18 },
+          { name:'bundled-resonator', preset:'string-resonator', amplitude:0.22 },
+          { name:'formant-voice', vowel:'o', amplitude:0.16 }
+        ],
+        effects: [
+          { name:'reverb', decay:0.45, mix:0.3 },
+          { name:'delay', time:0.32, feedback:0.22 },
+          { name:'lowpass', cutoff:4600 }
+        ],
+        plugins: currentRack
+      };
+      configArea.value = JSON.stringify(payload, null, 2);
+    }
+
     async function renderEngine(){
+      if(!configArea) return;
       let payload;
       try{
         payload = JSON.parse(configArea.value || '{}');
@@ -1601,8 +1273,9 @@ function bootAudio(){
         renderInfo.textContent = 'Invalid JSON: '+(err && err.message || err);
         return;
       }
-      if(!payload.duration) payload.duration = parseFloat(durationInput.value)||defaultConfig.duration;
-      if(!payload.sample_rate) payload.sample_rate = parseInt(sampleInput.value)||defaultConfig.sample_rate;
+      if(!payload.duration) payload.duration = parseFloat(durationInput && durationInput.value) || 8;
+      if(!payload.sample_rate) payload.sample_rate = parseInt(sampleInput && sampleInput.value) || 44100;
+      if(!payload.plugins) payload.plugins = currentRack;
       renderInfo.textContent = 'Rendering…';
       try{
         const res = await fetch('/api/render',{
@@ -1615,11 +1288,54 @@ function bootAudio(){
         if(!data.ok) throw new Error(data.error || 'Render failed');
         preview.src = data.audio;
         renderInfo.textContent = `Rendered ${data.duration.toFixed(2)}s @ ${data.sample_rate} Hz`;
-        try{ preview.play(); }catch(_){ /* ignore autoplay errors */ }
+        try{ preview.play(); }catch(_){ }
       }catch(err){
         renderInfo.textContent = 'Render failed: '+(err && err.message || err);
       }
     }
+
+    if(browsePluginBtn && pluginPicker){
+      browsePluginBtn.addEventListener('click', ()=> pluginPicker.click());
+      pluginPicker.addEventListener('change', ()=>{
+        const file = pluginPicker.files && pluginPicker.files[0];
+        const value = derivePathFromFile(file);
+        if(value && pluginPathInput){
+          pluginPathInput.value = value;
+          pushPathSuggestion(value);
+        }
+      });
+    }
+
+    if(desktopToggle){
+      desktopToggle.addEventListener('click', ()=>{
+        if(!desktop) return;
+        desktop.classList.toggle('collapsed');
+        updateDesktopToggleLabel();
+      });
+      updateDesktopToggleLabel();
+    }
+
+    bankButtons.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const bank = btn.dataset.bank;
+        if(!bank || bank === currentRack.active_bank) return;
+        currentRack.active_bank = bank;
+        renderRack({ rack: currentRack });
+        saveRack();
+      });
+    });
+
+    if(rescanBtn) rescanBtn.addEventListener('click', ()=> rescanPlugins());
+    if(refreshBtn) refreshBtn.addEventListener('click', ()=> refreshStatus());
+    if(addBtn) addBtn.addEventListener('click', ()=> addSlot());
+    if(pluginPathInput) pluginPathInput.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); registerPlugin(); } });
+    if(pluginNameInput) pluginNameInput.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); registerPlugin(); } });
+    const registerBtn = q('.registerPlugin');
+    if(registerBtn) registerBtn.addEventListener('click', ()=> registerPlugin());
+    if(durationInput) durationInput.addEventListener('change', ()=> applyDefaultConfig());
+    if(sampleInput) sampleInput.addEventListener('change', ()=> applyDefaultConfig());
+    const renderBtn = q('.renderNow');
+    if(renderBtn) renderBtn.addEventListener('click', ()=> renderEngine());
 
     const dragHandle = blockEl.querySelector('.dragHandle');
     let drag = null;
@@ -1640,35 +1356,15 @@ function bootAudio(){
       blockEl.style.left = x + 'px';
       blockEl.style.top = y + 'px';
       blockEl.style.position = 'absolute';
-      blockEl.style.width = Math.max(520, Math.floor(drag.w)) + 'px';
+      blockEl.style.width = Math.max(560, Math.floor(drag.w)) + 'px';
     });
     window.addEventListener('mouseup', ()=>{
       if(!drag) return;
-      drag=null;
+      drag = null;
       blockEl.classList.remove('dragging');
     });
 
-    q('.checkStatus').addEventListener('click', ()=>{ refreshStatus(); refreshRegistry(); });
-    q('.resetConfig').addEventListener('click', ()=> applyDefaultConfig());
-    q('.renderNow').addEventListener('click', ()=> renderEngine());
-    q('.runExternal').addEventListener('click', ()=> runExternalApp());
-    durationInput.addEventListener('change', ()=> applyDefaultConfig());
-    sampleInput.addEventListener('change', ()=> applyDefaultConfig());
-    if(registerWorkspaceBtn){
-      registerWorkspaceBtn.addEventListener('click', ()=> createWorkspace());
-    }
-    if(workspaceSourceInput){
-      workspaceSourceInput.addEventListener('keydown', (ev)=>{
-        if(ev.key === 'Enter'){
-          ev.preventDefault();
-          createWorkspace();
-        }
-      });
-    }
-
     applyDefaultConfig();
-    refreshRegistry();
-    refreshWorkspaces();
     refreshStatus();
   }
 
@@ -3201,7 +2897,7 @@ themeFile.addEventListener('change', async (e)=>{
   _editBtn.addEventListener('click', ()=> enableEditReorder(editMode));
 
   // Also enable on newly created streams
-  // Start with one block for convenience and keep the external workspace present
+  // Start with one block for convenience and mount the plugin rack
   ensureExternalAppsWorkspace();
   addBlock();
 })();

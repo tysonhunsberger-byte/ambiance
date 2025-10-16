@@ -14,11 +14,15 @@ from urllib.parse import urlparse
 
 from .core.engine import AudioEngine
 from .core.registry import registry
-from .integrations.external_apps import ExternalAppManager
+from .integrations.plugins import PluginManager
 from .utils.audio import encode_wav_bytes
 
 
-def _build_engine(payload: dict[str, Any]) -> tuple[AudioEngine, float]:
+def _build_engine(
+    payload: dict[str, Any],
+    *,
+    manager: PluginManager | None = None,
+) -> tuple[AudioEngine, float]:
     duration = float(payload.get("duration", 5.0))
     sample_rate = int(payload.get("sample_rate", 44100))
     engine = AudioEngine(sample_rate=sample_rate)
@@ -37,11 +41,25 @@ def _build_engine(payload: dict[str, Any]) -> tuple[AudioEngine, float]:
             raise ValueError("Effect configuration missing 'name'")
         engine.add_effect(registry.create_effect(name, **config))
 
+    plugin_config = payload.get("plugins")
+    if manager is not None:
+        rack = manager.build_rack_from_config(plugin_config)
+        engine.set_plugin_rack(rack)
+    elif plugin_config:
+        from .integrations.plugins import PluginRack, PluginLibrary, PluginHost  # lazy import
+
+        cache_dir = Path.cwd() / ".cache" / "plugins"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        library = PluginLibrary(cache_dir)
+        host = PluginHost(library)
+        rack = PluginRack.from_config(plugin_config, library=library, host=host)
+        engine.set_plugin_rack(rack)
+
     return engine, duration
 
 
-def render_payload(payload: dict[str, Any]) -> dict[str, Any]:
-    engine, duration = _build_engine(payload)
+def render_payload(payload: dict[str, Any], *, manager: PluginManager | None = None) -> dict[str, Any]:
+    engine, duration = _build_engine(payload, manager=manager)
     buffer = engine.render(duration)
     audio = encode_wav_bytes(buffer, engine.sample_rate)
     encoded = base64.b64encode(audio).decode("ascii")
@@ -62,7 +80,7 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
         self,
         *args: Any,
         directory: str,
-        manager: ExternalAppManager,
+        manager: PluginManager,
         ui_path: Path,
         **kwargs: Any,
     ) -> None:
@@ -91,29 +109,11 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802 - stdlib signature
         path = urlparse(self.path).path
         if path == "/api/status":
-            payload = self.manager.status()
+            payload = {
+                "plugins": self.manager.status(),
+                "registry": {"sources": list(registry.sources()), "effects": list(registry.effects())},
+            }
             self._send_json(payload)
-            return
-        if path == "/api/registry":
-            payload = {"sources": list(registry.sources()), "effects": list(registry.effects())}
-            self._send_json(payload)
-            return
-        if path == "/api/workspaces":
-            payload = {"ok": True, "workspaces": self.manager.workspaces_payload()}
-            self._send_json(payload)
-            return
-        if path.startswith("/api/workspaces/"):
-            parts = path.strip("/").split("/")
-            if len(parts) == 3 and parts[0] == "api" and parts[1] == "workspaces":
-                slug = parts[2]
-                workspace = self.manager.workspace_payload(slug)
-                if not workspace:
-                    self.send_error(HTTPStatus.NOT_FOUND, "Workspace not found")
-                    return
-                self._send_json({"ok": True, "workspace": workspace})
-                return
-        if path.startswith("/apps/"):
-            self._serve_workspace_asset(path)
             return
         if path in {"/", "", "/ui"}:
             self._serve_ui()
@@ -123,86 +123,64 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802 - stdlib signature
         path = urlparse(self.path).path
         try:
-            if path == "/api/install":
+            if path == "/api/render":
                 payload = self._read_json()
-                slug = payload.get("slug") or payload.get("bundle")
+                response = render_payload(payload, manager=self.manager)
+                self._send_json(response)
+                return
+            if path == "/api/plugins/register":
+                payload = self._read_json()
+                plugin_path = payload.get("path")
+                if not plugin_path:
+                    self._send_json({"ok": False, "error": "Missing 'path'"}, HTTPStatus.BAD_REQUEST)
+                    return
+                descriptor = self.manager.register_plugin(plugin_path, name=payload.get("name"))
+                self._send_json({"ok": True, "plugin": descriptor.to_payload()})
+                return
+            if path == "/api/plugins/rescan":
+                payload = self._read_json()
+                paths = payload.get("paths") if isinstance(payload.get("paths"), list) else None
+                discovered = self.manager.rescan(paths)
+                self._send_json(
+                    {
+                        "ok": True,
+                        "discovered": [descriptor.to_payload() for descriptor in discovered],
+                        "status": self.manager.status(),
+                    }
+                )
+                return
+            if path == "/api/plugins/rack":
+                payload = self._read_json()
+                rack_config = payload.get("rack") if isinstance(payload, dict) else None
+                rack = self.manager.set_rack(rack_config or {"active_bank": "A", "banks": {}})
+                self._send_json({"ok": True, "rack": rack.to_config()})
+                return
+            if path == "/api/plugins/open":
+                payload = self._read_json()
+                slug = payload.get("slug")
                 if not slug:
                     self._send_json({"ok": False, "error": "Missing 'slug'"}, HTTPStatus.BAD_REQUEST)
                     return
-                try:
-                    status = self.manager.install_bundled(str(slug))
-                except FileNotFoundError:
-                    self._send_json({"ok": False, "error": "Unknown bundled resource"}, HTTPStatus.NOT_FOUND)
-                    return
-                self._send_json({"ok": bool(status.get("installed")), "status": status})
-                return
-            if path == "/api/render":
-                payload = self._read_json()
-                response = render_payload(payload)
-                self._send_json(response)
-                return
-            if path == "/api/run-app":
-                payload = self._read_json()
-                executable = payload.get("path") or payload.get("executable")
-                if not executable:
-                    self._send_json({"ok": False, "error": "Missing 'path'"}, HTTPStatus.BAD_REQUEST)
-                    return
                 args = payload.get("args")
-                wait = bool(payload.get("wait", False))
-                timeout_raw = payload.get("timeout")
-                cwd = payload.get("cwd")
-                timeout_value = None
-                if timeout_raw not in (None, ""):
-                    try:
-                        timeout_value = float(timeout_raw)
-                    except (TypeError, ValueError) as exc:
-                        raise ValueError("Invalid timeout value") from exc
-                result = self.manager.launch_external(
-                    executable,
-                    args=args,
-                    wait=wait,
-                    timeout=timeout_value,
-                    cwd=cwd,
-                )
-                payload = {"ok": bool(result.get("ok", False)), **result}
-                self._send_json(payload)
+                extra_args = args if isinstance(args, list) else None
+                result = self.manager.launch_editor(slug, extra_args)
+                self._send_json({"ok": True, **result})
                 return
-            if path == "/api/workspaces":
+            if path == "/api/plugins/add":
                 payload = self._read_json()
-                source = payload.get("source")
-                if not source:
-                    self._send_json({"ok": False, "error": "Missing 'source'"}, HTTPStatus.BAD_REQUEST)
-                    return
-                info = self.manager.ensure_workspace(
-                    source,
-                    name=payload.get("name"),
-                    entry=payload.get("entry"),
-                    executable=payload.get("executable"),
-                    args=payload.get("args"),
-                )
-                self._send_json({"ok": True, "workspace": info.to_payload(self.manager.workspaces_dir / info.slug)})
+                bank = str(payload.get("bank", "A"))
+                stream = str(payload.get("stream", "master"))
+                slot = payload.get("slot") or {}
+                rack = self.manager.add_plugin_to_chain(bank, stream, slot)
+                self._send_json({"ok": True, "rack": rack.to_config()})
                 return
-            if path.startswith("/api/workspaces/") and path.endswith("/launch"):
-                parts = path.strip("/").split("/")
-                if len(parts) != 4 or parts[0] != "api" or parts[1] != "workspaces" or parts[3] != "launch":
-                    self.send_error(HTTPStatus.NOT_FOUND, "Unknown workspace endpoint")
-                    return
-                slug = parts[2]
+            if path == "/api/plugins/remove":
                 payload = self._read_json()
-                timeout_value = None
-                timeout_raw = payload.get("timeout")
-                if timeout_raw not in (None, ""):
-                    try:
-                        timeout_value = float(timeout_raw)
-                    except (TypeError, ValueError) as exc:
-                        raise ValueError("Invalid timeout value") from exc
-                result = self.manager.launch_workspace(
-                    slug,
-                    args=payload.get("args"),
-                    wait=bool(payload.get("wait", False)),
-                    timeout=timeout_value,
-                )
-                self._send_json({"ok": bool(result.get("ok", False)), **result})
+                bank = str(payload.get("bank", "A"))
+                stream = str(payload.get("stream", "master"))
+                index = int(payload.get("index", -1))
+                rack = self.manager.remove_plugin_from_chain(bank, stream, index)
+                self._send_json({"ok": True, "rack": rack.to_config()})
                 return
         except Exception as exc:  # pylint: disable=broad-except
             self._send_json({"ok": False, "error": str(exc)}, HTTPStatus.BAD_REQUEST)
@@ -211,13 +189,13 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
 
     def do_DELETE(self) -> None:  # noqa: N802 - stdlib signature
         path = urlparse(self.path).path
-        if path.startswith("/api/workspaces/"):
+        if path.startswith("/api/plugins/"):
             parts = path.strip("/").split("/")
-            if len(parts) == 3 and parts[0] == "api" and parts[1] == "workspaces":
+            if len(parts) == 3 and parts[0] == "api" and parts[1] == "plugins":
                 slug = parts[2]
-                removed = self.manager.remove_workspace(slug)
+                removed = self.manager.remove_plugin(slug)
                 if not removed:
-                    self.send_error(HTTPStatus.NOT_FOUND, "Workspace not found")
+                    self.send_error(HTTPStatus.NOT_FOUND, "Plugin not found or cannot be removed")
                     return
                 self._send_json({"ok": True})
                 return
@@ -235,25 +213,6 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
-    def _serve_workspace_asset(self, path: str) -> None:
-        parts = path.strip("/").split("/", 2)
-        if len(parts) < 2:
-            self.send_error(HTTPStatus.NOT_FOUND, "Workspace not found")
-            return
-        slug = parts[1]
-        relative = parts[2] if len(parts) > 2 else None
-        asset = self.manager.workspace_asset(slug, relative)
-        if not asset:
-            self.send_error(HTTPStatus.NOT_FOUND, "Workspace asset not found")
-            return
-        data = asset.read_bytes()
-        self.send_response(HTTPStatus.OK)
-        mime = self.guess_type(asset.name)
-        self.send_header("Content-Type", mime)
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
-
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
@@ -263,7 +222,7 @@ def serve(host: str = "127.0.0.1", port: int = 8000, ui: Path | None = None) -> 
     base_dir = Path(__file__).resolve().parents[2]
     directory = str(base_dir)
     ui_path = Path(ui) if ui else base_dir / "noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html"
-    manager = ExternalAppManager(base_dir=base_dir)
+    manager = PluginManager(base_dir=base_dir)
 
     def handler(*args: Any, **kwargs: Any) -> AmbianceRequestHandler:
         kwargs.setdefault("directory", directory)

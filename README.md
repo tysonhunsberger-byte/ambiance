@@ -1,22 +1,18 @@
 # Ambiance
 
 Ambiance is a modular audio generation toolkit that blends procedural synthesis with
-external acoustic modeling tools. The repository ships with a pair of Windows
-installers so that sound designers who run on Windows can hook directly into bundled
-third-party environments. The Python code offers drop-in simulations when those
-executables are not available, which keeps the package cross-platform friendly and
-ready for CI environments.
+a light-weight plugin rack. The engine can host VST/VST3, Audio Unit, and mc.svt
+plug-ins (alongside a handful of built-in utility processors) so that ambience beds
+and spot effects can be routed through familiar studio tools while remaining
+scriptable from Python.
 
 ## Features
 
 - **Composable audio engine** – Combine any number of sources and effects.
-- **External tool integration** – Bundled installers are detected, extracted into a
-  cache directory on demand, and exposed through Python helpers.
-- **In-app launcher** – Provide paths to third-party executables and run them from the
-  External Apps Workbench, capturing stdout/stderr without leaving the UI.
-- **External workspace bubbles** – Register zipped web UIs or extracted tool folders
-  and interact with them inside the External App Desktop that lives beneath the main
-  Noisetown canvas.
+- **Plugin rack & desktop** – Register VST/VST3, Audio Unit, mc.svt, or built-in
+  processors and assign them to specific streams or the master bus with A/B banks.
+- **Interactive plugin control** – Open plug-in editors through Carla/Pluginval hosts
+  directly from the UI so the processors remain usable in-app.
 - **Procedural audio sources** – Sine waves, noise beds, resonator simulations, and
   formant-inspired vocal timbres.
 - **Signal processing effects** – Reverb, ping-pong delay, and low-pass filtering.
@@ -40,10 +36,8 @@ ready for CI environments.
    python -m ambiance.cli output.wav --duration 10
    ```
 
-   If you run the command on Windows and keep the bundled installers in the repository
-   root, the helpers will extract them into `.cache/external_apps` and allow you to use
-   the native binaries. On other platforms, the Python fallbacks generate similar sounds
-   so your workflows stay portable.
+   Provide a JSON configuration if you want to drive the plugin rack, sources, or effects
+   from a saved template. The CLI understands the same schema that the UI renders.
 
 3. Launch the interactive UI server to use the Noisetown interface together with the
    Python engine:
@@ -53,38 +47,30 @@ ready for CI environments.
    ```
 
    The command serves the bundled `noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html`
-   interface at `http://127.0.0.1:8000/`. The UI exposes controls for checking the
-   bundled installers, triggering extractions, launching any
-   executable that you point to (including custom tools or the extracted installers),
-   registering standalone executables or entire workspaces for external tools, and
-   rendering ambience layers through the Python audio engine. If you place a
-   different HTML interface on disk, pass its path via `--ui`.
+   interface at `http://127.0.0.1:8000/`. The UI exposes a **Plugin Desktop** that
+   lists every registered processor, provides browse buttons for adding new plug-ins,
+   and shows draggable "bubbles" for each plug-in editor that you launch through Carla
+   or Pluginval. Use the rack controls to assign processors to named streams (the
+   engine uses the `name` attribute from each source) or the master chain and flip
+   between A/B banks while auditioning tweaks. If you place a different HTML interface
+   on disk, pass its path via `--ui`.
 
-### External workspaces & desktop bubbles
+### Working with the plugin rack
 
-The External Apps Workbench includes a *Workspace Source* form that turns local
-archives or folders into interactive "bubbles" on the External App Desktop (the band
-of windows shown underneath the main Noisetown viewport):
-
-1. **Source** – Enter a path to a `.zip` archive, an extracted directory, or a single
-   executable file. The helper safely copies/expands the contents into
-   `.cache/external_apps/workspaces/<slug>`. If a bundled download is just an installer
-   wrapper, extract it first (or request the raw files) and point the source field at
-   that folder, a fresh zip of the unpacked files, or the executable you want to run.
-2. **Entry HTML (optional)** – Provide a relative path to an HTML file when you want
-   the workspace to surface inside the app as an iframe.
-3. **Executable (optional)** – Supply a relative path to a native binary or script to
-   expose a *Launch* button. The launcher reuses the same process-management logic that
-   powers the generic executable runner, so captured stdout/stderr and background PIDs
-   are streamed into the bubble's log.
-4. **Default args (optional)** – Pre-populate launch arguments that appear in the
-   bubble's input field.
-
-Each workspace entry shows up in the workspace list for quick management and receives a
-dedicated bubble. Web workspaces automatically load inside an iframe (with a reload
-button for rapid iteration). Native workspaces show the log area and launch controls so
-you can spawn the underlying executable while keeping an eye on the output. Removing a
-workspace purges the cached copy from `.cache/external_apps/workspaces`.
+1. **Rescan or register plug-ins** – The rack automatically registers a pair of
+   built-in processors (gain trim and high-pass). Use the *Rescan* button to search the
+   default VST/AU locations or point the *Add Plug-in* field at any `.vst3`, `.vst`,
+   `.dll`, `.component`, `.svt`, or `.mc.svt` file/directory. Entries are cached in
+   `.cache/plugins/plugins.json`.
+2. **Assign processors to streams** – Choose a stream name (for example, `sine`,
+   `noise`, or `master`), pick a plug-in, and add it to the active bank. Chains render
+   in order and can target individual sources or the master bus.
+3. **A/B comparison** – Each bank maintains independent chains so you can toggle the
+   active bank while exploring alternate routings or parameter sets. The rack API
+   persists the configuration in `.cache/plugins/rack.json`.
+4. **Open plug-in editors** – If Carla or Pluginval is available on your PATH, press
+   *Open Editor* to spawn the plug-in UI inside a desktop bubble beneath the main
+   Noisetown viewport.
 
 4. Provide a JSON configuration to customize the engine:
 
@@ -96,7 +82,22 @@ workspace purges the cached copy from `.cache/external_apps/workspaces`.
      ],
      "effects": [
        {"type": "ReverbEffect", "decay": 0.4, "mix": 0.25}
-     ]
+     ],
+     "plugins": {
+       "active_bank": "A",
+       "banks": {
+         "A": {
+           "streams": {
+             "sine": [
+               {"slug": "builtin-gain", "params": {"gain_db": -3}}
+             ],
+             "master": [
+               {"slug": "builtin-highpass", "params": {"cutoff_hz": 140}}
+             ]
+           }
+         }
+       }
+     }
    }
    ```
 
@@ -108,8 +109,8 @@ workspace purges the cached copy from `.cache/external_apps/workspaces`.
 
 - Run tests with `pytest`.
 - Package metadata lives in `pyproject.toml`.
-- External resources are kept at the repository root and extracted to `.cache/` when
-  requested. The `.gitignore` prevents accidental commits of unpacked binaries.
+- Plug-in caches live under `.cache/plugins`. Registering additional plug-ins simply
+  records their paths in `plugins.json`, so version control stays clean.
 
 ## Upgrading
 

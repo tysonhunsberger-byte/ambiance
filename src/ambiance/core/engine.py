@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterable, List
+from typing import Iterable, List, Optional
 
 from ..npcompat import np
 
 from .base import AudioEffect, AudioSource
+
+try:  # pragma: no cover - optional import to avoid cycle at runtime
+    from ..integrations.plugins import PluginRack
+except Exception:  # pragma: no cover - plugins optional for import time
+    PluginRack = None  # type: ignore[assignment]
 
 
 def mix(buffers: Iterable[np.ndarray]) -> np.ndarray:
@@ -35,6 +40,7 @@ class AudioEngine:
     sample_rate: int = 44100
     sources: List[AudioSource] = field(default_factory=list)
     effects: List[AudioEffect] = field(default_factory=list)
+    plugin_rack: Optional["PluginRack"] = None
 
     def add_source(self, source: AudioSource) -> None:
         self.sources.append(source)
@@ -42,10 +48,21 @@ class AudioEngine:
     def add_effect(self, effect: AudioEffect) -> None:
         self.effects.append(effect)
 
+    def set_plugin_rack(self, rack: "PluginRack" | None) -> None:
+        self.plugin_rack = rack
+
     def render(self, duration: float) -> np.ndarray:
         """Render a buffer from all sources and effects."""
-        buffers = [source.generate(duration, self.sample_rate) for source in self.sources]
+        buffers = []
+        for source in self.sources:
+            buffer = source.generate(duration, self.sample_rate)
+            if self.plugin_rack:
+                stream_id = getattr(source, "name", source.__class__.__name__)
+                buffer = self.plugin_rack.process_stream(stream_id, buffer, self.sample_rate)
+            buffers.append(buffer)
         combined = mix(buffers)
+        if self.plugin_rack:
+            combined = self.plugin_rack.process_master(combined, self.sample_rate)
         for effect in self.effects:
             combined = effect.apply(combined, self.sample_rate)
         return combined
@@ -55,4 +72,5 @@ class AudioEngine:
             "sample_rate": self.sample_rate,
             "sources": [source.to_dict() for source in self.sources],
             "effects": [effect.to_dict() for effect in self.effects],
+            "plugins": self.plugin_rack.to_config() if self.plugin_rack else None,
         }

@@ -17,6 +17,7 @@ from . import (
     SineWaveSource,
 )
 from .core.registry import registry
+from .integrations.plugins import PluginManager
 from .utils.audio import write_wav
 
 
@@ -47,6 +48,10 @@ def run_from_config(engine: AudioEngine, config_path: Path) -> None:
         engine.add_source(_create_from_config("source", source_conf))
     for effect_conf in data.get("effects", []):
         engine.add_effect(_create_from_config("effect", effect_conf))
+    plugin_config = data.get("plugins")
+    if plugin_config:
+        manager = PluginManager()
+        engine.set_plugin_rack(manager.build_rack_from_config(plugin_config))
 
 
 def main(argv: list[str] | None = None) -> None:
