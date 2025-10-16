@@ -109,19 +109,37 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
             if path == "/api/install":
                 payload = self._read_json()
                 app = payload.get("app")
+                status_snapshot: dict[str, object]
                 if app == "modalys":
                     located = self.manager.ensure_modalys_installed()
+                    status_snapshot = self.manager.status()["modalys"]
                 elif app == "praat":
                     located = self.manager.ensure_praat_installed()
+                    status_snapshot = self.manager.status()["praat"]
                 else:
                     self._send_json({"ok": False, "error": "Unknown app"}, HTTPStatus.BAD_REQUEST)
                     return
+                installed_flag = bool(status_snapshot.get("installed"))
+                installer_only = bool(status_snapshot.get("installer_only"))
+                note = status_snapshot.get("note")
+                if installed_flag:
+                    message = f"{app.capitalize()} executable ready"
+                elif installer_only:
+                    message = f"{app.capitalize()} installer extracted"
+                elif located:
+                    message = f"{app.capitalize()} archive prepared"
+                else:
+                    message = "Installer not found"
                 self._send_json(
                     {
                         "ok": bool(located),
-                        "installed": bool(located),
-                        "path": str(located) if located else None,
-                        "message": f"{app.capitalize()} ready" if located else "Installer not found",
+                        "installed": installed_flag,
+                        "installer_only": installer_only,
+                        "path": status_snapshot.get("path") if status_snapshot else None,
+                        "workspace": status_snapshot.get("workspace") if status_snapshot else None,
+                        "message": message,
+                        "note": note,
+                        "status": status_snapshot,
                     }
                 )
                 return

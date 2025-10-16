@@ -1,4 +1,5 @@
 import sys
+import zipfile
 
 from ambiance.integrations.external_apps import ExternalAppManager
 
@@ -10,6 +11,8 @@ def test_status_handles_missing_installers(tmp_path):
 
     assert status["modalys"]["zip_present"] is False
     assert status["modalys"]["installed"] is False
+    assert status["modalys"]["installer_only"] is False
+    assert status["modalys"]["path"] is None
     assert status["praat"]["zip_present"] is False
     assert status["platform_supported"] in {True, False}
 
@@ -22,6 +25,26 @@ def test_installation_paths_created_on_extract(tmp_path):
     target.write_bytes(b"")
 
     assert manager.modalys_installation() == target
+
+
+def test_status_detects_installer_only(tmp_path):
+    archive = tmp_path / "Modalys 3.9.0 for Windows.zip"
+    installer_name = "Modalys for Max 3.9.0 Installer.exe"
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.writestr(installer_name, b"")
+
+    manager = ExternalAppManager(base_dir=tmp_path)
+
+    # Extraction should yield the installer path.
+    located = manager.ensure_modalys_installed()
+    assert located is not None
+    assert located.name == installer_name
+
+    status = manager.status()
+    assert status["modalys"]["zip_present"] is True
+    assert status["modalys"]["installer_only"] is True
+    assert status["modalys"]["installed"] is False
+    assert "installer" in (status["modalys"]["kind"] or "")
 
 
 def test_launch_external_waits_and_captures_output(tmp_path):

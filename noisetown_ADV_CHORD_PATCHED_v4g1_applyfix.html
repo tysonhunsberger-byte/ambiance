@@ -19,18 +19,69 @@
   .block.dragging{opacity:.95;outline:2px dashed var(--accent)}
   .block h2{margin:0 0 8px}
   .block .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
-  .block.external-block{max-width:720px}
-  .external-block textarea{width:100%;min-height:180px;padding:8px;background:#0f0f0f;color:inherit;border:1px solid #555;border-radius:6px;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;font-size:12px}
-  .external-block .runOutput{min-height:120px;resize:vertical}
-  .external-block .status-panels{display:flex;flex-wrap:wrap;gap:10px;width:100%}
-  .external-block .status-panel{flex:1;min-width:200px;background:var(--card);border:1px solid #555;border-radius:6px;padding:8px}
-  .external-block .status-panel strong{display:block;margin-bottom:4px}
-  .external-block .registry-tags{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
-  .external-block .registry-tags span{padding:2px 6px;border:1px solid #555;border-radius:4px;background:var(--card);font-size:12px}
-  .external-block .status-text{font-size:12px;color:var(--muted)}
-  .external-block.server-offline .status-text{color:#ff8585}
+  .block.external-block{min-width:620px;position:relative;overflow:hidden;background:linear-gradient(155deg,#1c1c1f 0%,#101722 55%,#0e1119 100%);border:1px solid #2f3947;box-shadow:0 24px 48px rgba(0,0,0,.35);}
+  .block.external-block::before{content:"";position:absolute;inset:-55% -35% auto;min-height:70%;background:radial-gradient(circle at top left,rgba(89,167,255,.35),rgba(89,167,255,0));pointer-events:none;z-index:0;}
+  .block.external-block::after{content:"";position:absolute;inset:auto -30% -60%;height:65%;background:radial-gradient(circle at bottom right,rgba(255,92,221,.25),rgba(255,92,221,0));pointer-events:none;z-index:0;}
+  .block.external-block > *{position:relative;z-index:1;}
+  .external-block h2{margin:0;font-size:22px;display:flex;align-items:center;gap:10px;}
+  .external-block h2 .tagline{font-size:13px;font-weight:500;color:var(--muted);opacity:.9;}
+  .external-block header{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;}
+  .external-block .command-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:10px 12px;box-shadow:0 12px 24px rgba(0,0,0,.25) inset;}
+  .external-block .command-bar .status-text{font-size:12px;color:var(--muted);margin-left:auto;}
+  .external-block.server-offline .command-bar .status-text{color:#ff8b8b;}
+  .external-block textarea{width:100%;min-height:200px;padding:10px;background:#090b10;color:inherit;border:1px solid rgba(100,140,200,.35);border-radius:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:12px;box-shadow:0 12px 24px rgba(0,0,0,.35) inset;resize:vertical;}
   body.theme-xp .external-block textarea,
-  body.theme-98 .external-block textarea{background:#fff;color:#000;border:1px solid #7b7b7b}
+  body.theme-98 .external-block textarea{background:#fff;color:#000;border:1px solid #7b7b7b;}
+  .external-block .external-dashboard{display:grid;gap:16px;grid-template-columns:minmax(260px,320px) minmax(320px,1fr);}
+  @media (max-width:1100px){.external-block .external-dashboard{grid-template-columns:1fr;}}
+  .capsule-stack{display:flex;flex-direction:column;gap:14px;}
+  .capsule{position:relative;padding:16px;border-radius:14px;background:linear-gradient(160deg,rgba(32,36,45,.92),rgba(17,24,33,.85));border:1px solid rgba(91,160,255,.45);box-shadow:0 20px 32px rgba(0,0,0,.35);overflow:hidden;}
+  .capsule::before{content:"";position:absolute;inset:-20% 40% auto -30%;height:120%;background:radial-gradient(circle at 20% 20%,rgba(89,167,255,.35),rgba(89,167,255,0));opacity:.8;pointer-events:none;}
+  .capsule h3{margin:0;font-size:16px;display:flex;align-items:center;gap:8px;}
+  .capsule .badge{font-size:11px;padding:2px 6px;border-radius:999px;background:rgba(89,167,255,.22);border:1px solid rgba(89,167,255,.45);text-transform:uppercase;letter-spacing:.6px;}
+  .capsule .capsule-status{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;}
+  .capsule .capsule-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .capsule .registry-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+  .capsule .registry-tags span{padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);font-size:11px;letter-spacing:.4px;text-transform:uppercase;}
+  .capsule .registry-tags span.off{opacity:.35;}
+  .capsule strong{display:block;margin-top:10px;font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
+  .capsule .status-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;background:rgba(89,167,255,.22);border:1px solid rgba(89,167,255,.45);margin-top:10px;}
+  .capsule-feed{margin-top:14px;padding:14px;border-radius:12px;background:rgba(14,18,24,.9);border:1px solid rgba(255,255,255,.05);box-shadow:0 16px 28px rgba(0,0,0,.3);}
+  .capsule-feed header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .capsule-feed header h4{margin:0;font-size:14px;text-transform:uppercase;letter-spacing:.6px;}
+  .capsule-feed .clearFeed{margin-left:auto;}
+  .bubble-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+  .bubble{position:relative;padding:12px 14px;border-radius:14px;background:linear-gradient(150deg,rgba(24,32,46,.95),rgba(14,16,24,.92));border:1px solid rgba(89,167,255,.28);box-shadow:0 14px 28px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:6px;overflow:hidden;}
+  .bubble::before{content:"";position:absolute;inset:-60% auto auto -20%;width:160px;height:160px;background:radial-gradient(circle,rgba(89,167,255,.35),rgba(89,167,255,0));pointer-events:none;}
+  .bubble h3{margin:0;font-size:14px;letter-spacing:.4px;text-transform:uppercase;}
+  .bubble .bubble-meta{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+  .bubble pre{margin:0;padding:10px;border-radius:10px;background:#05070c;color:inherit;border:1px solid rgba(89,167,255,.18);font-size:12px;white-space:pre-wrap;word-break:break-word;box-shadow:0 10px 20px rgba(0,0,0,.35) inset;}
+  .bubble .bubble-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .bubble button{background:rgba(0,0,0,.4);border:1px solid rgba(89,167,255,.4);border-radius:999px;padding:4px 10px;color:inherit;cursor:pointer;font-size:12px;letter-spacing:.3px;text-transform:uppercase;}
+  body.theme-xp .bubble pre,
+  body.theme-98 .bubble pre{background:#fff;color:#000;border:1px solid #7b7b7b;}
+  .playground{position:relative;padding:16px;border-radius:14px;background:linear-gradient(145deg,rgba(16,20,32,.92),rgba(10,12,18,.9));border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 32px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:12px;min-height:360px;}
+  .playground header{display:flex;flex-direction:column;gap:6px;}
+  .playground h3{margin:0;font-size:18px;letter-spacing:.6px;text-transform:uppercase;}
+  .playground .hint{font-size:12px;color:var(--muted);line-height:1.5;}
+  .playground canvas{width:100%;height:240px;border-radius:14px;border:1px solid rgba(89,167,255,.25);background:radial-gradient(circle at center,rgba(23,34,52,.85),rgba(12,16,26,.9));box-shadow:0 14px 28px rgba(0,0,0,.35) inset;touch-action:none;}
+  .orbit-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .orbit-controls label{font-size:12px;text-transform:uppercase;letter-spacing:.5px;}
+  .orbit-controls .btn{border-radius:999px;}
+  .engine-panel{margin-top:16px;padding:16px;border-radius:14px;background:rgba(9,11,18,.88);border:1px solid rgba(255,255,255,.05);box-shadow:0 16px 32px rgba(0,0,0,.35);display:grid;gap:16px;grid-template-columns:minmax(240px,1fr) minmax(260px,1fr);}
+  @media (max-width:1024px){.engine-panel{grid-template-columns:1fr;}}
+  .engine-panel .launch-form,.engine-panel .config-form{display:flex;flex-direction:column;gap:12px;}
+  .engine-panel .field{display:flex;flex-direction:column;gap:6px;}
+  .engine-panel input[type="text"],
+  .engine-panel input[type="number"]{padding:8px 10px;border-radius:8px;border:1px solid rgba(89,167,255,.25);background:#0c1018;color:inherit;}
+  body.theme-xp .engine-panel input[type="text"],
+  body.theme-xp .engine-panel input[type="number"],
+  body.theme-98 .engine-panel input[type="text"],
+  body.theme-98 .engine-panel input[type="number"]{background:#fff;color:#000;border:1px solid #7b7b7b;}
+  .engine-panel label{font-size:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
+  .engine-panel .runOutput{min-height:120px;}
+  .engine-panel .audio-preview{display:flex;flex-direction:column;gap:6px;}
+  .engine-panel .renderInfo{font-size:12px;color:var(--muted);}
   .scope{flex:1;min-width:220px;height:60px;background:#000;border:1px solid #666;border-radius:6px}
   .stream{background:var(--card);border:1px solid #555;border-radius:8px;padding:10px;margin:8px 0}
   .stream h3{margin:0 0 6px}
@@ -729,72 +780,166 @@ function bootAudio(){
   let blockCount = 0;
   const isExternalBlock = (el)=> !!(el && el.dataset && el.dataset.role === 'external-apps');
 
+  function ensureBubble(targetGrid, key){
+    if(!targetGrid) return null;
+    let bubble = targetGrid.querySelector(`[data-bubble="${key}"]`);
+    const isNew = !bubble;
+    if(isNew){
+      bubble = ce('div','bubble');
+      bubble.dataset.bubble = key;
+    }
+    if(isNew || targetGrid.firstElementChild !== bubble){
+      targetGrid.insertBefore(bubble, targetGrid.firstElementChild);
+    }
+    return bubble;
+  }
+
+  function renderBubble(targetGrid, key, options){
+    const bubble = ensureBubble(targetGrid, key);
+    if(!bubble) return null;
+    const { title, meta, body, actions, max } = options || {};
+    bubble.innerHTML = '';
+    if(title){
+      const h = document.createElement('h3');
+      h.textContent = title;
+      bubble.appendChild(h);
+    }
+    if(meta){
+      const metaEl = ce('div','bubble-meta');
+      metaEl.textContent = meta;
+      bubble.appendChild(metaEl);
+    }
+    const bodyEl = document.createElement('pre');
+    bodyEl.textContent = body || '';
+    bubble.appendChild(bodyEl);
+    if(actions && actions.length){
+      const row = ce('div','bubble-actions');
+      actions.forEach((action)=>{
+        if(!action) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = action.label || 'Action';
+        if(typeof action.onClick === 'function'){
+          btn.addEventListener('click', action.onClick);
+        }
+        row.appendChild(btn);
+      });
+      bubble.appendChild(row);
+    }
+    if(typeof max === 'number' && max > 0){
+      while(targetGrid.childElementCount > max){
+        targetGrid.removeChild(targetGrid.lastElementChild);
+      }
+    }
+    return bubble;
+  }
+
   function ensureExternalAppsWorkspace(){
     if(qs('#externalAppsBlock')) return null;
     const blockEl = ce('div','block external-block');
     blockEl.id = 'externalAppsBlock';
     blockEl.dataset.role = 'external-apps';
     blockEl.innerHTML = `
-      <h2><span class="dragHandle" style="cursor:move">⣿</span> External Apps Workbench</h2>
-      <div class="row">
-        <button class="btn checkStatus">🔄 Check Status</button>
+      <header>
+        <h2><span class="dragHandle" style="cursor:move">⣿</span> External Capsule Studio</h2>
+        <p class="tagline">Plant Modalys and Praat inside Noisetown — modular, vivid, and ready to jam.</p>
+      </header>
+      <div class="command-bar">
+        <button class="btn checkStatus">🔁 Refresh Capsules</button>
         <button class="btn installModalys">📦 Extract Modalys</button>
         <button class="btn installPraat">📦 Extract Praat</button>
-        <button class="btn resetConfig">🧰 Reset Config</button>
-        <div class="spacer"></div>
+        <button class="btn resetConfig">🧰 Reset Engine</button>
         <span class="status-text">Waiting for server…</span>
       </div>
-      <div class="status-panels">
-        <div class="status-panel">
-          <strong>Modalys</strong>
-          <div class="modalysStatus small">Pending…</div>
+      <div class="external-dashboard">
+        <section class="capsule-stack">
+          <article class="capsule modalysCapsule">
+            <h3>Modalys Capsule <span class="badge">Physical Magic</span></h3>
+            <p class="capsule-status modalysStatus">Pending…</p>
+            <span class="status-chip">Modalys Workspace</span>
+          </article>
+          <article class="capsule praatCapsule">
+            <h3>Praat Capsule <span class="badge">Vocal Wizardry</span></h3>
+            <p class="capsule-status praatStatus">Pending…</p>
+            <span class="status-chip">Praat Studio</span>
+          </article>
+          <article class="capsule registryCapsule">
+            <h3>Registry Palette <span class="badge">Noisetown DNA</span></h3>
+            <strong>Sources</strong>
+            <div class="registry-tags registrySources"></div>
+            <strong>Effects</strong>
+            <div class="registry-tags registryEffects"></div>
+          </article>
+          <div class="capsule-feed status-feed">
+            <header>
+              <h4>Capsule Snapshots</h4>
+              <span class="small">Drop-in paths and workspace hints update live.</span>
+            </header>
+            <div class="bubble-grid local-bubbles" aria-live="polite"></div>
+          </div>
+          <div class="capsule-feed launch-feed">
+            <header>
+              <h4>Launch Feed</h4>
+              <button class="btn clearFeed">🧹 Clear Feed</button>
+            </header>
+            <div class="bubble-grid global-bubbles" aria-live="polite"></div>
+          </div>
+        </section>
+        <section class="playground">
+          <header>
+            <h3>Orbit Playground</h3>
+            <p class="hint">Click to plant sonic orbs, drag to shape their gravities. Every orb becomes an instrument when you render.</p>
+          </header>
+          <canvas class="playCanvas" width="520" height="240" aria-label="Orbit sound designer canvas"></canvas>
+          <div class="orbit-controls">
+            <label for="orbMotion">Orb Drift</label>
+            <input type="range" id="orbMotion" class="orbMotion" min="0" max="1" step="0.01" value="0.45">
+            <button class="btn randomOrbs">✨ Shuffle Orbs</button>
+            <button class="btn clearOrbs">🧼 Clear Orbs</button>
+          </div>
+          <div class="orbit-stats small">0 orbs engaged.</div>
+        </section>
+      </div>
+      <div class="engine-panel">
+        <div class="launch-form">
+          <div class="field">
+            <label>Executable Path</label>
+            <input type="text" class="exePath" list="externalAppPaths" placeholder="C:\\Path\\to\\app.exe or /path/to/app">
+            <datalist id="externalAppPaths"></datalist>
+          </div>
+          <div class="field">
+            <label>Arguments</label>
+            <input type="text" class="exeArgs" placeholder="--help or other switches">
+          </div>
+          <div class="field">
+            <label>Launch Options</label>
+            <div class="row" style="gap:10px;align-items:center;flex-wrap:wrap;">
+              <label class="small"><input type="checkbox" class="waitToggle" checked> Wait for completion</label>
+              <label>Timeout</label>
+              <input type="number" class="timeoutInput" min="1" max="600" step="1" value="30">
+            </div>
+          </div>
+          <button class="btn runExternal">🚀 Launch Capsule</button>
+          <div class="field">
+            <label>Launch Output</label>
+            <textarea class="runOutput" readonly placeholder="Captured stdout/stderr or process information"></textarea>
+          </div>
         </div>
-        <div class="status-panel">
-          <strong>Praat</strong>
-          <div class="praatStatus small">Pending…</div>
+        <div class="config-form">
+          <div class="row" style="gap:12px;flex-wrap:wrap;">
+            <label>Duration (s)</label><input type="number" class="durationInput" min="1" max="120" step="1" value="8">
+            <label>Sample Rate</label><input type="number" class="sampleRateInput" min="8000" max="96000" step="1000" value="44100">
+          </div>
+          <div class="field">
+            <label>Engine Config (JSON)</label>
+            <textarea class="engineConfig" aria-label="Engine configuration JSON"></textarea>
+          </div>
+          <div class="audio-preview">
+            <button class="btn renderNow">🎧 Render with Engine</button>
+            <span class="small renderInfo">Idle.</span>
+            <audio class="enginePreview" controls></audio>
+          </div>
         </div>
-        <div class="status-panel">
-          <strong>Registry</strong>
-          <div class="small">Sources</div>
-          <div class="registry-tags registrySources"></div>
-          <div class="small" style="margin-top:6px">Effects</div>
-          <div class="registry-tags registryEffects"></div>
-        </div>
-      </div>
-      <div class="row">
-        <label>Duration (s)</label><input type="number" class="durationInput" min="1" max="120" step="1" value="8">
-        <label>Sample Rate</label><input type="number" class="sampleRateInput" min="8000" max="96000" step="1000" value="44100">
-      </div>
-      <div class="row">
-        <label style="width:100%">Executable Path</label>
-        <input type="text" class="exePath" list="externalAppPaths" placeholder="C:\\Path\\to\\app.exe or /path/to/app">
-        <datalist id="externalAppPaths"></datalist>
-      </div>
-      <div class="row">
-        <label style="width:100%">Arguments (optional)</label>
-        <input type="text" class="exeArgs" placeholder="--help or other switches">
-      </div>
-      <div class="row">
-        <label class="small"><input type="checkbox" class="waitToggle" checked> Wait for completion</label>
-        <label>Timeout</label><input type="number" class="timeoutInput" min="1" max="600" step="1" value="30">
-        <div class="spacer"></div>
-        <button class="btn runExternal">🚀 Run External App</button>
-      </div>
-      <div class="row">
-        <label style="width:100%">Engine Config (JSON)</label>
-        <textarea class="engineConfig" aria-label="Engine configuration JSON"></textarea>
-      </div>
-      <div class="row">
-        <button class="btn renderNow">🎧 Render with Engine</button>
-        <div class="spacer"></div>
-        <span class="small renderInfo">Idle.</span>
-      </div>
-      <div class="row">
-        <audio class="enginePreview" controls style="width:100%"></audio>
-      </div>
-      <div class="row">
-        <label style="width:100%">Run Output</label>
-        <textarea class="runOutput" readonly placeholder="Captured stdout/stderr or process information"></textarea>
       </div>
     `;
 
@@ -802,6 +947,7 @@ function bootAudio(){
     wireExternalAppsWorkspace(blockEl);
     return blockEl;
   }
+
 
   function wireExternalAppsWorkspace(blockEl){
     const q = (sel)=> blockEl.querySelector(sel);
@@ -821,30 +967,360 @@ function bootAudio(){
     const timeoutInput = q('.timeoutInput');
     const runOutput = q('.runOutput');
     const pathList = q('#externalAppPaths');
+    const localBubbleGrid = q('.local-bubbles');
+    const globalBubbleGrid = q('.global-bubbles');
+    const clearFeedBtn = q('.clearFeed');
+    const orbitCanvas = q('.playCanvas');
+    const orbitMotionInput = q('.orbMotion');
+    const randomOrbsBtn = q('.randomOrbs');
+    const clearOrbsBtn = q('.clearOrbs');
+    const orbitStats = q('.orbit-stats');
+
+    if(clearFeedBtn){
+      clearFeedBtn.addEventListener('click', ()=>{
+        if(globalBubbleGrid) globalBubbleGrid.innerHTML = '';
+        showRunOutput('Launch feed cleared.');
+      });
+    }
+
+    const orbit = {
+      canvas: orbitCanvas,
+      ctx: orbitCanvas ? orbitCanvas.getContext('2d') : null,
+      nodes: [],
+      dragging: null,
+      motion: orbitMotionInput ? parseFloat(orbitMotionInput.value) || 0 : 0.45,
+    };
+
+    function orbitClampX(x){
+      if(!orbit.canvas) return x;
+      return clamp(x, 14, orbit.canvas.width - 14);
+    }
+
+    function orbitClampY(y){
+      if(!orbit.canvas) return y;
+      return clamp(y, 14, orbit.canvas.height - 14);
+    }
+
+    function pointerToCanvas(evt){
+      if(!orbit.canvas) return { x: 0, y: 0 };
+      const rect = orbit.canvas.getBoundingClientRect();
+      const scaleX = orbit.canvas.width / rect.width;
+      const scaleY = orbit.canvas.height / rect.height;
+      return {
+        x: (evt.clientX - rect.left) * scaleX,
+        y: (evt.clientY - rect.top) * scaleY,
+      };
+    }
+
+    function dist(ax, ay, bx, by){
+      const dx = ax - bx;
+      const dy = ay - by;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function nodeToFreq(node){
+      if(!orbit.canvas) return 440;
+      const normX = node.x / orbit.canvas.width;
+      return 160 + Math.pow(normX, 1.1) * 6800;
+    }
+
+    function nodeToAmp(node){
+      if(!orbit.canvas) return 0.2;
+      const normY = 1 - node.y / orbit.canvas.height;
+      return clamp(0.08 + normY * 0.45, 0.05, 0.55);
+    }
+
+    function nodeToPan(node){
+      if(!orbit.canvas) return 0;
+      const normX = node.x / orbit.canvas.width;
+      return clamp(normX * 2 - 1, -1, 1);
+    }
+
+    function updateOrbitStats(){
+      if(!orbitStats) return;
+      const count = orbit.nodes.length;
+      if(!count){
+        orbitStats.textContent = '0 orbs engaged.';
+        return;
+      }
+      const freqs = orbit.nodes.map(nodeToFreq).sort((a, b)=> a - b);
+      const min = Math.round(freqs[0]);
+      const max = Math.round(freqs[freqs.length - 1]);
+      orbitStats.textContent = `${count} orb${count === 1 ? '' : 's'} engaged — ${min}–${max} Hz field`;
+    }
+
+    function drawOrbit(){
+      if(!orbit.ctx || !orbit.canvas) return;
+      const { ctx, canvas } = orbit;
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      const gradient = ctx.createLinearGradient(0, 0, w, h);
+      gradient.addColorStop(0, 'rgba(89,167,255,0.18)');
+      gradient.addColorStop(1, 'rgba(255,92,221,0.12)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.lineWidth = 1;
+      const steps = 6;
+      for(let i = 1; i < steps; i += 1){
+        const x = (w / steps) * i;
+        const y = (h / steps) * i;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+      orbit.nodes.forEach((node, index)=>{
+        ctx.beginPath();
+        const hue = node.hue ?? (index * 72 % 360);
+        const radius = node.radius || 14;
+        ctx.fillStyle = `hsla(${hue},80%,60%,0.85)`;
+        ctx.strokeStyle = `hsla(${hue},100%,75%,0.9)`;
+        ctx.lineWidth = orbit.dragging && orbit.dragging.index === index ? 3 : 2;
+        ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.font = '11px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${Math.round(nodeToFreq(node))} Hz`, node.x, node.y - radius - 6);
+      });
+    }
+
+    function commitOrbitChange(){
+      drawOrbit();
+      updateOrbitStats();
+    }
+
+    function addOrb(x, y, opts = {}){
+      if(!orbit.canvas) return null;
+      const node = {
+        x: orbitClampX(x),
+        y: orbitClampY(y),
+        radius: opts.radius || 14 + Math.random() * 6,
+        hue: typeof opts.hue === 'number' ? opts.hue : Math.random() * 360,
+        drift: opts.drift ?? Math.random() * Math.PI * 2,
+        speed: opts.speed ?? (0.0006 + Math.random() * 0.0015),
+      };
+      orbit.nodes.push(node);
+      commitOrbitChange();
+      return node;
+    }
+
+    function removeOrb(index){
+      if(index < 0 || index >= orbit.nodes.length) return;
+      orbit.nodes.splice(index, 1);
+      commitOrbitChange();
+    }
+
+    function seedOrbs(){
+      if(!orbit.canvas || orbit.nodes.length) return;
+      const w = orbit.canvas.width;
+      const h = orbit.canvas.height;
+      const seeds = [
+        { x: w * 0.22, y: h * 0.35, hue: 200 },
+        { x: w * 0.52, y: h * 0.62, hue: 320 },
+        { x: w * 0.75, y: h * 0.28, hue: 40 },
+      ];
+      seeds.forEach((seed)=> addOrb(seed.x, seed.y, seed));
+    }
+
+    function randomizeOrbs(){
+      if(!orbit.canvas) return;
+      orbit.nodes.length = 0;
+      const count = 4 + Math.floor(Math.random() * 3);
+      for(let i = 0; i < count; i += 1){
+        addOrb(
+          40 + Math.random() * (orbit.canvas.width - 80),
+          40 + Math.random() * (orbit.canvas.height - 80),
+          { hue: (i * 90 + Math.random() * 45) % 360 }
+        );
+      }
+      commitOrbitChange();
+    }
+
+    function clearOrbs(){
+      orbit.nodes.length = 0;
+      commitOrbitChange();
+    }
+
+    if(orbitCanvas && orbit.ctx){
+      orbitCanvas.addEventListener('pointerdown', (evt)=>{
+        const pos = pointerToCanvas(evt);
+        let index = -1;
+        let minDist = Infinity;
+        orbit.nodes.forEach((node, idx)=>{
+          const distance = dist(pos.x, pos.y, node.x, node.y);
+          const range = (node.radius || 14) + 12;
+          if(distance < range && distance < minDist){
+            minDist = distance;
+            index = idx;
+          }
+        });
+        if(index === -1){
+          addOrb(pos.x, pos.y);
+          index = orbit.nodes.length - 1;
+        }
+        orbit.dragging = {
+          index,
+          offsetX: pos.x - orbit.nodes[index].x,
+          offsetY: pos.y - orbit.nodes[index].y,
+          pointer: evt.pointerId,
+        };
+        orbitCanvas.setPointerCapture(evt.pointerId);
+        evt.preventDefault();
+      });
+
+      orbitCanvas.addEventListener('pointermove', (evt)=>{
+        if(!orbit.dragging) return;
+        const pos = pointerToCanvas(evt);
+        const node = orbit.nodes[orbit.dragging.index];
+        node.x = orbitClampX(pos.x - orbit.dragging.offsetX);
+        node.y = orbitClampY(pos.y - orbit.dragging.offsetY);
+        drawOrbit();
+        updateOrbitStats();
+      });
+
+      const release = ()=>{
+        if(orbit.dragging && orbit.dragging.pointer != null && orbitCanvas){
+          try{
+            orbitCanvas.releasePointerCapture(orbit.dragging.pointer);
+          }catch(_err){
+            // ignore capture issues
+          }
+        }
+        orbit.dragging = null;
+        commitOrbitChange();
+      };
+
+      ['pointerup','pointercancel','pointerleave'].forEach((type)=>{
+        orbitCanvas.addEventListener(type, release);
+      });
+
+      orbitCanvas.addEventListener('dblclick', (evt)=>{
+        const pos = pointerToCanvas(evt);
+        let targetIndex = -1;
+        orbit.nodes.some((node, idx)=>{
+          if(dist(pos.x, pos.y, node.x, node.y) <= (node.radius || 14) + 8){
+            targetIndex = idx;
+            return true;
+          }
+          return false;
+        });
+        if(targetIndex >= 0){
+          removeOrb(targetIndex);
+        }
+      });
+    }
+
+    if(randomOrbsBtn){
+      randomOrbsBtn.addEventListener('click', ()=>{
+        randomizeOrbs();
+        showRunOutput('Orbs shuffled for new timbres.');
+      });
+    }
+
+    if(clearOrbsBtn){
+      clearOrbsBtn.addEventListener('click', ()=>{
+        clearOrbs();
+        showRunOutput('Orbit cleared.');
+      });
+    }
+
+    if(orbitMotionInput){
+      orbitMotionInput.addEventListener('input', ()=>{
+        const value = parseFloat(orbitMotionInput.value);
+        orbit.motion = Number.isFinite(value) ? value : 0;
+        updateOrbitStats();
+      });
+    }
+
+    const orbitTick = ()=>{
+      if(!orbitCanvas || !orbit.ctx || orbit.dragging || orbit.motion <= 0) return;
+      const sway = 1.5 + orbit.motion * 3.5;
+      orbit.nodes.forEach((node, idx)=>{
+        node.drift = (node.drift || 0) + (node.speed || 0.0006 + idx * 0.00018) * (1 + orbit.motion * 40);
+        node.x = orbitClampX(node.x + Math.sin(node.drift) * sway);
+        node.y = orbitClampY(node.y + Math.cos(node.drift * 0.9) * sway * 0.7);
+      });
+      drawOrbit();
+    };
+
+    if(orbitCanvas && orbit.ctx){
+      LFO_TICKS.push(orbitTick);
+      ensureLfoLoop();
+      drawOrbit();
+      updateOrbitStats();
+    }
+
+    function gatherOrbitSources(){
+      if(!orbitCanvas || !orbit.nodes.length) return [];
+      const vowels = ['a','e','i','o','u'];
+      return orbit.nodes.map((node, index)=>{
+        const freq = nodeToFreq(node);
+        const amp = nodeToAmp(node);
+        const pan = nodeToPan(node);
+        const channel = index % 3;
+        if(channel === 0){
+          return {
+            name: 'sine',
+            frequency: Number(freq.toFixed(1)),
+            amplitude: Number(amp.toFixed(3)),
+            pan: Number(pan.toFixed(2)),
+          };
+        }
+        if(channel === 1){
+          return {
+            name: 'modalys',
+            preset: 'string-resonator',
+            amplitude: Number(amp.toFixed(3)),
+          };
+        }
+        const vowelIndex = Math.min(vowels.length - 1, Math.floor((node.x / orbit.canvas.width) * vowels.length));
+        return {
+          name: 'praat',
+          vowel: vowels[vowelIndex],
+          amplitude: Number(amp.toFixed(3)),
+          vibrato_rate: Number((4.2 + orbit.motion * 4.5).toFixed(2)),
+          vibrato_depth: Number((0.002 + orbit.motion * 0.004).toFixed(4)),
+          pan: Number(pan.toFixed(2)),
+        };
+      });
+    }
 
     const defaultConfig = {
       duration: parseFloat(durationInput.value)||8,
       sample_rate: parseInt(sampleInput.value)||44100,
       sources: [
-        { name:'sine', frequency:432, amplitude:0.18 },
         { name:'modalys', preset:'string-resonator', amplitude:0.22 },
-        { name:'praat', vowel:'o', amplitude:0.16, vibrato_rate:5.5, vibrato_depth:0.004 }
+        { name:'praat', vowel:'o', amplitude:0.18, vibrato_rate:5.2, vibrato_depth:0.003 },
+        { name:'sine', frequency:432, amplitude:0.14, pan:-0.2 },
+        { name:'sine', frequency:864, amplitude:0.1, pan:0.24 }
       ],
       effects: [
-        { name:'reverb', decay:0.45, mix:0.3 },
-        { name:'delay', time:0.32, feedback:0.22 },
-        { name:'lowpass', cutoff:4600 }
+        { name:'reverb', decay:0.48, mix:0.32 },
+        { name:'delay', time:0.28, feedback:0.24, mix:0.24 },
+        { name:'lowpass', cutoff:5200 }
       ]
     };
 
     function applyDefaultConfig(){
+      if(!configArea) return;
       const payload = JSON.parse(JSON.stringify(defaultConfig));
       payload.duration = parseFloat(durationInput.value)||payload.duration;
       payload.sample_rate = parseInt(sampleInput.value)||payload.sample_rate;
+      payload.meta = { note: 'Orbit Playground voices append automatically when rendering.' };
       configArea.value = JSON.stringify(payload, null, 2);
+      if(renderInfo) renderInfo.textContent = 'Orbit ready — render to hear the capsules sing.';
     }
 
     function renderTags(container, items){
+      if(!container) return;
       container.innerHTML='';
       if(!items || !items.length){
         const span=document.createElement('span');
@@ -853,7 +1329,7 @@ function bootAudio(){
         container.appendChild(span);
         return;
       }
-      items.forEach(name=>{
+      items.forEach((name)=>{
         const tag=document.createElement('span');
         tag.textContent=name;
         container.appendChild(tag);
@@ -863,18 +1339,70 @@ function bootAudio(){
     function formatStatus(data){
       if(!data) return 'Unavailable';
       const parts=[];
-      parts.push(data.zip_present ? 'Installer found' : 'Installer missing');
-      if(data.installed) parts.push('Extracted');
+      parts.push(data.zip_present ? 'Bundle found' : 'Bundle missing');
+      if(data.installed) parts.push('Executable ready');
+      else if(data.installer_only) parts.push('Installer only');
       else if(data.zip_present) parts.push('Not extracted');
+      if(data.note) parts.push(data.note);
       if(data.path) parts.push(data.path);
       return parts.join(' · ');
+    }
+
+    function updateLocalBubble(name, info){
+      if(!info) return;
+      const human = name === 'modalys' ? 'Modalys' : 'Praat';
+      const metaParts = [];
+      if(info.installed) metaParts.push('Executable ready');
+      else if(info.installer_only) metaParts.push('Installer only');
+      else metaParts.push(info.zip_present ? 'Not extracted' : 'Bundle missing');
+      if(info.note) metaParts.push(info.note);
+      const meta = metaParts.join(' · ');
+      const lines = [];
+      if(info.path) lines.push(info.path);
+      if(info.workspace && info.workspace !== info.path) lines.push(`Workspace: ${info.workspace}`);
+      const actions = [];
+      if(info.path){
+        actions.push({
+          label: 'Use Path',
+          onClick: ()=>{
+            if(!exePathInput) return;
+            exePathInput.value = info.path;
+            exePathInput.dispatchEvent(new Event('change',{bubbles:true}));
+          }
+        });
+      }
+      if(info.workspace){
+        actions.push({
+          label: 'Copy Workspace',
+          onClick: ()=>{
+            try{
+              if(typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText){
+                navigator.clipboard.writeText(info.workspace);
+                showRunOutput(`Workspace copied: ${info.workspace}`);
+              }else{
+                throw new Error('Clipboard unavailable');
+              }
+            }catch(_err){
+              showRunOutput(`Workspace: ${info.workspace}`);
+            }
+          }
+        });
+      }
+      renderBubble(localBubbleGrid, `status-${name}`, {
+        title: `${human} Bubble`,
+        meta: meta || 'No information',
+        body: lines.join('
+') || '',
+        actions,
+        max: 4,
+      });
     }
 
     function pushPathSuggestion(path){
       if(!pathList || !path) return;
       const value = String(path);
       if(!value) return;
-      const exists = Array.from(pathList.children).some(opt=> opt.value === value);
+      const exists = Array.from(pathList.children).some((opt)=> opt.value === value);
       if(!exists){
         const opt = document.createElement('option');
         opt.value = value;
@@ -900,6 +1428,8 @@ function bootAudio(){
         const data = await res.json();
         modalysStatus.textContent = formatStatus(data.modalys);
         praatStatus.textContent = formatStatus(data.praat);
+        updateLocalBubble('modalys', data.modalys);
+        updateLocalBubble('praat', data.praat);
         pushPathSuggestion(data.modalys && data.modalys.path);
         pushPathSuggestion(data.praat && data.praat.path);
         if(data.platform_supported){
@@ -940,32 +1470,27 @@ function bootAudio(){
         const data = await res.json();
         if(!data.ok) throw new Error(data.error || 'Installer not found');
         renderInfo.textContent = data.message || (app+' ready');
-        pushPathSuggestion(data.path);
+        showRunOutput(renderInfo.textContent);
+        if(data.path) pushPathSuggestion(data.path);
+        refreshStatus();
       }catch(err){
-        renderInfo.textContent = 'Install failed: '+(err && err.message || err || 'unknown');
+        renderInfo.textContent = 'Install failed: '+(err && err.message || err);
+        showRunOutput(renderInfo.textContent);
       }
-      refreshStatus();
     }
 
     async function runExternalApp(){
-      const path = exePathInput && exePathInput.value.trim();
+      const path = (exePathInput && exePathInput.value.trim()) || '';
       if(!path){
-        showRunOutput('Please provide a path to an executable.');
+        showRunOutput('Provide an executable path first.');
         return;
       }
-      const argsValue = exeArgsInput ? exeArgsInput.value : '';
       const payload = {
         path,
-        args: argsValue,
-        wait: !!(waitToggle && waitToggle.checked),
+        args: (exeArgsInput && exeArgsInput.value) || undefined,
+        wait: waitToggle ? !!waitToggle.checked : false,
+        timeout: timeoutInput ? parseFloat(timeoutInput.value)||undefined : undefined,
       };
-      if(waitToggle && waitToggle.checked){
-        const timeoutVal = parseFloat(timeoutInput && timeoutInput.value);
-        if(!Number.isNaN(timeoutVal) && timeoutVal>0){
-          payload.timeout = timeoutVal;
-        }
-      }
-      showRunOutput('Launching '+path+'…');
       try{
         const res = await fetch('/api/run-app',{
           method:'POST',
@@ -979,8 +1504,16 @@ function bootAudio(){
           showRunOutput(msg);
           return;
         }
+        const argsText = (data.args||[]).join(' ');
         if(typeof data.pid === 'number'){
-          showRunOutput(`Launched PID ${data.pid}\nCommand: ${(data.args||[]).join(' ')}`);
+          const message = `Launched PID ${data.pid}\nCommand: ${argsText}`;
+          showRunOutput(message);
+          renderBubble(globalBubbleGrid, `pid-${data.pid}`, {
+            title: 'Background App',
+            meta: `PID ${data.pid} · ${new Date().toLocaleTimeString()}`,
+            body: message,
+            max: 10,
+          });
         }else{
           const stdout = data.stdout || '';
           const stderr = data.stderr || '';
@@ -989,23 +1522,43 @@ function bootAudio(){
             stdout ? `--- stdout ---\n${stdout.trim()}` : null,
             stderr ? `--- stderr ---\n${stderr.trim()}` : null
           ].filter(Boolean);
-          showRunOutput(pieces.join('\n\n') || 'Completed with no output.');
+          const message = pieces.join('\n\n') || 'Completed with no output.';
+          showRunOutput(message);
+          const bubbleKey = `completed-${Date.now()}`;
+          renderBubble(globalBubbleGrid, bubbleKey, {
+            title: 'Completed App',
+            meta: new Date().toLocaleTimeString(),
+            body: `${path}\n${argsText ? argsText+'\n\n' : ''}${message}`.trim(),
+            max: 10,
+          });
         }
       }catch(err){
-        showRunOutput('Launch failed: '+(err && err.message || err));
+        const body = (err && err.message) || String(err);
+        showRunOutput('Launch failed: '+body);
+        renderBubble(globalBubbleGrid, `error-${Date.now()}`, {
+          title: 'Launch Error',
+          meta: new Date().toLocaleTimeString(),
+          body,
+          max: 10,
+        });
       }
     }
 
     async function renderEngine(){
       let payload;
       try{
-        payload = JSON.parse(configArea.value || '{}');
+        payload = JSON.parse((configArea && configArea.value) || '{}');
       }catch(err){
         renderInfo.textContent = 'Invalid JSON: '+(err && err.message || err);
         return;
       }
       if(!payload.duration) payload.duration = parseFloat(durationInput.value)||defaultConfig.duration;
       if(!payload.sample_rate) payload.sample_rate = parseInt(sampleInput.value)||defaultConfig.sample_rate;
+      const orbitSources = gatherOrbitSources();
+      if(orbitSources.length){
+        const baseSources = Array.isArray(payload.sources) ? payload.sources : [];
+        payload.sources = [...baseSources, ...orbitSources];
+      }
       renderInfo.textContent = 'Rendering…';
       try{
         const res = await fetch('/api/render',{
@@ -1016,9 +1569,10 @@ function bootAudio(){
         if(!res.ok) throw new Error('status '+res.status);
         const data = await res.json();
         if(!data.ok) throw new Error(data.error || 'Render failed');
-        preview.src = data.audio;
-        renderInfo.textContent = `Rendered ${data.duration.toFixed(2)}s @ ${data.sample_rate} Hz`;
-        try{ preview.play(); }catch(_){ /* ignore autoplay errors */ }
+        if(preview) preview.src = data.audio;
+        const orbitNote = orbitSources.length ? ` (+${orbitSources.length} orbit voice${orbitSources.length === 1 ? '' : 's'})` : '';
+        renderInfo.textContent = `Rendered ${data.duration.toFixed(2)}s @ ${data.sample_rate} Hz${orbitNote}`;
+        try{ preview && preview.play(); }catch(_){ /* ignore autoplay errors */ }
       }catch(err){
         renderInfo.textContent = 'Render failed: '+(err && err.message || err);
       }
@@ -1043,7 +1597,7 @@ function bootAudio(){
       blockEl.style.left = x + 'px';
       blockEl.style.top = y + 'px';
       blockEl.style.position = 'absolute';
-      blockEl.style.width = Math.max(520, Math.floor(drag.w)) + 'px';
+      blockEl.style.width = Math.max(620, Math.floor(drag.w)) + 'px';
     });
     window.addEventListener('mouseup', ()=>{
       if(!drag) return;
@@ -1051,19 +1605,28 @@ function bootAudio(){
       blockEl.classList.remove('dragging');
     });
 
-    q('.checkStatus').addEventListener('click', ()=>{ refreshStatus(); refreshRegistry(); });
-    q('.installModalys').addEventListener('click', ()=> install('modalys'));
-    q('.installPraat').addEventListener('click', ()=> install('praat'));
-    q('.resetConfig').addEventListener('click', ()=> applyDefaultConfig());
-    q('.renderNow').addEventListener('click', ()=> renderEngine());
-    q('.runExternal').addEventListener('click', ()=> runExternalApp());
-    durationInput.addEventListener('change', ()=> applyDefaultConfig());
-    sampleInput.addEventListener('change', ()=> applyDefaultConfig());
+    const checkBtn = q('.checkStatus');
+    if(checkBtn) checkBtn.addEventListener('click', ()=>{ refreshStatus(); refreshRegistry(); });
+    const installModalysBtn = q('.installModalys');
+    if(installModalysBtn) installModalysBtn.addEventListener('click', ()=> install('modalys'));
+    const installPraatBtn = q('.installPraat');
+    if(installPraatBtn) installPraatBtn.addEventListener('click', ()=> install('praat'));
+    const resetBtn = q('.resetConfig');
+    if(resetBtn) resetBtn.addEventListener('click', ()=> applyDefaultConfig());
+    const renderBtn = q('.renderNow');
+    if(renderBtn) renderBtn.addEventListener('click', ()=> renderEngine());
+    const runBtn = q('.runExternal');
+    if(runBtn) runBtn.addEventListener('click', ()=> runExternalApp());
 
+    if(durationInput) durationInput.addEventListener('change', ()=> applyDefaultConfig());
+    if(sampleInput) sampleInput.addEventListener('change', ()=> applyDefaultConfig());
+
+    seedOrbs();
     applyDefaultConfig();
     refreshRegistry();
     refreshStatus();
   }
+
 
   function addBlock(){
     if(!ACTX){ bootAudio(); /* resume only on Start Audio click */ }

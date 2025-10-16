@@ -7,7 +7,7 @@ import subprocess
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Tuple
 
 
 @dataclass
@@ -30,6 +30,58 @@ class ExternalAppManager:
         self.modalys_zip = self._find_zip("Modalys 3.9.0 for Windows.zip")
         self.praat_zip = self._find_zip("praat6445_win-intel64.zip")
 
+    # --- Discovery helpers -------------------------------------------------
+    def _app_target(self, name: str) -> Path:
+        return self.cache_dir / name
+
+    def _discover_executable(
+        self, target_dir: Path, preferred: Optional[str] = None
+    ) -> Tuple[Optional[Path], Optional[str]]:
+        """Inspect ``target_dir`` and return a candidate executable.
+
+        The returned tuple contains the discovered path (if any) and a string
+        describing the kind of file that was found.  The ``kind`` value is one
+        of ``"executable"`` or ``"installer"``.  ``None`` is returned if the
+        directory does not contain an executable.
+        """
+
+        def classify(path: Path) -> str:
+            name = path.name.lower()
+            if "installer" in name or "setup" in name:
+                return "installer"
+            return "executable"
+
+        if preferred:
+            candidate = target_dir / preferred
+            if candidate.exists():
+                return candidate, classify(candidate)
+
+        patterns = ("*.exe", "*.bat", "*.cmd")
+        candidates: list[Path] = []
+        for pattern in patterns:
+            candidates.extend(target_dir.glob(pattern))
+            candidates.extend(target_dir.rglob(pattern))
+
+        unique: list[Path] = []
+        seen: set[Path] = set()
+        for candidate in sorted(candidates):
+            if candidate in seen or not candidate.is_file():
+                continue
+            seen.add(candidate)
+            unique.append(candidate)
+
+        # Prefer non-installer executables when multiple files exist.
+        for candidate in unique:
+            kind = classify(candidate)
+            if kind == "executable":
+                return candidate, kind
+
+        if unique:
+            candidate = unique[0]
+            return candidate, classify(candidate)
+
+        return None, None
+
     def _find_zip(self, name: str) -> Optional[Path]:
         candidate = self.base_dir / name
         return candidate if candidate.exists() else None
@@ -37,33 +89,56 @@ class ExternalAppManager:
     def ensure_modalys_installed(self) -> Optional[Path]:
         if not self.modalys_zip:
             return None
-        target = self.cache_dir / "modalys"
-        executable = target / self.modalys_executable_name
-        if not executable.exists():
-            self._extract(self.modalys_zip, target)
-        return executable if executable.exists() else None
+        target = self._app_target("modalys")
+        executable, _ = self._prepare_app("modalys", target, self.modalys_zip, self.modalys_executable_name)
+        return executable
 
     def ensure_praat_installed(self) -> Optional[Path]:
         if not self.praat_zip:
             return None
-        target = self.cache_dir / "praat"
-        executable = target / self.praat_executable_name
-        if not executable.exists():
-            self._extract(self.praat_zip, target)
-        return executable if executable.exists() else None
+        target = self._app_target("praat")
+        executable, _ = self._prepare_app("praat", target, self.praat_zip, self.praat_executable_name)
+        return executable
 
     def modalys_installation(self) -> Optional[Path]:
-        target = self.cache_dir / "modalys" / self.modalys_executable_name
-        return target if target.exists() else None
+        target_dir = self._app_target("modalys")
+        if not target_dir.exists():
+            return None
+        executable, _ = self._discover_executable(target_dir, self.modalys_executable_name)
+        return executable
 
     def praat_installation(self) -> Optional[Path]:
-        target = self.cache_dir / "praat" / self.praat_executable_name
-        return target if target.exists() else None
+        target_dir = self._app_target("praat")
+        if not target_dir.exists():
+            return None
+        executable, _ = self._discover_executable(target_dir, self.praat_executable_name)
+        return executable
 
     def _extract(self, archive: Path, target_dir: Path) -> None:
         target_dir.mkdir(parents=True, exist_ok=True)
         with zipfile.ZipFile(archive, "r") as zf:
             zf.extractall(target_dir)
+
+    def _prepare_app(
+        self,
+        name: str,
+        target_dir: Path,
+        archive: Optional[Path],
+        preferred_name: Optional[str],
+    ) -> Tuple[Optional[Path], Optional[str]]:
+        if not archive:
+            return None, None
+        needs_extract = False
+        if not target_dir.exists():
+            needs_extract = True
+        else:
+            try:
+                needs_extract = not any(target_dir.iterdir())
+            except OSError:
+                needs_extract = True
+        if needs_extract:
+            self._extract(archive, target_dir)
+        return self._discover_executable(target_dir, preferred_name)
 
     def platform_supported(self) -> bool:
         return platform.system() in {"Windows", "Darwin", "Linux"}
@@ -136,18 +211,60 @@ class ExternalAppManager:
     def status(self) -> dict[str, object]:
         """Return structured availability information for the bundled apps."""
 
-        modalys_path = self.modalys_installation()
-        praat_path = self.praat_installation()
+        modalys_info = self._status_entry(
+            "modalys",
+            self.modalys_zip,
+            self.modalys_executable_name,
+        )
+        praat_info = self._status_entry(
+            "praat",
+            self.praat_zip,
+            self.praat_executable_name,
+        )
         return {
-            "modalys": {
-                "zip_present": bool(self.modalys_zip),
-                "installed": bool(modalys_path),
-                "path": str(modalys_path) if modalys_path else None,
-            },
-            "praat": {
-                "zip_present": bool(self.praat_zip),
-                "installed": bool(praat_path),
-                "path": str(praat_path) if praat_path else None,
-            },
+            "modalys": modalys_info,
+            "praat": praat_info,
             "platform_supported": self.platform_supported(),
+        }
+
+    def _status_entry(
+        self,
+        name: str,
+        archive: Optional[Path],
+        preferred_name: Optional[str],
+    ) -> dict[str, object]:
+        target_dir = self._app_target(name)
+        if target_dir.exists():
+            try:
+                extracted = any(target_dir.iterdir())
+            except OSError:
+                extracted = False
+        else:
+            extracted = False
+        executable: Optional[Path] = None
+        kind: Optional[str] = None
+        if extracted:
+            executable, kind = self._discover_executable(target_dir, preferred_name)
+
+        installed = bool(executable and kind != "installer")
+        installer_only = bool(executable and kind == "installer")
+        note: Optional[str] = None
+        if installer_only:
+            note = (
+                "Only an installer was found. Provide extracted runtime files "
+                "to launch the application directly."
+            )
+        elif not archive:
+            note = "Bundle archive is missing."
+        elif archive and not extracted:
+            note = "Archive located. Extract to prepare the application."
+
+        return {
+            "zip_present": bool(archive),
+            "installed": installed,
+            "installer_only": installer_only,
+            "kind": kind,
+            "path": str(executable) if executable else None,
+            "workspace": str(target_dir),
+            "note": note,
         }
