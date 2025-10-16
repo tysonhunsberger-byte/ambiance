@@ -1,0 +1,12 @@
+{
+  "name": "ambiance-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "npx serve .",
+    "format": "prettier --write \"**/*.{html,css,js,json}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5"
+  }
+}

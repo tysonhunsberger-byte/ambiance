@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Noisetown Ultimate — v4 (Per‑Stream Spaces, Spectrogram, Tooltips, Presets, Style Mode)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+<div id="app">
+  <div id="toolbar">
+      <span class="title">Noisetown Ultimate</span>
+    <button id="startAudio" class="btn">Start Audio</button>
+    <button id="addBlock" class="btn">Add Block</button>
+    <button id="editToggle" class="btn" aria-pressed="false">Edit: OFF</button>
+    <button id="styleMode" class="btn" aria-pressed="false">Style Mode: OFF</button>
+
+    <select id="themePicker" class="btn"><option value="flat">Theme: Flat (Default)</option><option value="win98">Theme: Windows 98</option><option value="winxp">Theme: Windows XP</option></select>
+<div class="spacer"></div>
+    <button id="saveSession" class="btn">Save</button>
+    <button id="savePreset" class="btn">Save Preset + Audio</button>
+    <input id="loadFile" type="file" accept="application/json" style="display:none">
+    <button id="loadSession" class="btn">Load</button>
+    <input id="loadPresetFile" type="file" accept="application/json" style="display:none">
+    <button id="loadPreset" class="btn">Load Preset</button>
+  </div>
+  <div id="main"></div>
+  <div id="modeToast" role="status" aria-live="polite"></div>
+</div>
+
+<!-- Style panel -->
+<div id="stylePanel" class="style-panel">
+  <h4>Style Painter</h4>
+  <div class="row">
+    <label>Preset</label>
+    <select id="stylePreset">
+      <option value="">Custom…</option>
+      <option value="bevel">Beveled</option>
+      <option value="shadow">Shadow</option>
+      <option value="soft">Soft Card</option>
+      <option value="glow">Glow</option>
+      <option value="flat">Flat</option>
+      </select>
+  </div>
+  <div class="row">
+    <label>Radius</label><input id="styRadius" type="range" min="0" max="20" step="1" value="8">
+  </div>
+  <div class="row">
+    <label>Shadow</label><input id="styShadow" type="range" min="0" max="40" step="1" value="12">
+  </div>
+  <div class="row">
+    <label>Apply to</label>
+    <select id="styScope">
+      <option value="element">This element</option>
+      <option value="stream">This stream</option>
+      <option value="block">This block</option>
+      <option value="global">Global</option>
+    </select>
+  </div>
+  <div class="row">
+    <button id="styApply" class="btn">Apply</button>
+    <button id="styResetTheme" class="btn">Reset</button>
+    <button id="stySaveTheme" class="btn" style="margin-left:auto">Save Theme JSON</button>
+  </div>
+  <div class="small">Hover to select an element. Click to focus. Adjust, then Apply.</div>
+</div>
+
+<script src="scripts/app.js"></script>
+<script src="scripts/mods-advanced.js"></script>
+<script src="scripts/mod-apply.js"></script>
+<script src="scripts/toolbar.js"></script>
+</body>
+</html>
