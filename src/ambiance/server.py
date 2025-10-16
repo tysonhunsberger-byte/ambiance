@@ -98,6 +98,23 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
             payload = {"sources": list(registry.sources()), "effects": list(registry.effects())}
             self._send_json(payload)
             return
+        if path == "/api/workspaces":
+            payload = {"ok": True, "workspaces": self.manager.workspaces_payload()}
+            self._send_json(payload)
+            return
+        if path.startswith("/api/workspaces/"):
+            parts = path.strip("/").split("/")
+            if len(parts) == 3 and parts[0] == "api" and parts[1] == "workspaces":
+                slug = parts[2]
+                workspace = self.manager.workspace_payload(slug)
+                if not workspace:
+                    self.send_error(HTTPStatus.NOT_FOUND, "Workspace not found")
+                    return
+                self._send_json({"ok": True, "workspace": workspace})
+                return
+        if path.startswith("/apps/"):
+            self._serve_workspace_asset(path)
+            return
         if path in {"/", "", "/ui"}:
             self._serve_ui()
             return
@@ -156,9 +173,60 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
                 payload = {"ok": bool(result.get("ok", False)), **result}
                 self._send_json(payload)
                 return
+            if path == "/api/workspaces":
+                payload = self._read_json()
+                source = payload.get("source")
+                if not source:
+                    self._send_json({"ok": False, "error": "Missing 'source'"}, HTTPStatus.BAD_REQUEST)
+                    return
+                info = self.manager.ensure_workspace(
+                    source,
+                    name=payload.get("name"),
+                    entry=payload.get("entry"),
+                    executable=payload.get("executable"),
+                    args=payload.get("args"),
+                )
+                self._send_json({"ok": True, "workspace": info.to_payload(self.manager.workspaces_dir / info.slug)})
+                return
+            if path.startswith("/api/workspaces/") and path.endswith("/launch"):
+                parts = path.strip("/").split("/")
+                if len(parts) != 4 or parts[0] != "api" or parts[1] != "workspaces" or parts[3] != "launch":
+                    self.send_error(HTTPStatus.NOT_FOUND, "Unknown workspace endpoint")
+                    return
+                slug = parts[2]
+                payload = self._read_json()
+                timeout_value = None
+                timeout_raw = payload.get("timeout")
+                if timeout_raw not in (None, ""):
+                    try:
+                        timeout_value = float(timeout_raw)
+                    except (TypeError, ValueError) as exc:
+                        raise ValueError("Invalid timeout value") from exc
+                result = self.manager.launch_workspace(
+                    slug,
+                    args=payload.get("args"),
+                    wait=bool(payload.get("wait", False)),
+                    timeout=timeout_value,
+                )
+                self._send_json({"ok": bool(result.get("ok", False)), **result})
+                return
         except Exception as exc:  # pylint: disable=broad-except
             self._send_json({"ok": False, "error": str(exc)}, HTTPStatus.BAD_REQUEST)
             return
+        self.send_error(HTTPStatus.NOT_FOUND, "Unknown endpoint")
+
+    def do_DELETE(self) -> None:  # noqa: N802 - stdlib signature
+        path = urlparse(self.path).path
+        if path.startswith("/api/workspaces/"):
+            parts = path.strip("/").split("/")
+            if len(parts) == 3 and parts[0] == "api" and parts[1] == "workspaces":
+                slug = parts[2]
+                removed = self.manager.remove_workspace(slug)
+                if not removed:
+                    self.send_error(HTTPStatus.NOT_FOUND, "Workspace not found")
+                    return
+                self._send_json({"ok": True})
+                return
         self.send_error(HTTPStatus.NOT_FOUND, "Unknown endpoint")
 
     # --- Static helpers ----------------------------------------------
@@ -169,6 +237,25 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
         data = self.ui_path.read_bytes()
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+    def _serve_workspace_asset(self, path: str) -> None:
+        parts = path.strip("/").split("/", 2)
+        if len(parts) < 2:
+            self.send_error(HTTPStatus.NOT_FOUND, "Workspace not found")
+            return
+        slug = parts[1]
+        relative = parts[2] if len(parts) > 2 else None
+        asset = self.manager.workspace_asset(slug, relative)
+        if not asset:
+            self.send_error(HTTPStatus.NOT_FOUND, "Workspace asset not found")
+            return
+        data = asset.read_bytes()
+        self.send_response(HTTPStatus.OK)
+        mime = self.guess_type(asset.name)
+        self.send_header("Content-Type", mime)
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)

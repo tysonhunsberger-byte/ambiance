@@ -1,4 +1,5 @@
 import sys
+import zipfile
 
 from ambiance.integrations.external_apps import ExternalAppManager
 
@@ -64,3 +65,53 @@ def test_launch_external_with_string_args(tmp_path):
 
     assert result["ok"] is True
     assert "123" in result["stdout"]
+
+
+def test_ensure_workspace_from_zip(tmp_path):
+    src = tmp_path / "source"
+    nested = src / "demo"
+    nested.mkdir(parents=True)
+    (nested / "index.html").write_text("<html>demo</html>", encoding="utf-8")
+    bin_dir = nested / "bin"
+    bin_dir.mkdir()
+    (bin_dir / "tool.exe").write_text("echo hi", encoding="utf-8")
+    archive = tmp_path / "demo.zip"
+    with zipfile.ZipFile(archive, "w") as zf:
+        for path in nested.rglob("*"):
+            if path.is_file():
+                zf.write(path, path.relative_to(src).as_posix())
+
+    manager = ExternalAppManager(base_dir=tmp_path)
+    info = manager.ensure_workspace(archive, name="Demo Workspace")
+
+    assert info.slug == "demo-workspace"
+    assert info.entry == "index.html"
+    assert info.executable == "bin/tool.exe"
+    payloads = manager.workspaces_payload()
+    assert payloads and payloads[0]["entry_url"].endswith("index.html")
+    asset = manager.workspace_asset(info.slug, None)
+    assert asset and asset.name == "index.html"
+
+
+def test_launch_workspace_runs_executable(tmp_path):
+    workspace_dir = tmp_path / "workspace"
+    workspace_dir.mkdir()
+    (workspace_dir / "index.html").write_text("<html>runner</html>", encoding="utf-8")
+    runner = workspace_dir / "runner.py"
+    runner.write_text("#!/usr/bin/env python3\nprint('workspace ok')\n", encoding="utf-8")
+    runner.chmod(0o755)
+
+    manager = ExternalAppManager(base_dir=tmp_path)
+    info = manager.ensure_workspace(
+        workspace_dir,
+        name="Runner",
+        entry="index.html",
+        executable="runner.py",
+    )
+
+    result = manager.launch_workspace(info.slug, wait=True, timeout=5)
+
+    assert result["ok"] is True
+    assert "workspace ok" in result["stdout"]
+    assert manager.remove_workspace(info.slug) is True
+    assert manager.workspace_info(info.slug) is None

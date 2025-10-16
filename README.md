@@ -14,6 +14,9 @@ and ready for CI environments.
   into a cache directory on demand, and exposed through Python wrappers.
 - **In-app launcher** – Provide paths to third-party executables and run them from the
   External Apps Workbench, capturing stdout/stderr without leaving the UI.
+- **External workspace bubbles** – Register zipped web UIs or extracted tool folders
+  and interact with them inside the External App Desktop that lives beneath the main
+  Noisetown canvas.
 - **Procedural audio sources** – Sine waves, noise beds, Modalys resonators, and
   Praat-inspired vocal timbres.
 - **Signal processing effects** – Reverb, ping-pong delay, and low-pass filtering.
@@ -52,9 +55,35 @@ and ready for CI environments.
    The command serves the bundled `noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html`
    interface at `http://127.0.0.1:8000/`. The UI exposes controls for checking Modalys
    and Praat installers, triggering extractions, launching any executable that you
-   point to (including the extracted Modalys/Praat binaries), and rendering ambience
-   layers through the Python audio engine. If you place a different HTML interface on
-   disk, pass its path via `--ui`.
+   point to (including the extracted Modalys/Praat binaries), registering workspaces
+   for external tools, and rendering ambience layers through the Python audio engine.
+   If you place a different HTML interface on disk, pass its path via `--ui`.
+
+### External workspaces & desktop bubbles
+
+The External Apps Workbench includes a *Workspace Source* form that turns local
+archives or folders into interactive "bubbles" on the External App Desktop (the band
+of windows shown underneath the main Noisetown viewport):
+
+1. **Source** – Enter a path to a `.zip` archive or an extracted directory. The helper
+   safely copies/expands the contents into `.cache/external_apps/workspaces/<slug>`.
+   The bundled Modalys download is an installer; if you prefer to work with the raw
+   Modalys files or Max 9 patches, extract them first and point the source field at
+   that folder or a fresh zip of the unpacked files.
+2. **Entry HTML (optional)** – Provide a relative path to an HTML file when you want
+   the workspace to surface inside the app as an iframe.
+3. **Executable (optional)** – Supply a relative path to a native binary or script to
+   expose a *Launch* button. The launcher reuses the same process-management logic that
+   powers the generic executable runner, so captured stdout/stderr and background PIDs
+   are streamed into the bubble's log.
+4. **Default args (optional)** – Pre-populate launch arguments that appear in the
+   bubble's input field.
+
+Each workspace entry shows up in the workspace list for quick management and receives a
+dedicated bubble. Web workspaces automatically load inside an iframe (with a reload
+button for rapid iteration). Native workspaces show the log area and launch controls so
+you can spawn the underlying executable while keeping an eye on the output. Removing a
+workspace purges the cached copy from `.cache/external_apps/workspaces`.
 
 4. Provide a JSON configuration to customize the engine:
 
