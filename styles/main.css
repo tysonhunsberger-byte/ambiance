@@ -536,47 +536,41 @@ body.theme-98 select, body.theme-xp select{background:#fff; color:#000; border:1
   color:color-mix(in srgb, var(--text) 55%, var(--muted) 45%);
 }
 
-#audioLab .tool-links{
-  list-style:none;
-  padding:0;
-  margin:0;
-  display:flex;
-  flex-direction:column;
-  gap:16px;
+#audioLab .lab-control--disabled{
+  opacity:0.6;
 }
 
-#audioLab .tool-name{
-  font-weight:700;
-  margin-bottom:2px;
+#audioLab .lab-control--disabled select{
+  pointer-events:none;
 }
 
-#audioLab .tool-actions{
+#audioLab .lab-sampler{
   display:flex;
   flex-wrap:wrap;
   gap:10px;
-  margin-top:6px;
-}
-
-#audioLab #labNotes{
-  width:100%;
-  min-height:180px;
-  padding:12px 14px;
-  border-radius:10px;
-  border:1px solid color-mix(in srgb, var(--card) 55%, rgba(10,18,64,0.45));
-  background:color-mix(in srgb, var(--panel) 75%, rgba(0,20,66,0.25));
-  color:var(--text);
-  resize:vertical;
-  font:400 0.95rem/1.5 'Segoe UI', Tahoma, sans-serif;
-}
-
-#audioLab .lab-note-actions{
-  display:flex;
   align-items:center;
-  flex-wrap:wrap;
-  gap:12px;
 }
 
-#audioLab #labNoteStatus{
+#audioLab .lab-sampler .btn{
+  flex:0 0 auto;
+}
+
+#audioLab .lab-switch{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-weight:600;
+}
+
+#audioLab .lab-switch input{
+  margin:0;
+  width:16px;
+  height:16px;
+  accent-color:var(--accent,#3b6ef6);
+}
+
+#audioLab [data-status="sample"]{
+  color:color-mix(in srgb, var(--text) 55%, var(--muted) 45%);
   min-height:1.4em;
 }
 

@@ -67,12 +67,22 @@
 
 <div id="audioLab" class="lab-panel">
   <h2>Digital Audio Creation Lab</h2>
-  <p class="lab-intro">Craft new soundscapes with an integrated instrument rack and quick links to heavyweight research tools from CDP, IRCAM, SuperCollider, and Praat.</p>
+  <p class="lab-intro">Craft new soundscapes with an integrated instrument rack, sample deck, and master controls tuned for live sketching.</p>
   <div class="lab-grid">
     <section class="lab-card" id="labInstrument">
       <h3>Virtual Instrument Rack</h3>
-      <p>Use your computer keyboard (A–; keys) to play. Combine envelopes, filtering, and ambience to sketch ideas directly in the browser.</p>
+      <p>Use your computer keyboard (A–; keys) to play. Combine envelopes, filtering, ambience, and sample layers to sketch ideas directly in the browser.</p>
       <button type="button" class="btn lab-toggle" data-action="toggle-instrument">Enable Instrument</button>
+      <div class="lab-control">
+        <label>Instrument</label>
+        <select data-param="voice">
+          <option value="classic">Classic Synth</option>
+          <option value="supersaw">Supersaw Stack</option>
+          <option value="pulse">Pulse Lead</option>
+          <option value="organ">Drawbar Organ</option>
+          <option value="noise">Noise Pad</option>
+        </select>
+      </div>
       <div class="lab-control">
         <label>Waveform</label>
         <select data-param="wave">
@@ -81,6 +91,16 @@
           <option value="sawtooth">Saw</option>
           <option value="square">Square</option>
         </select>
+      </div>
+      <div class="lab-control">
+        <label>Master Volume</label>
+        <input type="range" data-param="master" min="0" max="1.5" step="0.01" value="1">
+        <span class="small" data-readout="master">100%</span>
+      </div>
+      <div class="lab-control">
+        <label>Instrument Volume</label>
+        <input type="range" data-param="volume" min="0" max="1.5" step="0.01" value="0.9">
+        <span class="small" data-readout="volume">90%</span>
       </div>
       <div class="lab-control">
         <label>Octave</label>
@@ -112,55 +132,21 @@
         <input type="range" data-param="reverb" min="0" max="1" step="0.01" value="0.25">
         <span class="small" data-readout="reverb">25%</span>
       </div>
-      <div class="lab-help small">Tip: Toggle Edit Mode off while performing to avoid accidental drags.</div>
-    </section>
-
-    <section class="lab-card" id="labIntegrations">
-      <h3>Research Tool Bridge</h3>
-      <p>Jump into flagship audio environments and documentation without leaving the workspace.</p>
-      <ul class="tool-links">
-        <li>
-          <div class="tool-name">Composer's Desktop Project (CDP 8)</div>
-          <p class="small">Classic DSP suite for spectral transforms and granular workflows.</p>
-          <div class="tool-actions">
-            <button type="button" class="btn" data-tool-link="https://github.com/ComposersDesktop/CDP8">GitHub</button>
-            <button type="button" class="btn" data-tool-link="https://www.composersdesktop.com">Official Site</button>
-          </div>
-        </li>
-        <li>
-          <div class="tool-name">IRCAM Forum &amp; Audio Innovations</div>
-          <p class="small">Cutting-edge spatialisation, analysis, and subscription plug-ins from Paris.</p>
-          <div class="tool-actions">
-            <button type="button" class="btn" data-tool-link="https://www.ircam.fr/innovations/abonnements-et-logiciels">Visit IRCAM</button>
-          </div>
-        </li>
-        <li>
-          <div class="tool-name">SuperCollider</div>
-          <p class="small">Live-coding environment for synthesis, patterning, and algorithmic composition.</p>
-          <div class="tool-actions">
-            <button type="button" class="btn" data-tool-link="https://supercollider.github.io">Project</button>
-            <button type="button" class="btn" data-tool-link="https://docs.supercollider.online">Documentation</button>
-          </div>
-        </li>
-        <li>
-          <div class="tool-name">Praat</div>
-          <p class="small">Speech analysis powerhouse perfect for formant sculpting and morphing.</p>
-          <div class="tool-actions">
-            <button type="button" class="btn" data-tool-link="https://www.fon.hum.uva.nl/praat">Download</button>
-          </div>
-        </li>
-      </ul>
-    </section>
-
-    <section class="lab-card" id="labWorkflow">
-      <h3>Hybrid Workflow Notes</h3>
-      <p>Plan render passes, remind yourself of settings, or paste command-line snippets that you shuttle between the browser lab and desktop toolchains.</p>
-      <textarea id="labNotes" rows="8" placeholder="Document your CDP command chains, SuperCollider sketches, or Praat scripts here..."></textarea>
-      <div class="lab-note-actions">
-        <button type="button" class="btn" data-action="save-notes">Save Notes</button>
-        <button type="button" class="btn" data-action="clear-notes">Clear</button>
-        <span class="small" id="labNoteStatus" role="status" aria-live="polite"></span>
+      <div class="lab-control">
+        <label>Sample Deck</label>
+        <div class="lab-sampler">
+          <button type="button" class="btn" data-action="load-sample">Load Sample</button>
+          <input type="file" accept="audio/*" data-sample-file hidden>
+          <button type="button" class="btn" data-action="play-sample" disabled>Play</button>
+          <button type="button" class="btn" data-action="stop-sample" disabled>Stop</button>
+          <label class="lab-switch">
+            <input type="checkbox" data-param="sample-loop">
+            <span>Loop</span>
+          </label>
+        </div>
+        <div class="small" data-status="sample">No sample loaded</div>
       </div>
+      <div class="lab-help small">Tip: Toggle Edit Mode off while performing to avoid accidental drags. Samples play through the same effects and volume as the instrument.</div>
     </section>
   </div>
 </div>

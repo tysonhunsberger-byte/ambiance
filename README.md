@@ -36,7 +36,7 @@ These changes eliminate the previous issues where modules could not be added, re
 
 ## Digital Audio Creation Lab
 
-- Open the **Digital Audio Creation Lab** panel beneath the workspace to jam with the new virtual instrument. Toggle it on, play via the A–; keyboard keys, and sculpt the tone with envelope, filter, resonance, and reverb controls.
+- Open the **Digital Audio Creation Lab** panel beneath the workspace to jam with the refreshed virtual instrument. Toggle it on, play via the A–; keyboard keys, and sculpt the tone with envelope, filter, resonance, and reverb controls.
+- Pick from layered instrument engines (classic synth, supersaw stack, pulse lead, drawbar organ, or noise pad) and dial in the master/instrument volumes without leaving the rack.
+- Layer external sounds by loading audio files into the sample deck, with loop-aware playback that routes through the same effects bus as the instrument.
 - The lab shares the master audio graph, so sketches can run alongside existing streams without clipping thanks to the shared limiter.
-- Quick-launch buttons surface Composer's Desktop Project, IRCAM software, SuperCollider (and documentation), and Praat so you can jump into external processing workflows.
-- Capture hybrid workflows by jotting notes or command snippets in the provided scratchpad; notes persist in `localStorage` for painless recall.
