@@ -2198,6 +2198,7 @@ themeFile.addEventListener('change', async (e)=>{
         if(!enabled) return;
         mod.classList.add('draggingItem');
         e.dataTransfer.effectAllowed='move';
+        try{ e.dataTransfer.setData('text/plain','mod'); }catch(_){ }
         const ph = document.createElement('div'); ph.className='placeholder'; ph.style.height = mod.getBoundingClientRect().height+'px';
         mod.parentElement.insertBefore(ph, mod.nextSibling);
       });
