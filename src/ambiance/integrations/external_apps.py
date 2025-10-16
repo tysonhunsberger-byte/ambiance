@@ -157,8 +157,14 @@ class ExternalAppManager:
             shutil.copytree(source_path, base, dirs_exist_ok=True)
         elif zipfile.is_zipfile(source_path):
             self._extract(source_path, base)
+        elif source_path.is_file():
+            destination = base / source_path.name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source_path, destination)
         else:
-            raise ValueError("Workspace source must be a directory or zip archive")
+            raise ValueError(
+                "Workspace source must be a directory, zip archive, or executable file"
+            )
 
         root_dir = self._discover_root(base)
         root_rel = root_dir.relative_to(base)
@@ -427,18 +433,45 @@ class ExternalAppManager:
         """Return structured availability information for the bundled apps."""
 
         modalys_path = self.modalys_installation()
+        modalys_info = {
+            "zip_present": bool(self.modalys_zip),
+            "installed": bool(modalys_path),
+            "path": str(modalys_path) if modalys_path else None,
+        }
+
         praat_path = self.praat_installation()
+        praat_info = {
+            "zip_present": bool(self.praat_zip),
+            "installed": bool(praat_path),
+            "path": str(praat_path) if praat_path else None,
+        }
+
+        workspaces = self.workspaces_payload()
+        executable_suggestions: list[str] = []
+        for workspace in workspaces:
+            path = workspace.get("executable_path")
+            if path:
+                executable_suggestions.append(str(path))
+
+        bundled: list[dict[str, object]] = []
+        if self.modalys_zip or modalys_path:
+            bundled.append({
+                "key": "modalys",
+                "title": "Modalys",
+                **modalys_info,
+            })
+        if self.praat_zip or praat_path:
+            bundled.append({
+                "key": "praat",
+                "title": "Praat",
+                **praat_info,
+            })
+
         return {
-            "modalys": {
-                "zip_present": bool(self.modalys_zip),
-                "installed": bool(modalys_path),
-                "path": str(modalys_path) if modalys_path else None,
-            },
-            "praat": {
-                "zip_present": bool(self.praat_zip),
-                "installed": bool(praat_path),
-                "path": str(praat_path) if praat_path else None,
-            },
+            "modalys": modalys_info,
+            "praat": praat_info,
+            "bundled": bundled,
             "platform_supported": self.platform_supported(),
-            "workspaces": self.workspaces_payload(),
+            "workspaces": workspaces,
+            "executables": executable_suggestions,
         }

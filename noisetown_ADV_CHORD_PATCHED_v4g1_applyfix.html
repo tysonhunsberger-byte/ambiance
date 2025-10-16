@@ -25,6 +25,10 @@
   .external-block .status-panels{display:flex;flex-wrap:wrap;gap:10px;width:100%}
   .external-block .status-panel{flex:1;min-width:200px;background:var(--card);border:1px solid #555;border-radius:6px;padding:8px}
   .external-block .status-panel strong{display:block;margin-bottom:4px}
+  .external-block .statusList{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+  .external-block .statusItem{padding:4px;border-radius:4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04)}
+  .external-block .statusItem strong{font-size:12px;margin:0 0 2px;display:block;color:var(--text)}
+  .external-block .statusItem span{display:block}
   .external-block .registry-tags{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
   .external-block .registry-tags span{padding:2px 6px;border:1px solid #555;border-radius:4px;background:var(--card);font-size:12px}
   .external-block .status-text{font-size:12px;color:var(--muted)}
@@ -785,12 +789,16 @@ function bootAudio(){
       </div>
       <div class="status-panels">
         <div class="status-panel">
-          <strong>Modalys</strong>
-          <div class="modalysStatus small">Pending…</div>
+          <strong>Bundled Installers</strong>
+          <div class="bundledStatus statusList">
+            <div class="statusItem"><span>Pending…</span></div>
+          </div>
         </div>
         <div class="status-panel">
-          <strong>Praat</strong>
-          <div class="praatStatus small">Pending…</div>
+          <strong>Workspace Executables</strong>
+          <div class="workspaceExecs statusList">
+            <div class="statusItem"><span>Pending…</span></div>
+          </div>
         </div>
         <div class="status-panel">
           <strong>Registry</strong>
@@ -861,8 +869,8 @@ function bootAudio(){
   function wireExternalAppsWorkspace(blockEl){
     const q = (sel)=> blockEl.querySelector(sel);
     const statusText = q('.status-text');
-    const modalysStatus = q('.modalysStatus');
-    const praatStatus = q('.praatStatus');
+    const bundledStatus = q('.bundledStatus');
+    const workspaceExecStatus = q('.workspaceExecs');
     const registrySources = q('.registrySources');
     const registryEffects = q('.registryEffects');
     const durationInput = q('.durationInput');
@@ -885,6 +893,8 @@ function bootAudio(){
     const desktop = document.getElementById('externalDesktop');
     const desktopShelf = desktop ? desktop.querySelector('.desktopShelf') : null;
     const desktopToggle = desktop ? desktop.querySelector('.toggleDesktop') : null;
+    const statusExecutables = new Set();
+    const workspaceExecutables = new Set();
     let lastWorkspaces = [];
     const bubbleMap = new Map();
 
@@ -897,6 +907,77 @@ function bootAudio(){
     function setDesktopEmptyState(isEmpty){
       if(!desktop) return;
       desktop.classList.toggle('empty', isEmpty);
+    }
+
+    function legacyBundledFrom(data){
+      const items = [];
+      if(data && data.modalys){
+        items.push({ key:'modalys', title:'Modalys', ...data.modalys });
+      }
+      if(data && data.praat){
+        items.push({ key:'praat', title:'Praat', ...data.praat });
+      }
+      return items;
+    }
+
+    function renderBundledStatusList(items){
+      if(!bundledStatus) return;
+      bundledStatus.innerHTML = '';
+      const payload = Array.isArray(items) ? items : [];
+      if(!payload.length){
+        const empty = ce('div','statusItem');
+        const span = ce('span');
+        span.textContent = 'No installers detected.';
+        empty.appendChild(span);
+        bundledStatus.appendChild(empty);
+        return;
+      }
+      payload.forEach((item)=>{
+        if(!item) return;
+        const statusItem = ce('div','statusItem');
+        const title = ce('strong');
+        title.textContent = item.title || item.key || 'Installer';
+        statusItem.appendChild(title);
+        const summary = ce('span');
+        const parts = [];
+        if(item.zip_present) parts.push('Installer found');
+        else parts.push('Installer missing');
+        if(item.installed) parts.push('Extracted');
+        else if(item.zip_present) parts.push('Not extracted');
+        if(item.path) parts.push(item.path);
+        summary.textContent = parts.join(' · ');
+        statusItem.appendChild(summary);
+        bundledStatus.appendChild(statusItem);
+        if(item.path) pushPathSuggestion(item.path);
+      });
+    }
+
+    function updateExecutableStatus(){
+      if(!workspaceExecStatus) return;
+      workspaceExecStatus.innerHTML = '';
+      const combined = Array.from(new Set([
+        ...Array.from(statusExecutables),
+        ...Array.from(workspaceExecutables),
+      ]))
+        .filter(Boolean)
+        .map(String)
+        .sort((a,b)=> a.localeCompare(b));
+      if(!combined.length){
+        const empty = ce('div','statusItem');
+        const span = ce('span');
+        span.textContent = 'No executables registered yet.';
+        empty.appendChild(span);
+        workspaceExecStatus.appendChild(empty);
+        return;
+      }
+      combined.forEach((path)=>{
+        const item = ce('div','statusItem');
+        const span = ce('span');
+        span.textContent = path;
+        item.appendChild(span);
+        workspaceExecStatus.appendChild(item);
+        pushPathSuggestion(path);
+      });
     }
 
     if(desktopToggle){
@@ -1130,10 +1211,12 @@ function bootAudio(){
       if(!workspaceList) return;
       workspaceList.innerHTML = '';
       workspaceList.classList.toggle('empty', !workspaces || !workspaces.length);
+      workspaceExecutables.clear();
       if(!workspaces || !workspaces.length){
         const empty = ce('div','small');
         empty.textContent = 'No workspaces registered yet. Provide a source above to add one.';
         workspaceList.appendChild(empty);
+        updateExecutableStatus();
         return;
       }
       workspaces.forEach((ws)=>{
@@ -1160,6 +1243,7 @@ function bootAudio(){
         openBtn.addEventListener('click', ()=> openWorkspaceBubble(ws, false));
         actions.appendChild(openBtn);
         if(ws.executable_path){
+          workspaceExecutables.add(ws.executable_path);
           const launchBtn = ce('button','btn btn-xs');
           launchBtn.textContent = '🚀 Launch';
           launchBtn.addEventListener('click', ()=>{
@@ -1176,6 +1260,7 @@ function bootAudio(){
         row.appendChild(actions);
         workspaceList.appendChild(row);
       });
+      updateExecutableStatus();
     }
 
     function renderWorkspaces(workspaces){
@@ -1212,6 +1297,7 @@ function bootAudio(){
         renderInfo.textContent = 'Remove failed: '+(err && err.message || err);
       }
       await refreshWorkspaces();
+      refreshStatus();
     }
 
     async function createWorkspace(){
@@ -1248,6 +1334,7 @@ function bootAudio(){
         const list = await refreshWorkspaces();
         const resolved = list.find(ws=> created && ws.slug === created.slug);
         if(resolved) openWorkspaceBubble(resolved, true);
+        refreshStatus();
       }catch(err){
         renderInfo.textContent = 'Workspace failed: '+(err && err.message || err);
       }
@@ -1292,16 +1379,6 @@ function bootAudio(){
       });
     }
 
-    function formatStatus(data){
-      if(!data) return 'Unavailable';
-      const parts=[];
-      parts.push(data.zip_present ? 'Installer found' : 'Installer missing');
-      if(data.installed) parts.push('Extracted');
-      else if(data.zip_present) parts.push('Not extracted');
-      if(data.path) parts.push(data.path);
-      return parts.join(' · ');
-    }
-
     function pushPathSuggestion(path){
       if(!pathList || !path) return;
       const value = String(path);
@@ -1330,13 +1407,19 @@ function bootAudio(){
         const res = await fetch('/api/status');
         if(!res.ok) throw new Error('status '+res.status);
         const data = await res.json();
-        modalysStatus.textContent = formatStatus(data.modalys);
-        praatStatus.textContent = formatStatus(data.praat);
-        pushPathSuggestion(data.modalys && data.modalys.path);
-        pushPathSuggestion(data.praat && data.praat.path);
-        if(Array.isArray(data.workspaces)){
-          renderWorkspaces(data.workspaces);
+        const bundledItems = (Array.isArray(data.bundled) && data.bundled.length)
+          ? data.bundled
+          : legacyBundledFrom(data);
+        renderBundledStatusList(bundledItems);
+        statusExecutables.clear();
+        if(Array.isArray(data.executables)){
+          data.executables.forEach((path)=>{
+            if(path!=null && path!=="") statusExecutables.add(String(path));
+          });
         }
+        const workspaces = Array.isArray(data.workspaces) ? data.workspaces : [];
+        renderWorkspaces(workspaces);
+        updateExecutableStatus();
         if(data.platform_supported){
           statusText.textContent = 'Server ready — platform supported';
         }else{
@@ -1344,8 +1427,9 @@ function bootAudio(){
         }
       }catch(err){
         statusText.innerHTML = 'Server offline — run <code>python -m ambiance.server</code>';
-        modalysStatus.textContent = 'Unavailable';
-        praatStatus.textContent = 'Unavailable';
+        renderBundledStatusList([]);
+        statusExecutables.clear();
+        updateExecutableStatus();
         blockEl.classList.add('server-offline');
         renderWorkspaces([]);
       }
@@ -3049,6 +3133,7 @@ themeFile.addEventListener('change', async (e)=>{
 
 </script>
 
+<script>
 // === Style Preset wiring (add 9x themes) ===
 (function(){
   const sel = document.getElementById('stylePreset');

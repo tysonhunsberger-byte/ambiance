@@ -13,6 +13,8 @@ def test_status_handles_missing_installers(tmp_path):
     assert status["modalys"]["installed"] is False
     assert status["praat"]["zip_present"] is False
     assert status["platform_supported"] in {True, False}
+    assert status["bundled"] == []
+    assert status["executables"] == []
 
 
 def test_installation_paths_created_on_extract(tmp_path):
@@ -115,3 +117,21 @@ def test_launch_workspace_runs_executable(tmp_path):
     assert "workspace ok" in result["stdout"]
     assert manager.remove_workspace(info.slug) is True
     assert manager.workspace_info(info.slug) is None
+
+
+def test_ensure_workspace_from_executable_file(tmp_path):
+    exe_dir = tmp_path / "tools"
+    exe_dir.mkdir()
+    binary = exe_dir / "custom.exe"
+    binary.write_text("echo custom", encoding="utf-8")
+
+    manager = ExternalAppManager(base_dir=tmp_path)
+    info = manager.ensure_workspace(binary, name="Custom Tool")
+
+    assert info.title == "Custom Tool"
+    assert info.executable == "custom.exe"
+    payload = manager.workspace_payload(info.slug)
+    assert payload
+    assert payload["executable_path"].endswith("custom.exe")
+    status = manager.status()
+    assert payload["executable_path"] in status["executables"]

@@ -53,11 +53,12 @@ and ready for CI environments.
    ```
 
    The command serves the bundled `noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html`
-   interface at `http://127.0.0.1:8000/`. The UI exposes controls for checking Modalys
-   and Praat installers, triggering extractions, launching any executable that you
-   point to (including the extracted Modalys/Praat binaries), registering workspaces
-   for external tools, and rendering ambience layers through the Python audio engine.
-   If you place a different HTML interface on disk, pass its path via `--ui`.
+   interface at `http://127.0.0.1:8000/`. The UI exposes controls for checking the
+   bundled Modalys and Praat installers, triggering extractions, launching any
+   executable that you point to (including custom tools or the extracted installers),
+   registering standalone executables or entire workspaces for external tools, and
+   rendering ambience layers through the Python audio engine. If you place a
+   different HTML interface on disk, pass its path via `--ui`.
 
 ### External workspaces & desktop bubbles
 
@@ -65,11 +66,12 @@ The External Apps Workbench includes a *Workspace Source* form that turns local
 archives or folders into interactive "bubbles" on the External App Desktop (the band
 of windows shown underneath the main Noisetown viewport):
 
-1. **Source** – Enter a path to a `.zip` archive or an extracted directory. The helper
-   safely copies/expands the contents into `.cache/external_apps/workspaces/<slug>`.
-   The bundled Modalys download is an installer; if you prefer to work with the raw
-   Modalys files or Max 9 patches, extract them first and point the source field at
-   that folder or a fresh zip of the unpacked files.
+1. **Source** – Enter a path to a `.zip` archive, an extracted directory, or a single
+   executable file. The helper safely copies/expands the contents into
+   `.cache/external_apps/workspaces/<slug>`. The bundled Modalys download is an
+   installer; if you prefer to work with the raw Modalys files or Max 9 patches,
+   extract them first (or request the raw files) and point the source field at that
+   folder, a fresh zip of the unpacked files, or the executable you want to run.
 2. **Entry HTML (optional)** – Provide a relative path to an HTML file when you want
    the workspace to surface inside the app as an iframe.
 3. **Executable (optional)** – Supply a relative path to a native binary or script to
