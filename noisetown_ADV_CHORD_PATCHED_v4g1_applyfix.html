@@ -136,27 +136,29 @@ body.theme-98 #stylePreset, body.theme-xp #stylePreset{ background:#fff; color:#
 body.theme-98 #stylePreset option, body.theme-xp #stylePreset option{ color:#000; background:#fff; }
 
 /* === Windows XP look (xp.css-inspired) === */
-body.theme-xp{ background-image: var(--xp-wallpaper); background-size: cover; background-position:center;  image-rendering:pixelated; font-family: Tahoma, Verdana, sans-serif; background: var(--xp-wallpaper), linear-gradient(#7fb6ff 0 55%, #6aa7ff 60%, #97d65a 61%, #6cbc2a 100%) fixed; }
-body.theme-xp .mod{ border:1px solid #7aa0d6; border-radius:2px; background:#f2f6ff; box-shadow:none; }
-body.theme-xp .mod-hdr{ background: linear-gradient(#ffffff,#d6e4ff); color:#000; border-bottom:1px solid #7aa0d6; border-radius:2px 2px 0 0; }
-body.theme-xp .btn{ border-radius:2px; background: linear-gradient(#fff,#e7edf9); border:1px solid #6b8ccc; box-shadow:none; }
-body.theme-xp .btn:active{ background: linear-gradient(#d6e4ff,#bdd0f5); }
-body.theme-xp select, body.theme-xp input[type="text"], body.theme-xp input[type="number"]{ border:1px solid #6b8ccc; background:#fff; border-radius:2px; }
-body.theme-xp input[type="range"]::-webkit-slider-thumb{ width:14px; height:14px; border-radius:2px; background:#e7edf9; border:1px solid #6b8ccc; }
-body.theme-xp input[type="range"]::-moz-range-thumb{ width:14px; height:14px; border-radius:2px; background:#e7edf9; border:1px solid #6b8ccc; }
+body.theme-xp{
+  font-family: Tahoma, Verdana, sans-serif;
+  image-rendering:pixelated;
+  background: linear-gradient(180deg, #8fb9ff 0%, #afccff 45%, #eff4ff 100%) fixed;
+  background-color:#8fb9ff;
+  background-attachment: fixed;
+}
+body.theme-xp .mod{ border:1px solid #6c8ed0; border-radius:2px; background:linear-gradient(#f7faff 0%, #e0ebff 55%, #d4e2ff 100%); box-shadow:0 1px 0 rgba(255,255,255,.7) inset; }
+body.theme-xp .mod-hdr{ background: linear-gradient(180deg,#5c8fff 0%,#3f73e2 75%); color:#fff; border-bottom:1px solid #355db9; border-radius:2px 2px 0 0; text-shadow:0 1px 0 rgba(0,0,0,.35); }
+body.theme-xp .btn{ border-radius:2px; background: linear-gradient(#f5f9ff 0%, #d4e4ff 100%); border:1px solid #6b8ccc; color:#13336d; box-shadow:0 1px 0 rgba(255,255,255,.8) inset, 0 1px 2px rgba(20,48,125,.18); }
+body.theme-xp .btn:hover{ background:linear-gradient(#ffffff 0%, #dcebff 100%); }
+body.theme-xp .btn:active{ background: linear-gradient(#cddfff,#b9d0fb); color:#0a2c66; box-shadow: inset 0 1px 2px rgba(0,0,0,.18); }
+body.theme-xp select, body.theme-xp input[type="text"], body.theme-xp input[type="number"]{ border:1px solid #6b8ccc; background:linear-gradient(#ffffff,#edf3ff); border-radius:3px; color:#123169; box-shadow:0 1px 0 rgba(255,255,255,.7) inset; }
+body.theme-xp input[type="range"]::-webkit-slider-thumb{ width:14px; height:14px; border-radius:2px; background:linear-gradient(#f6f9ff,#d7e6ff); border:1px solid #5c7ed1; }
+body.theme-xp input[type="range"]::-moz-range-thumb{ width:14px; height:14px; border-radius:2px; background:linear-gradient(#f6f9ff,#d7e6ff); border:1px solid #5c7ed1; }
 
 /* ====================== XP fidelity pack ====================== */
 
 /* Taskbar (toolbar) */
 body.theme-xp #toolbar{
   position: fixed; left:0; right:0; bottom:0; height:32px; z-index:1000;
-  background: linear-gradient( to bottom,
-    #4a82e4 0%, /* Darker blue at the top */
-    #3f72d8 10%, /* Smoother blend to the middle */
-    #2562c1 50%, /* Mid-tone blue */
-    #3d71d3 90%, /* Slight brightening toward the bottom */
-    #3d71d3 100% /* Same color at the very bottom */);
-  border-top: 1px solid #183d92;
+  background: linear-gradient(180deg, #5a8ff5 0%, #457fe8 50%, #2b62c7 100%);
+  border-top: 1px solid #1d3e94;
   display: flex; align-items: center; gap: 8px; padding: 2px 6px;
   image-rendering: pixelated;
 }
@@ -343,34 +345,44 @@ body.theme-98 *::-webkit-scrollbar-thumb{
 
 
 /* ===== Windows XP theme (scoped) ===== */
-body.theme-xp{ background-image: var(--xp-wallpaper); background-size: cover; background-position:center; 
+body.theme-xp{ background-size: cover; background-position:center;
   /* canonical XP-ish colors */
-  --bg:#245ed8; --panel:#dfe8f6; --card:#eef3fb; --text:#000; --muted:#334155; --accent:#245ed8;
-  --select:#fff; --select-border:#93a4bd;
+  --bg:#8fb9ff; --panel:#d6e6ff; --card:#e6efff; --text:#00174a; --muted:#274276; --accent:#2b63e6;
+  --select:#f7fbff; --select-border:#6e8ed1;
   font-family: Tahoma, "Segoe UI", Verdana, Arial, sans-serif;
-  background: linear-gradient(#4c84ff, #245ed8) fixed;
+  background: linear-gradient(180deg, #8fb9ff 0%, #afccff 45%, #eff4ff 100%) fixed;
+}
+body.theme-xp #main{
+  background: linear-gradient(180deg, rgba(255,255,255,.94) 0%, rgba(205,226,255,.95) 45%, rgba(183,212,255,.97) 100%);
 }
 body.theme-xp #toolbar{
-  background: linear-gradient(#fdfefe, #dfe8f6); border-bottom:1px solid #93a4bd; padding:6px 8px;
+  background: linear-gradient(180deg, #5a8ff5 0%, #457fe8 50%, #2b62c7 100%);
+  border-bottom:1px solid #1d3e94; padding:6px 8px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
 }
 body.theme-xp .stream, body.theme-xp .block{
-  background: var(--card); border-radius:8px;
-  border:1px solid #93a4bd; box-shadow: 0 1px 0 #fff inset, 0 1px 0 rgba(0,0,0,.05);
+  background: linear-gradient(180deg, rgba(249,252,255,1) 0%, rgba(221,234,255,1) 48%, rgba(199,219,255,1) 100%);
+  border-radius:8px;
+  border:1px solid #6e8ed1; box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 1px 2px rgba(23,47,128,.2);
 }
 body.theme-xp .mod{
-  border-radius:8px; border:1px solid #93a4bd; background:#f7f9fe;
+  border-radius:8px; border:1px solid #6e8ed1; background:linear-gradient(#f4f8ff,#dce8ff);
 }
 body.theme-xp .mod-hdr{
   display:flex; align-items:center; justify-content:space-between; gap:8px;
-  background: linear-gradient(#ffffff,#e3edff); color:#111; padding:6px 10px; border-bottom:1px solid #93a4bd; border-radius:8px 8px 0 0;
-  font-weight:bold;
+  background: linear-gradient(180deg,#5e91ff,#2f64dd); color:#fff; padding:6px 10px; border-bottom:1px solid #264fb3; border-radius:8px 8px 0 0;
+  font-weight:bold; text-shadow:0 1px 0 rgba(0,0,0,.35);
 }
+body.theme-xp .mod-hdr .name,
+body.theme-xp .mod-hdr .carat{ color:#fff; }
+body.theme-xp .mod-body{ background:linear-gradient(#f9fbff,#e7f0ff); }
 body.theme-xp .btn{
-  background: linear-gradient(#fff, #e8eef9); color:#000; border:1px solid #93a4bd; border-radius:6px;
-  box-shadow: 0 1px 0 #fff inset, 0 1px 1px rgba(0,0,0,.1);
+  background: linear-gradient(#f7faff, #d4e3ff); color:#123169; border:1px solid #6e8ed1; border-radius:6px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.85) inset, 0 1px 2px rgba(21,47,120,.18);
   padding:4px 10px;
 }
-body.theme-xp .btn:active{ background: linear-gradient(#e8eef9, #fff); }
+body.theme-xp .btn:hover{ background: linear-gradient(#ffffff, #dcebff); }
+body.theme-xp .btn:active{ background: linear-gradient(#cddfff, #b7d0fb); color:#0a2c66; box-shadow: inset 0 1px 2px rgba(0,0,0,.18); }
 
 /* Checkboxes & radios */
 body.theme-xp input[type="checkbox"], body.theme-xp input[type="radio"]{
@@ -400,8 +412,8 @@ body.theme-xp input[type="range"]::-webkit-slider-thumb{
 
 /* Inputs */
 body.theme-xp select, body.theme-xp input[type="number"], body.theme-xp input[type="text"]{
-  background:#fff; color:#000; border:1px solid #93a4bd; border-radius:6px; padding:4px 6px;
-  box-shadow: 0 1px 0 #fff inset;
+  background:linear-gradient(#ffffff,#edf3ff); color:#123169; border:1px solid #6e8ed1; border-radius:6px; padding:4px 6px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.85) inset;
 }
 
 /* Canvases */
@@ -426,7 +438,7 @@ body.theme-xp{ background-image: none !important; }
 .style-panel{background:#f6f6f6 !important; color:#111 !important; border:1px solid #8aa8d8 !important;}
 .style-panel input,.style-panel select,.style-panel textarea{background:#fff !important; color:#000 !important; border:1px solid #7b7b7b !important;}
 body.theme-xp, body.theme-xp #app, body.theme-xp #main, body.theme-xp .workspace{
-  background: linear-gradient(#eaf2ff, #d6e6ff) !important;
+  background: linear-gradient(180deg, #8fb9ff 0%, #afccff 45%, #eff4ff 100%) !important;
   color: var(--text,#000);
 }
 body.theme-98, body.theme-98 #app, body.theme-98 #main, body.theme-98 .workspace{
@@ -438,7 +450,7 @@ body:not(.theme-xp):not(.theme-98) #main,
 body:not(.theme-xp):not(.theme-98) .workspace{
   background: var(--bg, #1b1b1b) !important;
 }
-body.theme-xp{--bg:#dfe8f6;--panel:#e9f0fb;--card:#f6f9ff;--text:#000;--muted:#333;--accent:#3a6ea5;--select:#fff;--select-border:#8aa8d8;}
+body.theme-xp{--bg:#8fb9ff;--panel:#e1ebfb;--card:#f4f7ff;--text:#000;--muted:#333;--accent:#245ed8;--select:#fff;--select-border:#8aa8d8;}
 body.theme-98{--bg:#008080;--panel:#c0c0c0;--card:#dfdfdf;--text:#000;--muted:#111;--accent:#0000aa;--select:#fff;--select-border:#7b7b7b;}
 body.theme-xp  .card, body.theme-xp  .stream, body.theme-xp  .mod-body,
 body.theme-98 .card, body.theme-98 .stream, body.theme-98 .mod-body{
@@ -450,19 +462,19 @@ body.theme-98 select, body.theme-xp select{background:#fff; color:#000; border:1
 <div id="app">
   <div id="toolbar">
       <span class="title">Noisetown Ultimate</span>
-    <button id="startAudio" class="btn">🎵 Start Audio</button>
-    <button id="addBlock" class="btn">➕ Add Block</button>
-    <button id="editToggle" class="btn" aria-pressed="false">✏️ Edit: OFF</button>
-    <button id="styleMode" class="btn" aria-pressed="false">🎨 Style Mode: OFF</button>
+    <button id="startAudio" class="btn">Start Audio</button>
+    <button id="addBlock" class="btn">Add Block</button>
+    <button id="editToggle" class="btn" aria-pressed="false">Edit: OFF</button>
+    <button id="styleMode" class="btn" aria-pressed="false">Style Mode: OFF</button>
     
     <select id="themePicker" class="btn"><option value="flat">Theme: Flat (Default)</option><option value="win98">Theme: Windows 98</option><option value="winxp">Theme: Windows XP</option></select>
 <div class="spacer"></div>
-    <button id="saveSession" class="btn">💾 Save</button>
-    <button id="savePreset" class="btn">💾 Save Preset+Audio</button>
+    <button id="saveSession" class="btn">Save</button>
+    <button id="savePreset" class="btn">Save Preset + Audio</button>
     <input id="loadFile" type="file" accept="application/json" style="display:none">
-    <button id="loadSession" class="btn">📂 Load</button>
+    <button id="loadSession" class="btn">Load</button>
     <input id="loadPresetFile" type="file" accept="application/json" style="display:none">
-    <button id="loadPreset" class="btn">📂 Load Preset</button>
+    <button id="loadPreset" class="btn">Load Preset</button>
   </div>
   <div id="main"></div>
   <div id="modeToast" role="status" aria-live="polite"></div>
@@ -506,113 +518,6 @@ body.theme-98 select, body.theme-xp select{background:#fff; color:#000; border:1
 </div>
 
 <script>
-  /* ==== Dark palette util (ColorHunt-inspired, WCAG-aware) ==== */
-  function hexToRgb(hex){
-    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return m ? [parseInt(m[1],16)/255, parseInt(m[2],16)/255, parseInt(m[3],16)/255] : [0,0,0];
-  }
-  function relLum([r,g,b]){ const f=x=>x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4);
-    const [R,G,B]=[f(r),f(g),f(b)]; return 0.2126*R + 0.7152*G + 0.0722*B; }
-  function contrastRatio(c1, c2){
-    const L1=relLum(hexToRgb(c1)), L2=relLum(hexToRgb(c2));
-    const [a,b]=L1>L2?[L1,L2]:[L2,L1]; return (a+0.05)/(b+0.05);
-  }
-  function ensureTextContrast(bg, text="#eaeaf0"){ return contrastRatio(bg, text) < 4.5 ? "#f2f2f5" : text; }
-  window.DARK_PALETTES = Array.isArray(window.DARK_PALETTES) ? window.DARK_PALETTES : [
-    ["#0F0F0F","#232D3F","#3F4E4F","#A27B5C"],
-    ["#11111B","#1E1E2E","#313244","#89B4FA"],
-    ["#0B0C10","#1F2833","#C5C6C7","#66FCF1"],
-    ["#0D0D0D","#202020","#2F2F2F","#F2A900"],
-    ["#121212","#1E1E1E","#2C2C2C","#A78BFA"],
-    ["#0A0F14","#11171F","#1C2733","#00BCD4"],
-    ["#0E131F","#1A2130","#293349","#E63946"],
-    ["#151515","#222222","#333333","#FF6F61"],
-    ["#0A0A0A","#1A1A1A","#2B2B2B","#6CCFF6"],
-    ["#0C0D0E","#191B1F","#2B2F36","#ED6EA0"]
-  ]
-  window.pickDarkPalette = window.pickDarkPalette || function(){ return window.window.DARK_PALETTES[Math.floor(Math.random()*window.window.DARK_PALETTES.length)]; }
-  window.pick2DarkPalette = window.pick2DarkPalette || pickDarkPalette;
-  window.applyPaletteToVars = window.applyPaletteToVars || function(p){
-    const [bg, panel, card, accent] = p;
-    const root = document.documentElement;
-    const text = ensureTextContrast(bg, "#eaeaf0");
-    root.style.setProperty('--bg', bg);
-    root.style.setProperty('--panel', panel);
-    root.style.setProperty('--card', card);
-    root.style.setProperty('--accent', accent);
-    root.style.setProperty('--text', text);
-    root.style.setProperty('--muted', "#a0a3a8");
-    root.style.setProperty('--select', accent);
-    root.style.setProperty('--select-border', card);
-  }
-
-  // ==== Expanded Dark Palettes (ColorHunt-inspired) ====
-  window.DARK_PALETTES = window.DARK_PALETTES || [
-    ["#0F0F0F","#232D3F","#3F4E4F","#A27B5C"],
-    ["#11111B","#1E1E2E","#313244","#89B4FA"],
-    ["#0B0C10","#1F2833","#C5C6C7","#66FCF1"],
-    ["#0D0D0D","#202020","#2F2F2F","#F2A900"],
-    ["#121212","#1E1E1E","#2C2C2C","#A78BFA"],
-    ["#0A0F14","#11171F","#1C2733","#00BCD4"],
-    ["#0E131F","#1A2130","#293349","#E63946"],
-    ["#151515","#222222","#333333","#FF6F61"],
-    ["#0A0A0A","#1A1A1A","#2B2B2B","#6CCFF6"],
-    ["#0C0D0E","#191B1F","#2B2F36","#ED6EA0"],
-    ["#111111","#2A2438","#352F44","#5C5470"],
-    ["#0B132B","#1C2541","#3A506B","#5BC0BE"],
-    ["#0D1B2A","#1B263B","#415A77","#E0E1DD"],
-    ["#101418","#1B232E","#2C3A4F","#40C463"],
-    ["#0D0C1D","#161B33","#474973","#A69CAC"],
-    ["#0D1321","#1D2D44","#3E5C76","#748CAB"],
-    ["#0E0F1A","#1B1F3B","#313866","#97A0E0"],
-    ["#0A0E14","#141B2D","#233554","#E43D40"],
-    ["#0F172A","#1E293B","#334155","#F472B6"],
-    ["#130F40","#1E1E60","#30336B","#22A6B3"],
-    ["#0A0908","#22333B","#5E503F","#C6AC8F"],
-    ["#1B1B1B","#2C2C2C","#3D3D3D","#FF7F50"],
-    ["#0B0A07","#1D1A16","#403D39","#E07A5F"],
-    ["#171717","#2D2D2D","#404040","#10B981"],
-    ["#0E0D0D","#1A1A1A","#2D2D2D","#FF4D6D"],
-    ["#09090B","#18181B","#27272A","#22D3EE"],
-    ["#0E141B","#1B2430","#4A6572","#F7C59F"],
-    ["#0B0C10","#1C1F26","#2A2F36","#FF3B30"],
-    ["#0E1E1E","#1A2A2A","#2E3B3B","#F9A826"],
-    ["#141414","#1F1F1F","#2A2A2A","#6EE7B7"],
-    ["#0F0A0A","#1F0E0E","#2F1414","#F25F5C"],
-    ["#0C0A3E","#1B1B6E","#3A0CA3","#FF5D8F"],
-    ["#081C15","#1B4332","#2D6A4F","#95D5B2"],
-    ["#0B0F0C","#1E2B1F","#334D35","#9FE870"],
-    ["#0B090A","#161A1D","#2B2D42","#EF233C"],
-    ["#0C0F0A","#1C2818","#2F3E2C","#8FD694"],
-    ["#0F1020","#171738","#2E2B5F","#E8458B"],
-    ["#12100E","#1D1A16","#2C2622","#E0A96D"],
-    ["#0F0E17","#1A1B26","#232946","#E53170"],
-    ["#0B0D12","#16222A","#2C3E50","#E74C3C"],
-    ["#10141B","#1E2933","#36454F","#F59E0B"],
-    ["#0E1220","#1A1F36","#2E3A59","#32E0C4"],
-    ["#0A0E1A","#141C2F","#253B6E","#60A5FA"],
-    ["#0E0E52","#1C1C7A","#2E2E9A","#FF5470"],
-    ["#0A0D0F","#1D2125","#2F3438","#FF6F00"],
-    ["#0F1021","#191A32","#2A2B45","#64DFDF"],
-    ["#0B1321","#1D2D44","#3E5C76","#D72638"],
-    ["#0D0D0D","#242B2E","#2F3B3E","#66D7D1"],
-    ["#0D0208","#2C0510","#35061A","#FF5E6C"],
-    ["#0E0A0F","#2A1F2D","#3E2C41","#D90368"],
-    ["#0E0D0B","#24221F","#3A3730","#F4A261"],
-    ["#0E0F0C","#1B201C","#2C3639","#A27B5C"],
-    ["#090C08","#132A13","#184E77","#52B788"],
-    ["#0B090A","#191516","#2D2426","#E5383B"],
-    ["#0F0E0E","#1F1B1B","#2E2A2A","#EC8F6A"],
-    ["#0A0A0A","#151515","#212121","#29AB87"],
-    ["#131516","#1E2428","#2D343C","#76E4F7"],
-    ["#0B0E11","#151A1F","#2D3436","#E17055"],
-    ["#0A0718","#1B163F","#2E2A68","#9A4DFF"],
-    ["#0B0A07","#1E2019","#2D3123","#DDB967"],
-    ["#0E131B","#182230","#26364D","#61C0BF"]
-  ];
-  window.pickDarkPalette = window.pickDarkPalette || function(){ return window.window.DARK_PALETTES[Math.floor(Math.random()*window.window.DARK_PALETTES.length)]; }
-  window.pick2DarkPalette = window.pick2DarkPalette || pickDarkPalette;
-
   /* --- Granular Worklet Source --- */
   ;(function ensureGranularWorklet(){
     if(self._granularWorkletReady) return;
@@ -719,83 +624,6 @@ body.theme-98 select, body.theme-xp select{background:#fff; color:#000; border:1
 
 (function(){
   // ===== Utilities =====
-
-  // ==== Random Dark Theme utilities (ColorHunt-inspired) ====
-  function hexToRgb(hex){
-    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    if(!m) return [0,0,0];
-    return [parseInt(m[1],16)/255, parseInt(m[2],16)/255, parseInt(m[3],16)/255];
-  }
-  function relLum([r,g,b]){ // sRGB to relative luminance
-    const f = x => (x<=0.03928? x/12.92 : Math.pow((x+0.055)/1.055, 2.4));
-    const [R,G,B] = [f(r), f(g), f(b)];
-    return 0.2126*R + 0.7152*G + 0.0722*B;
-  }
-  function contrastRatio(c1, c2){
-    const L1 = relLum(hexToRgb(c1)), L2 = relLum(hexToRgb(c2));
-    const [a,b] = L1>L2 ? [L1,L2] : [L2,L1];
-    return (a+0.05)/(b+0.05);
-  }
-  function ensureTextContrast(bg, text){
-    // if contrast < 4.5, force text to white or very light gray
-    if(contrastRatio(bg, text) < 4.5){
-      return "#f2f2f5";
-    }
-    return text;
-  }
-  // Curated dark palettes (hex) inspired by ColorHunt dark collections
-  /* PALETTES REPLACED */
-  window.pickDarkPalette = window.pickDarkPalette || function(){
-    return window.window.DARK_PALETTES[Math.floor(Math.random()*window.window.DARK_PALETTES.length)];
-  }
-  window.applyPaletteToVars = window.applyPaletteToVars || function(p){
-    const [bg, panel, card, accent] = p;
-    // derive text & muted ensuring contrast
-    let text = ensureTextContrast(bg, "#eaeaf0");
-    const muted = "#a0a3a8";
-    const root = document.documentElement;
-    root.style.setProperty('--bg', bg);
-    root.style.setProperty('--panel', panel);
-    root.style.setProperty('--card', card);
-    root.style.setProperty('--accent', accent);
-    root.style.setProperty('--text', text);
-    root.style.setProperty('--muted', muted);
-    root.style.setProperty('--select', accent);
-    root.style.setProperty('--select-border', card);
-  }
-
-  // === Random dark theme generator ===
-  function hsl(h,s,l){ return `hsl(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%)`; }
-  function clamp01(x){ return x<0?0:(x>1?1:x); } // ensure present
-  function randomDarkTheme(seed=Math.random()){
-    // base hue and accent hue (30-330 apart)
-    const baseH = Math.floor(seed*360);
-    const accentH = (baseH + 180 + Math.floor(seed*90)-45 + 360) % 360;
-    // Construct a tasteful dark palette
-    const bgL = 8 + Math.floor(seed*4);          // 8–12
-    const panelL = bgL + 6;                      // panel slightly lighter
-    const cardL = panelL + 6;                    // card lighter
-    const textL = 92;                            // near-white
-    const mutedL = 65;
-    const sAcc = 70;                              // accent saturation
-    const accL = 55;
-    const selL = 20;
-    const selBorL = 35;
-    return {
-      '--bg':        hsl(baseH, 12, bgL),
-      '--panel':     hsl(baseH, 12, panelL),
-      '--card':      hsl(baseH, 12, cardL),
-      '--text':      hsl(baseH, 10, textL),
-      '--muted':     hsl(baseH, 10, mutedL),
-      '--accent':    hsl(accentH, sAcc, accL),
-      '--select':    hsl(accentH, 35, selL),
-      '--select-border': hsl(accentH, 40, selBorL)
-    };
-  }
-  function applyThemeVars(vars){
-    const root = document.documentElement;
-    Object.entries(vars).forEach(([k,v])=> root.style.setProperty(k, v));
-  }
 
   function applyIndepRouting(sample, gA, gB){
     try{
@@ -2087,7 +1915,7 @@ return blockModel;
   
 qs('#styleMode').addEventListener('click', (e)=>{
   styleMode = !styleMode;
-  e.target.textContent = '🎨 Style Mode: ' + (styleMode?'ON':'OFF');
+  e.target.textContent = 'Style Mode: ' + (styleMode?'ON':'OFF');
   e.target.setAttribute('aria-pressed', String(styleMode));
   stylePanel.style.display = styleMode ? 'block' : 'none';
   document.body.classList.toggle('style-on', styleMode);
@@ -2170,15 +1998,6 @@ document.addEventListener('click', (ev)=>{
 
   
 qs('#stySaveTheme').addEventListener('click', ()=>{
-  // Random Theme button
-  const _randBtn = qs('#styRandomTheme');
-  if(_randBtn){
-    _randBtn.addEventListener('click', ()=>{
-      const t = randomDarkTheme(Math.random());
-      applyThemeVars(t);
-    });
-  }
-
   // Collect inline styles as theme JSON
   const themed = [];
   qsa('body *').forEach(el=>{
@@ -2429,189 +2248,7 @@ themeFile.addEventListener('change', async (e)=>{
   addBlock();
 })();
 
-  // Toolbar Random Theme
-  const _rtb = document.getElementById('btnRandomTheme');
-  if(_rtb){
-    _rtb.addEventListener('click', ()=>{
-      
-      try{
-        const pal = (typeof pickDarkPalette==='function' ? pickDarkPalette() : (typeof pick2DarkPalette==='function' ? pick2DarkPalette() : null));
-        if(!pal) throw new Error('palette fn missing');
-        if(typeof applyPaletteToVars!=='function') throw new Error('applyPaletteToVars missing');
-        applyPaletteToVars(pal);
-        console.log('Applied dark palette', pal);
-      }catch(err){
-        console.warn('Random Theme failed:', err);
-      }
-    });
-  }
 </script>
-
-<!-- Added by ChatGPT: Extra dark palettes + smart mapper (Color Hunt + Color-Hex) -->
-<script id="extra-palettes-v1">
-(function(){
-  try {
-    const RAW = [
-      // Color-Hex: Beautiful Dark Colors — https://www.color-hex.com/color-palette/14906
-      ["#152d32","#001f24","#2f3b22","#052d0a","#0f4539"],
-      // Color-Hex: VS Dark — https://www.color-hex.com/color-palette/98179
-      ["#007acc","#3e3e42","#2d2d30","#252526","#1e1e1e"],
-      // Color-Hex: Midnight Blue — https://www.color-hex.com/color-palette/82459
-      ["#000000","#0a0913","#131122","#1d1936","#282442"],
-      // Color-Hex: Neon Dark — https://www.color-hex.com/color-palette/13122
-      ["#001eff","#8900ff","#ff008d","#1c1c1c","#ffffff"],
-      // Color-Hex: dark red — https://www.color-hex.com/color-palette/8243
-      ["#5c1010","#6f0000","#560d0d","#c30101","#940000"],
-      // Color-Hex: dark neon — https://www.color-hex.com/color-palette/42699
-      ["#742323","#757a25","#237629","#2c2972","#732474"],
-      // Color-Hex: Cyber Dark — https://www.color-hex.com/color-palette/60813
-      ["#000000","#323232","#ff4b4b","#ffffff","#323296"],
-      // Color-Hex: Dark UI — https://www.color-hex.com/color-palette/46857
-      ["#bdbdbd","#32393d","#373737","#2d2d2d","#464646"],
-      // Color-Hex: Midnight Shades — https://www.color-hex.com/color-palette/65195
-      ["#10102c","#342c5c","#67647d","#272d50","#bdc7d8"],
-      // Color-Hex: Neon And The Dark — https://www.color-hex.com/color-palette/96786
-      ["#96ff00","#0038ff","#dc21ff","#000000","#000000"],
-      // Color-Hex: Darker Cyberpunk — https://www.color-hex.com/color-palette/1033260
-      ["#070719","#840000","#dc2b2b","#10436c","#156085"],
-      // Color-Hex: Dark-Light — https://www.color-hex.com/color-palette/64811
-      ["#443355","#333333","#555555","#999999","#eeeedd"],
-      // Color-Hex: Midnight Blue Shades — https://www.color-hex.com/color-palette/104653
-      ["#040622","#150f38","#151345","#1c1d54","#26236b"],
-      // Color-Hex: Cyber UI — https://www.color-hex.com/color-palette/79313
-      ["#0c1e3e","#122c5a","#38fbdb","#fc0ff5","#8e52f5"],
-      // Color-Hex: Neon Sign Darks — https://www.color-hex.com/color-palette/78801
-      ["#2d2929","#661b28","#271d23","#2a4454","#44545a"],
-      // Color-Hex: Black Carbon — https://www.color-hex.com/color-palette/1041000
-      ["#695c49","#383f3f","#3f3b33","#161617","#aaaaaa"],
-
-      // Color Hunt palettes (order as on page) — colors will be role-mapped below
-      // https://colorhunt.co/palette/f0e3caff8303a357091b1a17
-      ["#F0E3CA","#FF8303","#A35709","#1B1A17"],
-      // https://colorhunt.co/palette/581845900c3fc70039ff5733
-      ["#581845","#900C3F","#C70039","#FF5733"],
-      // https://colorhunt.co/palette/900c3fc70039ff5733ffc300
-      ["#900C3F","#C70039","#FF5733","#FFC300"],
-      // https://colorhunt.co/palette/1d16168e1616d84040eeeeee
-      ["#1D1616","#8E1616","#D84040","#EEEEEE"]
-    ];
-
-    // Helpers
-    const clamp01 = v => Math.max(0, Math.min(1, v));
-    const hex = s => s.replace(/#/g,"").trim();
-    function hexToRgb(h) {
-      h = hex(h);
-      if (h.length===3) h = h.split("").map(ch=>ch+ch).join("");
-      const n = parseInt(h,16);
-      return {r:(n>>16)&255, g:(n>>8)&255, b:n&255};
-    }
-    function srgbToLin(c) {
-      c /= 255;
-      return (c <= 0.04045) ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4);
-    }
-    function relLuminance(rgb){
-      const R = srgbToLin(rgb.r), G = srgbToLin(rgb.g), B = srgbToLin(rgb.b);
-      return 0.2126*R + 0.7152*G + 0.0722*B;
-    }
-    function rgbToHsl({r,g,b}){
-      r/=255; g/=255; b/=255;
-      const max = Math.max(r,g,b), min=Math.min(r,g,b);
-      let h,s,l=(max+min)/2;
-      if (max === min) { h = s = 0; }
-      else {
-        const d = max-min;
-        s = l > 0.5 ? d/(2-max-min) : d/(max+min);
-        switch(max){
-          case r: h = (g-b)/d + (g<b?6:0); break;
-          case g: h = (b-r)/d + 2; break;
-          case b: h = (r-g)/d + 4; break;
-        }
-        h/=6;
-      }
-      return {h,s,l};
-    }
-    function contrastRatio(hex1, hex2){
-      const L1 = relLuminance(hexToRgb(hex1));
-      const L2 = relLuminance(hexToRgb(hex2));
-      const [a,b] = L1>L2 ? [L1,L2] : [L2,L1];
-      return (a+0.05)/(b+0.05);
-    }
-
-    function mapRoles(pal){
-      // unique, valid, uppercase
-      const colors = Array.from(new Set(
-        pal.map(c=>("#"+hex(c).toUpperCase())).filter(c=>/^#[0-9A-F]{6}$/.test(c))
-      ));
-      if (colors.length < 2) return null;
-      // compute metrics
-      const metrics = colors.map(c=>{
-        const rgb = hexToRgb(c);
-        const lum = relLuminance(rgb);
-        const hsl = rgbToHsl(rgb);
-        return {c, lum, sat: hsl.s, light: hsl.l};
-      });
-
-      // BG = darkest
-      const bg = metrics.reduce((a,b)=>a.lum<b.lum?a:b).c;
-
-      // ACCENT = highest saturation with decent contrast against BG
-      const satSorted = metrics.slice().sort((a,b)=>b.sat - a.sat);
-      let accent = satSorted.find(m=>m.c!==bg && contrastRatio(m.c,bg)>=3)?.c;
-      if (!accent) accent = satSorted.find(m=>m.c!==bg)?.c || bg;
-
-      // PANEL = next-darkest (excluding bg)
-      const nonBg = metrics.filter(m=>m.c!==bg).sort((a,b)=>a.lum - b.lum);
-      const panel = (nonBg[0]?.c) || bg;
-
-      // CARD = lightest remaining that still has 3:1 contrast with panel
-      const remaining = metrics.filter(m=>m.c!==bg && m.c!==panel).sort((a,b)=>a.lum - b.lum);
-      let card = remaining.slice(-1)[0]?.c || panel;
-      const cr = contrastRatio(card, panel);
-      if (cr < 3 && remaining.length>1){
-        // pick the lightest with >=3 contrast, else fallback
-        const cand = remaining.slice().reverse().find(m=>contrastRatio(m.c, panel)>=3);
-        if (cand) card = cand.c;
-      }
-
-      // ensure text contrast on bg (we don't set var here, app likely handles text)
-      return [bg, panel, card, accent];
-    }
-
-    const mapped = RAW.map(mapRoles).filter(Boolean);
-
-    // If the host page already defined DARK_PALETTES, extend it; else create it.
-    window.DARK_PALETTES = (Array.isArray(window.DARK_PALETTES) ? window.DARK_PALETTES : []).concat(mapped);
-
-    // Optional: lightweight keyboard randomizer (Alt+R)
-    function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-    if (!window.__extraPalettesKeybound){
-      window.__extraPalettesKeybound = true;
-      document.addEventListener('keydown', (e)=>{
-        if (e.altKey && (e.key==='r' || e.key==='R')){
-          try {
-            const pal = pickRandom(window.DARK_PALETTES);
-            if (Array.isArray(pal) && pal.length>=4 && typeof window.applyThemeFromPalette==='function'){
-              window.applyThemeFromPalette(pal);
-            } else {
-              // Fallback: apply to CSS vars directly
-              const root = document.documentElement;
-              root.style.setProperty('--bg', pal[0]);
-              root.style.setProperty('--panel', pal[1]);
-              root.style.setProperty('--card', pal[2]);
-              root.style.setProperty('--accent', pal[3]);
-            }
-            console.log('[Noisetown] Applied random extra palette:', pal);
-          } catch(err){ console.warn('Palette apply error', err); }
-        }
-      });
-    }
-
-    console.log('[Noisetown] Extra palettes added:', mapped.length, 'Total:', (window.DARK_PALETTES||[]).length);
-  } catch (err){
-    console.warn('Extra palettes script failed:', err);
-  }
-})();
-
 
 // === Style Preset wiring (add 9x themes) ===
 (function(){
@@ -2628,21 +2265,6 @@ themeFile.addEventListener('change', async (e)=>{
   // ensure current applies on load if selected
   setThemeClass(sel.value);
 })();
-
-// Move Random Theme: ensure toolbar button removed; keep style panel button id 'btnRandomTheme'
-(function(){
-  const btn = document.getElementById('btnRandomTheme');
-  if(btn){
-    btn.onclick = () => {
-      try{
-        const pal = (window.pickDarkPalette ? window.pickDarkPalette() : (window.pick2DarkPalette ? window.pick2DarkPalette() : null));
-        if(!pal) throw new Error('palette function missing');
-        if(window.applyPaletteToVars) window.applyPaletteToVars(pal);
-      }catch(err){ console.warn('Random Theme failed', err); }
-    };
-  }
-})();
-
 
 function applyMod(target, s, ctx){
   const el = ctx.el;
