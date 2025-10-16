@@ -9,22 +9,31 @@ def test_status_handles_missing_installers(tmp_path):
 
     status = manager.status()
 
-    assert status["modalys"]["zip_present"] is False
-    assert status["modalys"]["installed"] is False
-    assert status["praat"]["zip_present"] is False
     assert status["platform_supported"] in {True, False}
     assert status["bundled"] == []
+    assert status["workspaces"] == []
     assert status["executables"] == []
 
 
 def test_installation_paths_created_on_extract(tmp_path):
-    manager = ExternalAppManager(base_dir=tmp_path)
-    modalys_folder = tmp_path / ".cache" / "external_apps" / "modalys"
-    modalys_folder.mkdir(parents=True)
-    target = modalys_folder / manager.modalys_executable_name
-    target.write_bytes(b"")
+    src = tmp_path / "demo"
+    src.mkdir()
+    (src / "run.exe").write_text("echo hi", encoding="utf-8")
+    archive = tmp_path / "demo.zip"
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.write(src / "run.exe", arcname="run.exe")
 
-    assert manager.modalys_installation() == target
+    manager = ExternalAppManager(base_dir=tmp_path)
+    bundles = manager.status()["bundled"]
+    assert len(bundles) == 1
+    bundle = bundles[0]
+    assert bundle["key"] == "bundle-1"
+    updated = manager.install_bundled(bundle["key"])
+    assert updated["installed"] is True
+    assert updated["path"].endswith("run.exe")
+    refreshed = manager.status()
+    assert refreshed["bundled"][0]["installed"] is True
+    assert any(path.endswith("run.exe") for path in refreshed["executables"])
 
 
 def test_launch_external_waits_and_captures_output(tmp_path):

@@ -125,22 +125,16 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
         try:
             if path == "/api/install":
                 payload = self._read_json()
-                app = payload.get("app")
-                if app == "modalys":
-                    located = self.manager.ensure_modalys_installed()
-                elif app == "praat":
-                    located = self.manager.ensure_praat_installed()
-                else:
-                    self._send_json({"ok": False, "error": "Unknown app"}, HTTPStatus.BAD_REQUEST)
+                slug = payload.get("slug") or payload.get("bundle")
+                if not slug:
+                    self._send_json({"ok": False, "error": "Missing 'slug'"}, HTTPStatus.BAD_REQUEST)
                     return
-                self._send_json(
-                    {
-                        "ok": bool(located),
-                        "installed": bool(located),
-                        "path": str(located) if located else None,
-                        "message": f"{app.capitalize()} ready" if located else "Installer not found",
-                    }
-                )
+                try:
+                    status = self.manager.install_bundled(str(slug))
+                except FileNotFoundError:
+                    self._send_json({"ok": False, "error": "Unknown bundled resource"}, HTTPStatus.NOT_FOUND)
+                    return
+                self._send_json({"ok": bool(status.get("installed")), "status": status})
                 return
             if path == "/api/render":
                 payload = self._read_json()

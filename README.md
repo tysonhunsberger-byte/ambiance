@@ -1,24 +1,24 @@
 # Ambiance
 
 Ambiance is a modular audio generation toolkit that blends procedural synthesis with
-external acoustic modeling tools. The repository ships with the Windows installers for
-**Modalys 3.9.0** and **Praat 6.4.45** so that sound designers who run on Windows can
-hook directly into those environments. The Python code offers drop-in simulations when
-those executables are not available, which keeps the package cross-platform friendly
-and ready for CI environments.
+external acoustic modeling tools. The repository ships with a pair of Windows
+installers so that sound designers who run on Windows can hook directly into bundled
+third-party environments. The Python code offers drop-in simulations when those
+executables are not available, which keeps the package cross-platform friendly and
+ready for CI environments.
 
 ## Features
 
 - **Composable audio engine** – Combine any number of sources and effects.
-- **External tool integration** – Modalys and Praat installers are detected, extracted
-  into a cache directory on demand, and exposed through Python wrappers.
+- **External tool integration** – Bundled installers are detected, extracted into a
+  cache directory on demand, and exposed through Python helpers.
 - **In-app launcher** – Provide paths to third-party executables and run them from the
   External Apps Workbench, capturing stdout/stderr without leaving the UI.
 - **External workspace bubbles** – Register zipped web UIs or extracted tool folders
   and interact with them inside the External App Desktop that lives beneath the main
   Noisetown canvas.
-- **Procedural audio sources** – Sine waves, noise beds, Modalys resonators, and
-  Praat-inspired vocal timbres.
+- **Procedural audio sources** – Sine waves, noise beds, resonator simulations, and
+  formant-inspired vocal timbres.
 - **Signal processing effects** – Reverb, ping-pong delay, and low-pass filtering.
 - **Command line renderer** – Render ambience tracks directly to WAV files.
 - **Upgradeable architecture** – New sources/effects can be registered by importing a
@@ -41,7 +41,7 @@ and ready for CI environments.
    ```
 
    If you run the command on Windows and keep the bundled installers in the repository
-   root, the wrappers will extract them into `.cache/external_apps` and allow you to use
+   root, the helpers will extract them into `.cache/external_apps` and allow you to use
    the native binaries. On other platforms, the Python fallbacks generate similar sounds
    so your workflows stay portable.
 
@@ -54,7 +54,7 @@ and ready for CI environments.
 
    The command serves the bundled `noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html`
    interface at `http://127.0.0.1:8000/`. The UI exposes controls for checking the
-   bundled Modalys and Praat installers, triggering extractions, launching any
+   bundled installers, triggering extractions, launching any
    executable that you point to (including custom tools or the extracted installers),
    registering standalone executables or entire workspaces for external tools, and
    rendering ambience layers through the Python audio engine. If you place a
@@ -68,10 +68,9 @@ of windows shown underneath the main Noisetown viewport):
 
 1. **Source** – Enter a path to a `.zip` archive, an extracted directory, or a single
    executable file. The helper safely copies/expands the contents into
-   `.cache/external_apps/workspaces/<slug>`. The bundled Modalys download is an
-   installer; if you prefer to work with the raw Modalys files or Max 9 patches,
-   extract them first (or request the raw files) and point the source field at that
-   folder, a fresh zip of the unpacked files, or the executable you want to run.
+   `.cache/external_apps/workspaces/<slug>`. If a bundled download is just an installer
+   wrapper, extract it first (or request the raw files) and point the source field at
+   that folder, a fresh zip of the unpacked files, or the executable you want to run.
 2. **Entry HTML (optional)** – Provide a relative path to an HTML file when you want
    the workspace to surface inside the app as an iframe.
 3. **Executable (optional)** – Supply a relative path to a native binary or script to
@@ -93,7 +92,7 @@ workspace purges the cached copy from `.cache/external_apps/workspaces`.
    {
      "sources": [
        {"type": "SineWaveSource", "frequency": 523.25, "amplitude": 0.15},
-       {"type": "PraatSource", "vowel": "i", "amplitude": 0.2}
+       {"type": "FormantVoiceSource", "vowel": "i", "amplitude": 0.2}
      ],
      "effects": [
        {"type": "ReverbEffect", "decay": 0.4, "mix": 0.25}

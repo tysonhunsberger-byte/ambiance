@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import platform
 from dataclasses import dataclass
 from typing import Optional
 
@@ -10,29 +9,17 @@ from ..npcompat import np
 
 from ..core.base import AudioSource
 from ..core.registry import registry
-from ..integrations.external_apps import ExternalAppManager
-
-_MANAGER = ExternalAppManager()
-
-
 @dataclass
 @registry.register_source
-class ModalysSource(AudioSource):
-    """Wrapper around the Modalys installer shipped in the repository."""
+class BundledResonatorSource(AudioSource):
+    """Synthetic resonator that can optionally align with bundled resources."""
 
-    name: str = "modalys"
+    name: str = "bundled-resonator"
     preset: str = "string-resonator"
     amplitude: float = 0.25
     seed: Optional[int] = None
 
     def generate(self, duration: float, sample_rate: int) -> np.ndarray:
-        app_path = _MANAGER.ensure_modalys_installed()
-        if not app_path:
-            return self._simulate(duration, sample_rate)
-        if platform.system() != "Windows":
-            return self._simulate(duration, sample_rate)
-        # For Windows users, this would invoke the installer/exe to render audio.
-        # We do not execute it in this environment but leave the hook for runtime use.
         return self._simulate(duration, sample_rate)
 
     def _simulate(self, duration: float, sample_rate: int) -> np.ndarray:
@@ -49,25 +36,22 @@ class ModalysSource(AudioSource):
             "preset": self.preset,
             "amplitude": self.amplitude,
             "seed": self.seed,
-            "resource": str(_MANAGER.modalys_zip) if _MANAGER.modalys_zip else None,
         })
         return data
 
 
 @dataclass
 @registry.register_source
-class PraatSource(AudioSource):
-    """Formant-style voice synthesis based on the Praat binary."""
+class FormantVoiceSource(AudioSource):
+    """Formant-style voice synthesis using a lightweight oscillator stack."""
 
-    name: str = "praat"
+    name: str = "formant-voice"
     vowel: str = "a"
     amplitude: float = 0.2
     vibrato_rate: float = 5.0
     vibrato_depth: float = 0.005
 
     def generate(self, duration: float, sample_rate: int) -> np.ndarray:
-        app_path = _MANAGER.ensure_praat_installed()
-        # As with Modalys, we fallback to simulation when execution is not possible.
         return self._simulate(duration, sample_rate)
 
     def _simulate(self, duration: float, sample_rate: int) -> np.ndarray:
@@ -96,6 +80,5 @@ class PraatSource(AudioSource):
             "amplitude": self.amplitude,
             "vibrato_rate": self.vibrato_rate,
             "vibrato_depth": self.vibrato_depth,
-            "resource": str(_MANAGER.praat_zip) if _MANAGER.praat_zip else None,
         })
         return data

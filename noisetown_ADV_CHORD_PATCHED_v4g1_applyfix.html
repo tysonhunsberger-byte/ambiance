@@ -33,13 +33,16 @@
   .external-block .registry-tags span{padding:2px 6px;border:1px solid #555;border-radius:4px;background:var(--card);font-size:12px}
   .external-block .status-text{font-size:12px;color:var(--muted)}
   .external-block.server-offline .status-text{color:#ff8585}
-  #externalDesktop{flex:0 0 260px;background:var(--panel);border-top:1px solid #333;padding:8px;overflow:auto;display:flex;flex-direction:column;gap:10px}
-  #externalDesktop.collapsed{flex:0 0 auto;padding:6px 8px}
+  #externalDesktop{background:var(--panel);border:1px solid #444;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+  #externalDesktop.collapsed{padding:8px}
   #externalDesktop.collapsed .desktopShelf,#externalDesktop.collapsed .desktopEmpty{display:none}
   #externalDesktop .desktopHdr{display:flex;align-items:center;gap:8px;font-weight:700}
   #externalDesktop .desktopShelf{display:flex;flex-wrap:wrap;gap:12px}
   #externalDesktop .desktopEmpty{display:none;font-style:italic;color:var(--muted)}
   #externalDesktop.empty .desktopEmpty{display:block}
+  .external-block .workbenchPanel{display:flex;flex-direction:column;gap:14px}
+  .fileInputRow{display:flex;align-items:center;gap:8px;width:100%;flex-wrap:wrap}
+  .fileInputRow input[type="text"]{flex:1 1 auto;min-width:180px}
   .appBubble{background:var(--card);border:1px solid #555;border-radius:8px;padding:10px;min-width:260px;flex:1 1 320px;max-width:520px;position:relative;display:flex;flex-direction:column;gap:8px}
   .appBubble iframe{width:100%;height:220px;border:0;border-radius:6px;background:#000}
   .appBubble .bubbleTitle{display:flex;align-items:center;gap:8px;font-weight:700}
@@ -59,7 +62,7 @@
   .workspaceRow .workspaceMeta{font-size:12px;color:var(--muted)}
   .workspaceRow .workspaceActions{display:flex;flex-wrap:wrap;gap:6px}
   .workspaceRow button{padding:4px 8px;font-size:12px}
-  body.theme-xp #externalDesktop, body.theme-98 #externalDesktop{background:linear-gradient(#f9f9ff,#dee6fb);border-top:1px solid #8aa8d8}
+  body.theme-xp #externalDesktop, body.theme-98 #externalDesktop{background:linear-gradient(#f9f9ff,#dee6fb);border:1px solid #8aa8d8}
   body.theme-xp .appBubble, body.theme-98 .appBubble{background:#fff;border-color:#9ab4e0}
   body.theme-xp .bubbleLog, body.theme-98 .bubbleLog{background:#fff;border-color:#9ab4e0;color:#000}
   body.theme-xp .workspaceList, body.theme-98 .workspaceList{background:#fff;border-color:#9ab4e0}
@@ -521,15 +524,6 @@ body.theme-98 select, body.theme-xp select{background:#fff; color:#000; border:1
     <button id="loadPreset" class="btn">📂 Load Preset</button>
   </div>
   <div id="main"></div>
-  <div id="externalDesktop" class="empty" aria-label="External app desktop">
-    <div class="desktopHdr">
-      <span class="desktopTitle">External App Desktop</span>
-      <div class="spacer"></div>
-      <button type="button" class="btn btn-xs toggleDesktop">⬇️ Collapse</button>
-    </div>
-    <div class="desktopEmpty small">No workspace bubbles yet. Register a workspace to view them here.</div>
-    <div class="desktopShelf"></div>
-  </div>
   <div id="modeToast" role="status" aria-live="polite"></div>
 </div>
 
@@ -779,42 +773,54 @@ function bootAudio(){
     blockEl.dataset.role = 'external-apps';
     blockEl.innerHTML = `
       <h2><span class="dragHandle" style="cursor:move">⣿</span> External Apps Workbench</h2>
-      <div class="row">
-        <button class="btn checkStatus">🔄 Check Status</button>
-        <button class="btn installModalys">📦 Extract Modalys</button>
-        <button class="btn installPraat">📦 Extract Praat</button>
-        <button class="btn resetConfig">🧰 Reset Config</button>
-        <div class="spacer"></div>
-        <span class="status-text">Waiting for server…</span>
+      <div id="externalDesktop" class="empty" aria-label="External app desktop">
+        <div class="desktopHdr">
+          <span class="desktopTitle">External App Desktop</span>
+          <div class="spacer"></div>
+          <button type="button" class="btn btn-xs toggleDesktop">⬇️ Collapse</button>
+        </div>
+        <div class="desktopEmpty small">No workspace bubbles yet. Register a workspace to view them here.</div>
+        <div class="desktopShelf"></div>
       </div>
-      <div class="status-panels">
-        <div class="status-panel">
-          <strong>Bundled Installers</strong>
-          <div class="bundledStatus statusList">
-            <div class="statusItem"><span>Pending…</span></div>
+      <div class="workbenchPanel">
+        <div class="row">
+          <button class="btn checkStatus">🔄 Check Status</button>
+          <button class="btn resetConfig">🧰 Reset Config</button>
+          <div class="spacer"></div>
+          <span class="status-text">Waiting for server…</span>
+        </div>
+        <div class="status-panels">
+          <div class="status-panel">
+            <strong>Bundled Installers</strong>
+            <div class="bundledStatus statusList">
+              <div class="statusItem"><span>Pending…</span></div>
+            </div>
+          </div>
+          <div class="status-panel">
+            <strong>Workspace Executables</strong>
+            <div class="workspaceExecs statusList">
+              <div class="statusItem"><span>Pending…</span></div>
+            </div>
+          </div>
+          <div class="status-panel">
+            <strong>Registry</strong>
+            <div class="small">Sources</div>
+            <div class="registry-tags registrySources"></div>
+            <div class="small" style="margin-top:6px">Effects</div>
+            <div class="registry-tags registryEffects"></div>
           </div>
         </div>
-        <div class="status-panel">
-          <strong>Workspace Executables</strong>
-          <div class="workspaceExecs statusList">
-            <div class="statusItem"><span>Pending…</span></div>
-          </div>
-        </div>
-        <div class="status-panel">
-          <strong>Registry</strong>
-          <div class="small">Sources</div>
-          <div class="registry-tags registrySources"></div>
-          <div class="small" style="margin-top:6px">Effects</div>
-          <div class="registry-tags registryEffects"></div>
-        </div>
-      </div>
       <div class="row">
         <label>Duration (s)</label><input type="number" class="durationInput" min="1" max="120" step="1" value="8">
         <label>Sample Rate</label><input type="number" class="sampleRateInput" min="8000" max="96000" step="1000" value="44100">
       </div>
       <div class="row">
         <label style="width:100%">Executable Path</label>
-        <input type="text" class="exePath" list="externalAppPaths" placeholder="C:\\Path\\to\\app.exe or /path/to/app">
+        <div class="fileInputRow">
+          <input type="text" class="exePath" list="externalAppPaths" placeholder="C:\\Path\\to\\app.exe or /path/to/app">
+          <button type="button" class="btn btn-xs browseExe">📁 Choose File…</button>
+          <input type="file" class="exePicker" accept=".exe,.bat,.cmd,.com,.sh" style="display:none">
+        </div>
         <datalist id="externalAppPaths"></datalist>
       </div>
       <div class="row">
@@ -845,7 +851,13 @@ function bootAudio(){
       </div>
       <div class="row">
         <label style="width:100%">Workspace Source (zip or folder)</label>
-        <input type="text" class="workspaceSource" placeholder="C:\\Path\\to\\Modalys.zip or extracted folder">
+        <div class="fileInputRow">
+          <input type="text" class="workspaceSource" placeholder="C:\\Path\\to\\archive.zip or extracted folder">
+          <button type="button" class="btn btn-xs browseWorkspaceFile">📁 Choose File…</button>
+          <button type="button" class="btn btn-xs browseWorkspaceFolder">📂 Choose Folder…</button>
+          <input type="file" class="workspaceFilePicker" style="display:none">
+          <input type="file" class="workspaceFolderPicker" style="display:none" webkitdirectory directory>
+        </div>
       </div>
       <div class="row">
         <input type="text" class="workspaceName" placeholder="Workspace name (optional)">
@@ -858,6 +870,7 @@ function bootAudio(){
         <div class="workspaceList empty">
           <div class="small">No workspaces registered yet. Provide a source above to add one.</div>
         </div>
+      </div>
       </div>
     `;
 
@@ -879,11 +892,17 @@ function bootAudio(){
     const renderInfo = q('.renderInfo');
     const preview = q('.enginePreview');
     const exePathInput = q('.exePath');
+    const exePicker = q('.exePicker');
+    const browseExeBtn = q('.browseExe');
     const exeArgsInput = q('.exeArgs');
     const waitToggle = q('.waitToggle');
     const timeoutInput = q('.timeoutInput');
     const runOutput = q('.runOutput');
     const workspaceSourceInput = q('.workspaceSource');
+    const workspaceFilePicker = q('.workspaceFilePicker');
+    const workspaceFolderPicker = q('.workspaceFolderPicker');
+    const browseWorkspaceFileBtn = q('.browseWorkspaceFile');
+    const browseWorkspaceFolderBtn = q('.browseWorkspaceFolder');
     const workspaceNameInput = q('.workspaceName');
     const workspaceEntryInput = q('.workspaceEntry');
     const workspaceExecutableInput = q('.workspaceExecutable');
@@ -898,6 +917,56 @@ function bootAudio(){
     let lastWorkspaces = [];
     const bubbleMap = new Map();
 
+    function derivePathFromFile(file){
+      if(!file) return '';
+      if(file.path) return file.path;
+      if(file.webkitRelativePath){
+        const parts = file.webkitRelativePath.split(/[/\\]/).filter(Boolean);
+        if(parts.length > 1){
+          return parts.slice(0, -1).join('/');
+        }
+        if(parts.length){
+          return parts[0];
+        }
+      }
+      return file.name || '';
+    }
+
+    if(browseExeBtn && exePicker){
+      browseExeBtn.addEventListener('click', ()=> exePicker.click());
+      exePicker.addEventListener('change', ()=>{
+        const file = exePicker.files && exePicker.files[0];
+        const value = derivePathFromFile(file);
+        if(exePathInput && value){
+          exePathInput.value = value;
+          pushPathSuggestion(value);
+        }
+      });
+    }
+
+    if(browseWorkspaceFileBtn && workspaceFilePicker){
+      browseWorkspaceFileBtn.addEventListener('click', ()=> workspaceFilePicker.click());
+      workspaceFilePicker.addEventListener('change', ()=>{
+        const file = workspaceFilePicker.files && workspaceFilePicker.files[0];
+        const value = derivePathFromFile(file);
+        if(workspaceSourceInput && value){
+          workspaceSourceInput.value = value;
+        }
+      });
+    }
+
+    if(browseWorkspaceFolderBtn && workspaceFolderPicker){
+      browseWorkspaceFolderBtn.addEventListener('click', ()=> workspaceFolderPicker.click());
+      workspaceFolderPicker.addEventListener('change', ()=>{
+        const files = workspaceFolderPicker.files;
+        const file = files && files.length ? files[0] : null;
+        const value = derivePathFromFile(file);
+        if(workspaceSourceInput && value){
+          workspaceSourceInput.value = value;
+        }
+      });
+    }
+
     function updateDesktopToggleLabel(){
       if(!desktopToggle || !desktop) return;
       const collapsed = desktop.classList.contains('collapsed');
@@ -907,17 +976,6 @@ function bootAudio(){
     function setDesktopEmptyState(isEmpty){
       if(!desktop) return;
       desktop.classList.toggle('empty', isEmpty);
-    }
-
-    function legacyBundledFrom(data){
-      const items = [];
-      if(data && data.modalys){
-        items.push({ key:'modalys', title:'Modalys', ...data.modalys });
-      }
-      if(data && data.praat){
-        items.push({ key:'praat', title:'Praat', ...data.praat });
-      }
-      return items;
     }
 
     function renderBundledStatusList(items){
@@ -935,9 +993,21 @@ function bootAudio(){
       payload.forEach((item)=>{
         if(!item) return;
         const statusItem = ce('div','statusItem');
+        const header = ce('div','statusHeader');
+        header.style.display = 'flex';
+        header.style.alignItems = 'center';
+        header.style.justifyContent = 'space-between';
+        header.style.gap = '8px';
         const title = ce('strong');
         title.textContent = item.title || item.key || 'Installer';
-        statusItem.appendChild(title);
+        header.appendChild(title);
+        if(item.zip_present){
+          const installBtn = ce('button','btn btn-xs');
+          installBtn.textContent = item.installed ? '♻️ Reinstall' : '📦 Install';
+          installBtn.addEventListener('click', ()=> installBundled(item.key));
+          header.appendChild(installBtn);
+        }
+        statusItem.appendChild(header);
         const summary = ce('span');
         const parts = [];
         if(item.zip_present) parts.push('Installer found');
@@ -945,8 +1015,15 @@ function bootAudio(){
         if(item.installed) parts.push('Extracted');
         else if(item.zip_present) parts.push('Not extracted');
         if(item.path) parts.push(item.path);
+        else if(item.root) parts.push(item.root);
         summary.textContent = parts.join(' · ');
         statusItem.appendChild(summary);
+        if(item.source){
+          const src = ce('span');
+          src.className = 'status-text';
+          src.textContent = item.source;
+          statusItem.appendChild(src);
+        }
         bundledStatus.appendChild(statusItem);
         if(item.path) pushPathSuggestion(item.path);
       });
@@ -1346,8 +1423,8 @@ function bootAudio(){
       sample_rate: parseInt(sampleInput.value)||44100,
       sources: [
         { name:'sine', frequency:432, amplitude:0.18 },
-        { name:'modalys', preset:'string-resonator', amplitude:0.22 },
-        { name:'praat', vowel:'o', amplitude:0.16, vibrato_rate:5.5, vibrato_depth:0.004 }
+        { name:'bundled-resonator', preset:'string-resonator', amplitude:0.22 },
+        { name:'formant-voice', vowel:'o', amplitude:0.16, vibrato_rate:5.5, vibrato_depth:0.004 }
       ],
       effects: [
         { name:'reverb', decay:0.45, mix:0.3 },
@@ -1407,9 +1484,7 @@ function bootAudio(){
         const res = await fetch('/api/status');
         if(!res.ok) throw new Error('status '+res.status);
         const data = await res.json();
-        const bundledItems = (Array.isArray(data.bundled) && data.bundled.length)
-          ? data.bundled
-          : legacyBundledFrom(data);
+        const bundledItems = Array.isArray(data.bundled) ? data.bundled : [];
         renderBundledStatusList(bundledItems);
         statusExecutables.clear();
         if(Array.isArray(data.executables)){
@@ -1448,19 +1523,21 @@ function bootAudio(){
       }
     }
 
-    async function install(app){
-      renderInfo.textContent = 'Extracting '+app+'…';
+    async function installBundled(slug){
+      if(!slug) return;
+      renderInfo.textContent = 'Preparing installer…';
       try{
         const res = await fetch('/api/install',{
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({app})
+          body: JSON.stringify({slug})
         });
         if(!res.ok) throw new Error('status '+res.status);
         const data = await res.json();
         if(!data.ok) throw new Error(data.error || 'Installer not found');
-        renderInfo.textContent = data.message || (app+' ready');
-        pushPathSuggestion(data.path);
+        const status = data.status || {};
+        if(status.path) pushPathSuggestion(status.path);
+        renderInfo.textContent = status.installed ? 'Installer extracted.' : 'Installer ready.';
       }catch(err){
         renderInfo.textContent = 'Install failed: '+(err && err.message || err || 'unknown');
       }
@@ -1572,8 +1649,6 @@ function bootAudio(){
     });
 
     q('.checkStatus').addEventListener('click', ()=>{ refreshStatus(); refreshRegistry(); });
-    q('.installModalys').addEventListener('click', ()=> install('modalys'));
-    q('.installPraat').addEventListener('click', ()=> install('praat'));
     q('.resetConfig').addEventListener('click', ()=> applyDefaultConfig());
     q('.renderNow').addEventListener('click', ()=> renderEngine());
     q('.runExternal').addEventListener('click', ()=> runExternalApp());

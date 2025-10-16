@@ -14,6 +14,21 @@ from typing import Optional, Sequence
 
 
 @dataclass
+class BundledResource:
+    """Metadata describing a bundled archive or executable."""
+
+    slug: str
+    title: str
+    source: Path
+
+    def exists(self) -> bool:
+        return self.source.exists()
+
+    def install_dir(self, cache_dir: Path) -> Path:
+        return (cache_dir / "bundled" / self.slug).resolve()
+
+
+@dataclass
 class WorkspaceInfo:
     """Metadata describing an extracted workspace for an external app."""
 
@@ -73,9 +88,6 @@ class ExternalAppManager:
     base_dir: Path = Path(__file__).resolve().parents[2]
     cache_dir: Path | None = None
 
-    modalys_executable_name: str = "Modalys for Max 3.9.0 Installer.exe"
-    praat_executable_name: str = "Praat.exe"
-
     def __post_init__(self) -> None:
         self.base_dir = Path(self.base_dir)
         if self.cache_dir is None:
@@ -83,40 +95,50 @@ class ExternalAppManager:
         else:
             self.cache_dir = Path(self.cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.modalys_zip = self._find_zip("Modalys 3.9.0 for Windows.zip")
-        self.praat_zip = self._find_zip("praat6445_win-intel64.zip")
+        self.bundled_dir = self.cache_dir / "bundled"
+        self.bundled_dir.mkdir(parents=True, exist_ok=True)
         self.workspaces_dir = self.cache_dir / "workspaces"
         self.workspaces_dir.mkdir(parents=True, exist_ok=True)
+        self._bundled_resources = self._discover_bundled_resources()
+        self._bundled_lookup = {item.slug: item for item in self._bundled_resources}
 
-    def _find_zip(self, name: str) -> Optional[Path]:
-        candidate = self.base_dir / name
-        return candidate if candidate.exists() else None
+    def _discover_bundled_resources(self) -> list[BundledResource]:
+        bundles: list[BundledResource] = []
+        sources: list[Path] = []
+        sources.extend(sorted(self.base_dir.glob("*.zip")))
+        sources.extend(sorted(self.base_dir.glob("*.exe")))
+        for index, path in enumerate(sources, start=1):
+            slug = f"bundle-{index}"
+            title = f"Bundled Tool {index}"
+            bundles.append(BundledResource(slug=slug, title=title, source=path))
+        return bundles
 
-    def ensure_modalys_installed(self) -> Optional[Path]:
-        if not self.modalys_zip:
-            return None
-        target = self.cache_dir / "modalys"
-        executable = target / self.modalys_executable_name
-        if not executable.exists():
-            self._extract(self.modalys_zip, target)
-        return executable if executable.exists() else None
+    def bundled_resources(self) -> list[BundledResource]:
+        return list(self._bundled_resources)
 
-    def ensure_praat_installed(self) -> Optional[Path]:
-        if not self.praat_zip:
-            return None
-        target = self.cache_dir / "praat"
-        executable = target / self.praat_executable_name
-        if not executable.exists():
-            self._extract(self.praat_zip, target)
-        return executable if executable.exists() else None
+    def install_bundled(self, slug: str) -> dict[str, object]:
+        resource = self._bundled_lookup.get(slug)
+        if not resource:
+            raise FileNotFoundError(f"Unknown bundled resource: {slug}")
+        status = self._bundled_status(resource)
+        if not resource.exists():
+            return status
 
-    def modalys_installation(self) -> Optional[Path]:
-        target = self.cache_dir / "modalys" / self.modalys_executable_name
-        return target if target.exists() else None
+        target = resource.install_dir(self.cache_dir)
+        if target.exists():
+            shutil.rmtree(target)
+        target.mkdir(parents=True, exist_ok=True)
 
-    def praat_installation(self) -> Optional[Path]:
-        target = self.cache_dir / "praat" / self.praat_executable_name
-        return target if target.exists() else None
+        if resource.source.is_dir():
+            shutil.copytree(resource.source, target, dirs_exist_ok=True)
+        elif zipfile.is_zipfile(resource.source):
+            self._extract(resource.source, target)
+        else:
+            destination = target / resource.source.name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(resource.source, destination)
+
+        return self._bundled_status(resource)
 
     def _extract(self, archive: Path, target_dir: Path) -> None:
         target_dir.mkdir(parents=True, exist_ok=True)
@@ -334,8 +356,6 @@ class ExternalAppManager:
             name_lower = path.name.lower()
             if "setup" in name_lower or "install" in name_lower:
                 score += 5
-            if any(keyword in name_lower for keyword in ("modalys", "praat", "max")):
-                score -= 3
             candidates.append((score, path))
         if not candidates:
             return None
@@ -429,22 +449,35 @@ class ExternalAppManager:
             "cwd": str(working_dir),
         }
 
+    def _bundled_status(self, resource: BundledResource) -> dict[str, object]:
+        payload: dict[str, object] = {
+            "key": resource.slug,
+            "title": resource.title,
+            "zip_present": resource.exists(),
+            "source": str(resource.source) if resource.exists() else None,
+            "installed": False,
+            "root": None,
+            "executable": None,
+            "path": None,
+        }
+
+        install_dir = resource.install_dir(self.cache_dir)
+        if install_dir.exists():
+            payload["installed"] = any(install_dir.iterdir())
+            payload["root"] = str(install_dir)
+            try:
+                root = self._discover_root(install_dir)
+            except FileNotFoundError:
+                root = install_dir
+            payload["root"] = str(root)
+            executable_rel = self._resolve_executable(root, None)
+            if executable_rel:
+                payload["executable"] = executable_rel
+                payload["path"] = str((root / executable_rel).resolve())
+        return payload
+
     def status(self) -> dict[str, object]:
-        """Return structured availability information for the bundled apps."""
-
-        modalys_path = self.modalys_installation()
-        modalys_info = {
-            "zip_present": bool(self.modalys_zip),
-            "installed": bool(modalys_path),
-            "path": str(modalys_path) if modalys_path else None,
-        }
-
-        praat_path = self.praat_installation()
-        praat_info = {
-            "zip_present": bool(self.praat_zip),
-            "installed": bool(praat_path),
-            "path": str(praat_path) if praat_path else None,
-        }
+        """Return structured availability information for bundled resources."""
 
         workspaces = self.workspaces_payload()
         executable_suggestions: list[str] = []
@@ -453,25 +486,17 @@ class ExternalAppManager:
             if path:
                 executable_suggestions.append(str(path))
 
-        bundled: list[dict[str, object]] = []
-        if self.modalys_zip or modalys_path:
-            bundled.append({
-                "key": "modalys",
-                "title": "Modalys",
-                **modalys_info,
-            })
-        if self.praat_zip or praat_path:
-            bundled.append({
-                "key": "praat",
-                "title": "Praat",
-                **praat_info,
-            })
+        bundled = [self._bundled_status(item) for item in self._bundled_resources]
+        for item in bundled:
+            path = item.get("path")
+            if path:
+                executable_suggestions.append(str(path))
+
+        seen_execs: dict[str, None] = {str(path): None for path in executable_suggestions}
 
         return {
-            "modalys": modalys_info,
-            "praat": praat_info,
             "bundled": bundled,
             "platform_supported": self.platform_supported(),
             "workspaces": workspaces,
-            "executables": executable_suggestions,
+            "executables": list(seen_execs.keys()),
         }

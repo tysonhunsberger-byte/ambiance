@@ -4,7 +4,7 @@ from .core.engine import AudioEngine
 from .core.registry import registry
 from .server import serve
 from .sources.basic import NoiseSource, SineWaveSource
-from .sources.integrated import ModalysSource, PraatSource
+from .sources.integrated import BundledResonatorSource, FormantVoiceSource
 from .effects.spatial import ReverbEffect, DelayEffect, LowPassFilterEffect
 
 __all__ = [
@@ -12,8 +12,8 @@ __all__ = [
     "registry",
     "NoiseSource",
     "SineWaveSource",
-    "ModalysSource",
-    "PraatSource",
+    "BundledResonatorSource",
+    "FormantVoiceSource",
     "ReverbEffect",
     "DelayEffect",
     "LowPassFilterEffect",
