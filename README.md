@@ -11,6 +11,7 @@ The Noisetown workspace is now delivered as a standard multi-file web project. T
 ./scripts/mods-advanced.js
 ./scripts/mod-apply.js
 ./scripts/toolbar.js    # toolbar theming, XP chrome, clock/start button
+./scripts/tools.js      # digital audio lab (virtual instrument + integrations)
 ./package.json          # tooling entry points (serve + prettier)
 ```
 All former inline `<style>` and `<script>` blocks have been migrated into the files above. Shared helpers such as the XP taskbar chrome are now reusable functions instead of inlined snippets.
@@ -32,3 +33,10 @@ Edit mode now provides dedicated controls:
 - Drag-and-drop for streams and module cards has been stabilised so ordering works reliably after toggling edit mode.
 
 These changes eliminate the previous issues where modules could not be added, removed, or reordered while editing.
+
+## Digital Audio Creation Lab
+
+- Open the **Digital Audio Creation Lab** panel beneath the workspace to jam with the new virtual instrument. Toggle it on, play via the A–; keyboard keys, and sculpt the tone with envelope, filter, resonance, and reverb controls.
+- The lab shares the master audio graph, so sketches can run alongside existing streams without clipping thanks to the shared limiter.
+- Quick-launch buttons surface Composer's Desktop Project, IRCAM software, SuperCollider (and documentation), and Praat so you can jump into external processing workflows.
+- Capture hybrid workflows by jotting notes or command snippets in the provided scratchpad; notes persist in `localStorage` for painless recall.

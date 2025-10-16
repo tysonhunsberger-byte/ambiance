@@ -211,6 +211,14 @@ function bootAudio(){
     if(typeof window._GLOBAL_TEMPO !== 'number'){ window._GLOBAL_TEMPO = 120; }
   }
 
+  window.ensureNoisetownAudio = function ensureNoisetownAudio(){
+    bootAudio();
+    if(ACTX && typeof ACTX.resume === 'function' && ACTX.state === 'suspended'){
+      ACTX.resume().catch(()=>{});
+    }
+    return { context: ACTX, master: MASTER.pre };
+  };
+
   // ===== Blocks & Streams =====
   const main = qs('#main');
   const blocks = [];        // { el, bus, analyser, cvs, ctx, streams:[] }
@@ -1792,14 +1800,19 @@ themeFile.addEventListener('change', async (e)=>{
   }
 
   function attachModuleClose(modEl){
-    if(!modEl || modEl.querySelector('.mod-close')) return;
+    if(!modEl) return;
     const hdr = modEl.querySelector('.mod-hdr');
     if(!hdr) return;
-    const closeBtn = document.createElement('button');
-    closeBtn.type = 'button';
-    closeBtn.className = 'mod-close';
-    closeBtn.textContent = 'Remove';
-    closeBtn.title = 'Remove module';
+    let closeBtn = modEl.querySelector('.mod-close');
+    if(!closeBtn){
+      closeBtn = document.createElement('button');
+      closeBtn.type = 'button';
+      closeBtn.className = 'mod-close';
+      closeBtn.textContent = 'Remove';
+      closeBtn.title = 'Remove module';
+      hdr.appendChild(closeBtn);
+    }
+    if(closeBtn._modRemoveBound) return;
     closeBtn.addEventListener('click', (ev)=>{
       ev.stopPropagation();
       const parent = modEl.parentElement;
@@ -1808,7 +1821,7 @@ themeFile.addEventListener('change', async (e)=>{
         enableEditReorder(editMode);
       }
     });
-    hdr.appendChild(closeBtn);
+    closeBtn._modRemoveBound = true;
   }
 
   function captureModuleTemplates(streamEl){
@@ -1910,6 +1923,8 @@ themeFile.addEventListener('change', async (e)=>{
         if(!editMode){ e.preventDefault(); return; }
         mod.classList.add('draggingItem');
         e.dataTransfer.effectAllowed='move';
+        try{ e.dataTransfer.setData('text/plain', mod.dataset.mod || 'module'); }
+        catch(err){ /* Firefox requires setData but others may throw */ }
         const ph = document.createElement('div');
         ph.className='placeholder';
         ph.style.height = mod.getBoundingClientRect().height+'px';
