@@ -60,6 +60,34 @@ def test_remove_plugin(tmp_path):
     assert status["streams"]["Main"]["lanes"]["B"] == []
 
 
+def test_assign_plugin_with_relative_path(tmp_path):
+    manager = PluginRackManager(base_dir=tmp_path)
+    workspace = manager.workspace_path()
+    plugin = workspace / "dream.vst3"
+    plugin.mkdir()
+
+    result = manager.assign_plugin("dream.vst3", stream="Dreams", lane="B")
+
+    assert result["stream"] == "Dreams"
+    status = manager.status()
+    dream_lane = status["streams"]["Dreams"]["lanes"]["B"]
+    assert dream_lane and dream_lane[0]["plugin"]["path"].endswith("dream.vst3")
+
+
+def test_remove_plugin_with_relative_path(tmp_path):
+    manager = PluginRackManager(base_dir=tmp_path)
+    workspace = manager.workspace_path()
+    plugin = workspace / "texture.vst3"
+    plugin.mkdir()
+
+    manager.assign_plugin(plugin, stream="Textures", lane="A", slot=1)
+    removed = manager.remove_plugin(stream="Textures", lane="A", path="texture.vst3")
+
+    assert removed["removed"]
+    status = manager.status()
+    assert status["streams"]["Textures"]["lanes"]["A"] == []
+
+
 def test_modalys_bundle_installation(tmp_path):
     archive = tmp_path / "Modalys Bundle.zip"
     with zipfile.ZipFile(archive, "w") as zf:

@@ -1,4 +1,6 @@
-from ambiance.server import render_payload
+from pathlib import Path
+
+from ambiance.server import build_homepage, render_payload
 
 
 def test_render_payload_produces_audio_data_url():
@@ -18,3 +20,18 @@ def test_render_payload_produces_audio_data_url():
     assert response["ok"] is True
     assert response["audio"].startswith("data:audio/wav;base64,")
     assert response["samples"] == int(payload["duration"] * payload["sample_rate"])
+
+
+def test_build_homepage_includes_status_details():
+    status = {
+        "workspace": "/tmp/plugins",
+        "workspace_exists": True,
+        "plugins": [{"path": "/tmp/plugins/example.vst3"}],
+    }
+
+    html = build_homepage(status, Path("noisetown.html"))
+
+    assert "1 plugin available." in html
+    assert "/tmp/plugins" in html
+    assert "noisetown.html" in html
+    assert "href=\"/ui/\"" in html
