@@ -10,11 +10,11 @@ from . import (
     AudioEngine,
     DelayEffect,
     LowPassFilterEffect,
-    ModalysSource,
     NoiseSource,
-    PraatSource,
+    ResonantInstrumentSource,
     ReverbEffect,
     SineWaveSource,
+    VocalFormantSource,
 )
 from .core.registry import registry
 from .utils.audio import write_wav
@@ -60,8 +60,8 @@ def main(argv: list[str] | None = None) -> None:
     else:
         engine.add_source(SineWaveSource(frequency=432, amplitude=0.2))
         engine.add_source(NoiseSource(amplitude=0.05))
-        engine.add_source(ModalysSource())
-        engine.add_source(PraatSource(vowel="o", amplitude=0.15))
+        engine.add_source(ResonantInstrumentSource())
+        engine.add_source(VocalFormantSource(vowel="o", amplitude=0.15))
         engine.add_effect(ReverbEffect())
         engine.add_effect(DelayEffect(time=0.35, feedback=0.25))
         engine.add_effect(LowPassFilterEffect(cutoff=5500))

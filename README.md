@@ -1,21 +1,22 @@
 # Ambiance
 
 Ambiance is a modular audio generation toolkit that blends procedural synthesis with
-external acoustic modeling tools. The repository ships with the Windows installers for
-**Modalys 3.9.0** and **Praat 6.4.45** so that sound designers who run on Windows can
-hook directly into those environments. The Python code offers drop-in simulations when
-those executables are not available, which keeps the package cross-platform friendly
-and ready for CI environments.
+a plugin rack for native sound design tools. Drop VST, VST3, Audio Unit, or mc.svt
+devices into the workspace directory and the system exposes them inside the UI for
+lane-based routing, A/B comparisons, and lightweight session management.
 
 ## Features
 
 - **Composable audio engine** – Combine any number of sources and effects.
-- **External tool integration** – Modalys and Praat installers are detected, extracted
-  into a cache directory on demand, and exposed through Python wrappers.
-- **In-app launcher** – Provide paths to third-party executables and run them from the
-  External Apps Workbench, capturing stdout/stderr without leaving the UI.
-- **Procedural audio sources** – Sine waves, noise beds, Modalys resonators, and
-  Praat-inspired vocal timbres.
+- **Plugin rack integration** – Drop plugins into the workspace directory and assign
+  them to streams with dedicated A/B lanes.
+- **Bundled Modalys starter** – A Modalys (Max) external is copied into the rack
+  workspace automatically when the distribution is present, making it easy to begin
+  experimenting with physical modelling textures.
+- **In-rack management** – Route plugins to stream lanes, copy workspace paths, and
+  switch lanes instantly for comparative listening.
+- **Procedural audio sources** – Sine waves, noise beds, resonant instrument models,
+  and formant-inspired vocal timbres.
 - **Signal processing effects** – Reverb, ping-pong delay, and low-pass filtering.
 - **Command line renderer** – Render ambience tracks directly to WAV files.
 - **Upgradeable architecture** – New sources/effects can be registered by importing a
@@ -37,10 +38,11 @@ and ready for CI environments.
    python -m ambiance.cli output.wav --duration 10
    ```
 
-   If you run the command on Windows and keep the bundled installers in the repository
-   root, the wrappers will extract them into `.cache/external_apps` and allow you to use
-   the native binaries. On other platforms, the Python fallbacks generate similar sounds
-   so your workflows stay portable.
+   The command renders using the built-in procedural sources. To hook in a native
+   plugin, drop its files inside `.cache/plugins` (created on demand) and map them to
+   streams through the plugin rack UI. When a Modalys distribution is present next to
+   the project, the rack automatically stages the `Modalys (Max)` external for
+   assignment so you can immediately explore its sound-design capabilities.
 
 3. Launch the interactive UI server to use the Noisetown interface together with the
    Python engine:
@@ -50,9 +52,8 @@ and ready for CI environments.
    ```
 
    The command serves the bundled `noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html`
-   interface at `http://127.0.0.1:8000/`. The UI exposes controls for checking Modalys
-   and Praat installers, triggering extractions, launching any executable that you
-   point to (including the extracted Modalys/Praat binaries), and rendering ambience
+   interface at `http://127.0.0.1:8000/`. The UI exposes the plugin rack, lets you
+   assign plugins to stream lanes for instant A/B comparison, and renders ambience
    layers through the Python audio engine. If you place a different HTML interface on
    disk, pass its path via `--ui`.
 
@@ -62,7 +63,7 @@ and ready for CI environments.
    {
      "sources": [
        {"type": "SineWaveSource", "frequency": 523.25, "amplitude": 0.15},
-       {"type": "PraatSource", "vowel": "i", "amplitude": 0.2}
+       {"type": "VocalFormantSource", "vowel": "i", "amplitude": 0.2}
      ],
      "effects": [
        {"type": "ReverbEffect", "decay": 0.4, "mix": 0.25}

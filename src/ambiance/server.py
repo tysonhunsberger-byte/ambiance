@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 
 from .core.engine import AudioEngine
 from .core.registry import registry
-from .integrations.external_apps import ExternalAppManager
+from .integrations.plugins import PluginRackManager
 from .utils.audio import encode_wav_bytes
 
 
@@ -62,7 +62,7 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
         self,
         *args: Any,
         directory: str,
-        manager: ExternalAppManager,
+        manager: PluginRackManager,
         ui_path: Path,
         **kwargs: Any,
     ) -> None:
@@ -90,7 +90,7 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
     # --- Routing -----------------------------------------------------
     def do_GET(self) -> None:  # noqa: N802 - stdlib signature
         path = urlparse(self.path).path
-        if path == "/api/status":
+        if path in {"/api/status", "/api/plugins"}:
             payload = self.manager.status()
             self._send_json(payload)
             return
@@ -106,55 +106,50 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802 - stdlib signature
         path = urlparse(self.path).path
         try:
-            if path == "/api/install":
-                payload = self._read_json()
-                app = payload.get("app")
-                if app == "modalys":
-                    located = self.manager.ensure_modalys_installed()
-                elif app == "praat":
-                    located = self.manager.ensure_praat_installed()
-                else:
-                    self._send_json({"ok": False, "error": "Unknown app"}, HTTPStatus.BAD_REQUEST)
-                    return
-                self._send_json(
-                    {
-                        "ok": bool(located),
-                        "installed": bool(located),
-                        "path": str(located) if located else None,
-                        "message": f"{app.capitalize()} ready" if located else "Installer not found",
-                    }
-                )
-                return
             if path == "/api/render":
                 payload = self._read_json()
                 response = render_payload(payload)
                 self._send_json(response)
                 return
-            if path == "/api/run-app":
+            if path == "/api/plugins/assign":
                 payload = self._read_json()
-                executable = payload.get("path") or payload.get("executable")
-                if not executable:
+                plugin_path = payload.get("path")
+                if not plugin_path:
                     self._send_json({"ok": False, "error": "Missing 'path'"}, HTTPStatus.BAD_REQUEST)
                     return
-                args = payload.get("args")
-                wait = bool(payload.get("wait", False))
-                timeout_raw = payload.get("timeout")
-                cwd = payload.get("cwd")
-                timeout_value = None
-                if timeout_raw not in (None, ""):
-                    try:
-                        timeout_value = float(timeout_raw)
-                    except (TypeError, ValueError) as exc:
-                        raise ValueError("Invalid timeout value") from exc
-                result = self.manager.launch_external(
-                    executable,
-                    args=args,
-                    wait=wait,
-                    timeout=timeout_value,
-                    cwd=cwd,
+                stream = payload.get("stream", "Main")
+                lane = payload.get("lane", "A")
+                slot = payload.get("slot")
+                result = self.manager.assign_plugin(
+                    plugin_path,
+                    stream=stream,
+                    lane=lane,
+                    slot=slot,
                 )
-                payload = {"ok": bool(result.get("ok", False)), **result}
-                self._send_json(payload)
+                self._send_json({"ok": True, "assignment": result, "status": self.manager.status()})
+                return
+            if path == "/api/plugins/remove":
+                payload = self._read_json()
+                stream = payload.get("stream")
+                if not stream:
+                    self._send_json({"ok": False, "error": "Missing 'stream'"}, HTTPStatus.BAD_REQUEST)
+                    return
+                lane = payload.get("lane", "A")
+                slot = payload.get("slot")
+                remove_path = payload.get("path")
+                result = self.manager.remove_plugin(
+                    stream=stream,
+                    lane=lane,
+                    slot=slot,
+                    path=remove_path,
+                )
+                self._send_json({"ok": True, "removed": result, "status": self.manager.status()})
+                return
+            if path == "/api/plugins/toggle":
+                payload = self._read_json()
+                stream = payload.get("stream") or "Main"
+                result = self.manager.toggle_lane(stream)
+                self._send_json({"ok": True, "toggle": result, "status": self.manager.status()})
                 return
         except Exception as exc:  # pylint: disable=broad-except
             self._send_json({"ok": False, "error": str(exc)}, HTTPStatus.BAD_REQUEST)
@@ -182,7 +177,7 @@ def serve(host: str = "127.0.0.1", port: int = 8000, ui: Path | None = None) -> 
     base_dir = Path(__file__).resolve().parents[2]
     directory = str(base_dir)
     ui_path = Path(ui) if ui else base_dir / "noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html"
-    manager = ExternalAppManager(base_dir=base_dir)
+    manager = PluginRackManager(base_dir=base_dir)
 
     def handler(*args: Any, **kwargs: Any) -> AmbianceRequestHandler:
         kwargs.setdefault("directory", directory)
