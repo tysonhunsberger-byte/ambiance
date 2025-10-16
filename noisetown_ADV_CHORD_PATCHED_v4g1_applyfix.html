@@ -530,8 +530,8 @@ body.theme-98 select, body.theme-xp select{background:#fff; color:#000; border:1
     ["#0A0A0A","#1A1A1A","#2B2B2B","#6CCFF6"],
     ["#0C0D0E","#191B1F","#2B2F36","#ED6EA0"]
   ]
-  window.pickDarkPalette = window.pickDarkPalette || function(){ return window.window.DARK_PALETTES[Math.floor(Math.random()*window.window.DARK_PALETTES.length)]; }
-  window.pick2DarkPalette = window.pick2DarkPalette || pickDarkPalette;
+  window.pickDarkPalette = window.pickDarkPalette || function(){ return window.DARK_PALETTES[Math.floor(Math.random()*window.DARK_PALETTES.length)]; }
+  window.pick2DarkPalette = window.pick2DarkPalette || window.pickDarkPalette;
   window.applyPaletteToVars = window.applyPaletteToVars || function(p){
     const [bg, panel, card, accent] = p;
     const root = document.documentElement;
@@ -610,8 +610,8 @@ body.theme-98 select, body.theme-xp select{background:#fff; color:#000; border:1
     ["#0B0A07","#1E2019","#2D3123","#DDB967"],
     ["#0E131B","#182230","#26364D","#61C0BF"]
   ];
-  window.pickDarkPalette = window.pickDarkPalette || function(){ return window.window.DARK_PALETTES[Math.floor(Math.random()*window.window.DARK_PALETTES.length)]; }
-  window.pick2DarkPalette = window.pick2DarkPalette || pickDarkPalette;
+  window.pickDarkPalette = window.pickDarkPalette || function(){ return window.DARK_PALETTES[Math.floor(Math.random()*window.DARK_PALETTES.length)]; }
+  window.pick2DarkPalette = window.pick2DarkPalette || window.pickDarkPalette;
 
   /* --- Granular Worklet Source --- */
   ;(function ensureGranularWorklet(){
@@ -746,7 +746,7 @@ body.theme-98 select, body.theme-xp select{background:#fff; color:#000; border:1
   // Curated dark palettes (hex) inspired by ColorHunt dark collections
   /* PALETTES REPLACED */
   window.pickDarkPalette = window.pickDarkPalette || function(){
-    return window.window.DARK_PALETTES[Math.floor(Math.random()*window.window.DARK_PALETTES.length)];
+    return window.DARK_PALETTES[Math.floor(Math.random()*window.DARK_PALETTES.length)];
   }
   window.applyPaletteToVars = window.applyPaletteToVars || function(p){
     const [bg, panel, card, accent] = p;
