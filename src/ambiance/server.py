@@ -10,11 +10,12 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from socketserver import ThreadingMixIn
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from .core.engine import AudioEngine
 from .core.registry import registry
 from .integrations.plugins import PluginRackManager
+from .integrations.flutter_vst_host import FlutterVSTHost
 from .utils.audio import encode_wav_bytes
 
 
@@ -64,10 +65,12 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
         directory: str,
         manager: PluginRackManager,
         ui_path: Path,
+        vst_host: FlutterVSTHost,
         **kwargs: Any,
     ) -> None:
         self.manager = manager
         self.ui_path = ui_path
+        self.vst_host = vst_host
         super().__init__(*args, directory=directory, **kwargs)
 
     # --- Response helpers -------------------------------------------
@@ -93,6 +96,20 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
         if path in {"/api/status", "/api/plugins"}:
             payload = self.manager.status()
             self._send_json(payload)
+            return
+        if path == "/api/vst/status":
+            status = self.vst_host.status()
+            self._send_json({"ok": True, "status": status})
+            return
+        if path == "/api/vst/ui":
+            query = parse_qs(urlparse(self.path).query)
+            plugin_path = query.get("path", [None])[0]
+            try:
+                descriptor = self.vst_host.describe_ui(plugin_path)
+            except RuntimeError as exc:
+                self._send_json({"ok": False, "error": str(exc)}, HTTPStatus.BAD_REQUEST)
+                return
+            self._send_json({"ok": True, "descriptor": descriptor})
             return
         if path == "/api/registry":
             payload = {"sources": list(registry.sources()), "effects": list(registry.effects())}
@@ -151,6 +168,77 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
                 result = self.manager.toggle_lane(stream)
                 self._send_json({"ok": True, "toggle": result, "status": self.manager.status()})
                 return
+            if path == "/api/vst/load":
+                payload = self._read_json()
+                plugin_path = payload.get("path")
+                parameters = payload.get("parameters") or None
+                if not plugin_path:
+                    self._send_json({"ok": False, "error": "Missing 'path'"}, HTTPStatus.BAD_REQUEST)
+                    return
+                plugin = self.vst_host.load_plugin(plugin_path, parameters)
+                self._send_json({"ok": True, "plugin": plugin, "status": self.vst_host.status()})
+                return
+            if path == "/api/vst/unload":
+                self.vst_host.unload()
+                self._send_json({"ok": True, "status": self.vst_host.status()})
+                return
+            if path == "/api/vst/parameter":
+                payload = self._read_json()
+                identifier = payload.get("id")
+                value = payload.get("value")
+                if identifier is None or value is None:
+                    self._send_json(
+                        {"ok": False, "error": "Missing 'id' or 'value'"}, HTTPStatus.BAD_REQUEST
+                    )
+                    return
+                update = self.vst_host.set_parameter(identifier, float(value))
+                self._send_json({"ok": True, "status": self.vst_host.status(), "update": update})
+                return
+            if path == "/api/vst/render":
+                payload = self._read_json()
+                duration = float(payload.get("duration", 1.5))
+                sample_rate = int(payload.get("sample_rate", 44100))
+                preview = self.vst_host.render_preview(duration=duration, sample_rate=sample_rate)
+                audio = encode_wav_bytes(preview, sample_rate)
+                encoded = base64.b64encode(audio).decode("ascii")
+                self._send_json(
+                    {
+                        "ok": True,
+                        "audio": f"data:audio/wav;base64,{encoded}",
+                        "duration": duration,
+                        "sample_rate": sample_rate,
+                    }
+                )
+                return
+            if path == "/api/vst/play":
+                payload = self._read_json()
+                note = int(payload.get("note", 60))
+                velocity = float(payload.get("velocity", 0.8))
+                duration = float(payload.get("duration", 1.0))
+                sample_rate = int(payload.get("sample_rate", 44100))
+                try:
+                    audio = self.vst_host.play_note(
+                        note,
+                        velocity=velocity,
+                        duration=duration,
+                        sample_rate=sample_rate,
+                    )
+                except RuntimeError as exc:
+                    self._send_json({"ok": False, "error": str(exc)}, HTTPStatus.BAD_REQUEST)
+                    return
+                wav = encode_wav_bytes(audio, sample_rate)
+                encoded = base64.b64encode(wav).decode("ascii")
+                self._send_json(
+                    {
+                        "ok": True,
+                        "audio": f"data:audio/wav;base64,{encoded}",
+                        "note": note,
+                        "velocity": velocity,
+                        "duration": duration,
+                        "sample_rate": sample_rate,
+                    }
+                )
+                return
         except Exception as exc:  # pylint: disable=broad-except
             self._send_json({"ok": False, "error": str(exc)}, HTTPStatus.BAD_REQUEST)
             return
@@ -178,11 +266,13 @@ def serve(host: str = "127.0.0.1", port: int = 8000, ui: Path | None = None) -> 
     directory = str(base_dir)
     ui_path = Path(ui) if ui else base_dir / "noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html"
     manager = PluginRackManager(base_dir=base_dir)
+    vst_host = FlutterVSTHost(base_dir=base_dir)
 
     def handler(*args: Any, **kwargs: Any) -> AmbianceRequestHandler:
         kwargs.setdefault("directory", directory)
         kwargs.setdefault("manager", manager)
         kwargs.setdefault("ui_path", ui_path)
+        kwargs.setdefault("vst_host", vst_host)
         return AmbianceRequestHandler(*args, **kwargs)
 
     with ThreadingHTTPServer((host, port), handler) as httpd:

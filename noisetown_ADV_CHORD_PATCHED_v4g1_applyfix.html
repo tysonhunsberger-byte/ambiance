@@ -43,6 +43,47 @@
   .plugin-block .workspaceNotes span{display:block}
   .plugin-block .pluginLibrary li.selected{outline:2px solid rgba(89,167,255,.6);outline-offset:2px}
   .plugin-block .rack-panel{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:12px;background:rgba(9,12,19,.92);border:1px solid rgba(255,255,255,.06);box-shadow:0 20px 36px rgba(0,0,0,.35)}
+  .plugin-block .host-panel{margin-top:14px;display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:12px;background:rgba(16,20,30,.9);border:1px solid rgba(89,167,255,.25);box-shadow:0 18px 30px rgba(0,0,0,.32)}
+  .plugin-block .host-header{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .plugin-block .host-header h3{margin:0;font-size:17px}
+  .plugin-block .host-actions{display:flex;gap:8px;margin-left:auto}
+  .plugin-block .hostStatus{padding:10px;border-radius:8px;background:rgba(12,16,24,.75);border:1px solid rgba(255,255,255,.06)}
+  .plugin-block .hostParameters{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .plugin-block .hostParameters li{padding:10px;border-radius:10px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px}
+  .plugin-block .hostParamLabel{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+  .plugin-block .hostParamLabel span{font-size:12px;color:var(--muted)}
+  .plugin-block .hostWarnings{display:flex;flex-direction:column;gap:4px}
+  .plugin-block .hostWarnings span{display:block;padding:6px 8px;border-radius:6px;background:rgba(255,139,139,.1);border:1px solid rgba(255,139,139,.3);font-size:12px;color:#ff9b9b}
+  .plugin-block .instrument-panel{margin-top:12px;padding:20px;border-radius:14px;background:linear-gradient(160deg,rgba(8,12,20,.92),rgba(15,18,28,.94));border:1px solid rgba(89,167,255,.2);display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 40px rgba(0,0,0,.35);position:relative;overflow:hidden;color:#f8fafc;--instrument-accent:#f97316;--instrument-surface:rgba(9,12,18,.78);--instrument-border:rgba(255,255,255,.08)}
+  .plugin-block .instrument-panel::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 80% 10%,rgba(89,167,255,.18),transparent 55%)}
+  .instrument-panel[hidden]{display:none !important}
+  .instrument-header{display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap;position:relative;z-index:1}
+  .instrument-header h3{margin:0;font-size:18px}
+  .instrument-header .instrument-subtitle{margin:2px 0 0;color:var(--muted)}
+  .instrument-octave{margin-left:auto;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:rgba(12,18,30,.75);border:1px solid rgba(255,255,255,.08)}
+  .instrument-body{display:grid;gap:18px;grid-template-columns:minmax(280px,340px) minmax(260px,1fr);align-items:start;position:relative;z-index:1}
+  @media (max-width:1100px){.instrument-body{grid-template-columns:1fr}}
+  .instrument-visual{position:relative;overflow:hidden;border-radius:16px;border:1px solid var(--instrument-border);background:rgba(10,14,22,.7);box-shadow:0 16px 34px rgba(0,0,0,.32)}
+  .instrument-artwork{width:100%;height:auto;display:block;opacity:.92}
+  .instrument-ui-surface{position:absolute;inset:18px;display:flex;flex-direction:column;gap:12px;padding:12px;border-radius:12px;background:var(--instrument-surface);backdrop-filter:blur(4px);border:1px solid var(--instrument-border);overflow:auto}
+  .instrument-controls{display:flex;flex-direction:column;gap:14px}
+  .instrument-control-panel{border-radius:14px;padding:16px;background:var(--instrument-surface);border:1px solid var(--instrument-border);box-shadow:0 14px 30px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:12px}
+  .instrument-control-panel h4{margin:0;font-size:15px}
+  .instrument-control-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+  .instrument-control-row{display:flex;gap:12px;flex-wrap:wrap}
+  .instrument-control{display:flex;flex-direction:column;gap:8px}
+  .instrument-control .value{font-size:12px;color:var(--muted)}
+  .instrument-control.knob{align-items:center;text-align:center}
+  .instrument-control.knob input[type="range"]{width:100px}
+  .instrument-keyboard{position:relative;display:flex;align-items:flex-end;gap:2px;padding:18px 14px;border-radius:14px;background:rgba(9,12,18,.9);border:1px solid var(--instrument-border);box-shadow:0 16px 30px rgba(0,0,0,.32);overflow-x:auto;z-index:1}
+  .instrument-keyboard::-webkit-scrollbar{height:6px}
+  .instrument-keyboard::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+  .instrument-key{position:relative;min-width:42px;height:140px;border-radius:6px;border:1px solid rgba(0,0,0,.6);background:linear-gradient(180deg,#f5f7ff 0%,#d1d5e5 100%);color:#000;font-weight:600;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease}
+  .instrument-key.black{background:linear-gradient(180deg,#1f2430 0%,#0f1218 100%);color:#fff;height:98px;margin-left:-18px;margin-right:-18px;z-index:2;border-color:#111}
+  .instrument-key.active{transform:translateY(2px);box-shadow:0 8px 16px rgba(0,0,0,.35);background:linear-gradient(180deg,var(--instrument-accent) 0%, rgba(0,0,0,.45) 100%);color:#111;border-color:var(--instrument-accent)}
+  .instrument-key.black.active{background:linear-gradient(180deg,var(--instrument-accent) 0%, rgba(0,0,0,.6) 100%);color:#000;border-color:var(--instrument-accent)}
+  .instrument-footer{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;padding:10px 0 0;margin-top:-6px;border-top:1px solid rgba(255,255,255,.08);position:relative;z-index:1}
+  .instrument-velocity{display:flex;align-items:center;gap:8px}
   .plugin-block .rack-header{display:flex;flex-direction:column;gap:6px}
   .plugin-block .streamsContainer{display:flex;flex-direction:column;gap:14px}
   .plugin-block .rackStream{border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 18px 32px rgba(0,0,0,.28)}
@@ -762,6 +803,7 @@ function bootAudio(){
   let blockCount = 0;
 
   const pluginState = { status: null, selected: null };
+  const hostState = { status: null, busy: false };
   const LANE_KEYS = ['A', 'B'];
 
   const isPluginBlock = (el)=> !!(el && el.dataset && el.dataset.role === 'plugin-rack');
@@ -800,6 +842,48 @@ function bootAudio(){
           <div class="rackNotes small"></div>
         </section>
       </div>
+      <section class="host-panel" aria-live="polite">
+        <header class="host-header">
+          <div class="host-title">
+            <h3>Live VST Host</h3>
+            <p class="host-subtitle small">Powered by Flutter VST3 toolkit</p>
+          </div>
+          <div class="host-actions">
+            <button class="btn hostLoad" disabled>⬆️ Load Selected</button>
+            <button class="btn hostUnload" disabled>⏏ Unload</button>
+            <button class="btn hostPreview" disabled>▶️ Preview</button>
+          </div>
+        </header>
+        <div class="hostStatus small">Toolkit status pending…</div>
+        <ul class="hostParameters"></ul>
+        <div class="hostWarnings"></div>
+      </section>
+      <section class="instrument-panel" aria-live="polite" hidden>
+        <header class="instrument-header">
+          <div>
+            <h3 class="instrument-title">Digital Instrument</h3>
+            <p class="instrument-subtitle small">Load an instrument plugin to unlock performance controls.</p>
+          </div>
+          <div class="instrument-octave">
+            <button class="btn instrument-octave-down" type="button" aria-label="Lower octave">◀ Oct</button>
+            <span class="instrument-octave-label">Octave 4</span>
+            <button class="btn instrument-octave-up" type="button" aria-label="Raise octave">Oct ▶</button>
+          </div>
+        </header>
+        <div class="instrument-body">
+          <div class="instrument-visual">
+            <img class="instrument-artwork" alt="Instrument artwork" loading="lazy">
+            <div class="instrument-ui-surface"></div>
+          </div>
+          <div class="instrument-controls"></div>
+        </div>
+        <div class="instrument-keyboard" role="group" aria-label="Instrument keyboard"></div>
+        <footer class="instrument-footer">
+          <div class="instrument-status small">Load an instrument plugin to begin.</div>
+          <label class="instrument-velocity small">Velocity <input class="instrument-velocity-slider" type="range" min="0.2" max="1" step="0.05" value="0.85"></label>
+          <button class="btn instrument-preview-note" type="button">🎺 Preview</button>
+        </footer>
+      </section>
       <section class="rack-log">
         <label style="display:block;margin-bottom:6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Rack Activity</label>
         <textarea class="rackOutput" readonly placeholder="Status updates from the plugin rack will appear here."></textarea>
@@ -823,6 +907,37 @@ function bootAudio(){
     const selectedLabel = q('.selectedPlugin');
     const streamsContainer = q('.streamsContainer');
     const rackNotes = q('.rackNotes');
+    const hostPanel = q('.host-panel');
+    const hostStatusBox = q('.hostStatus');
+    const hostParamList = q('.hostParameters');
+    const hostWarnings = q('.hostWarnings');
+    const hostLoadBtn = q('.hostLoad');
+    const hostUnloadBtn = q('.hostUnload');
+    const hostPreviewBtn = q('.hostPreview');
+    const instrumentPanel = q('.instrument-panel');
+    const instrumentTitle = q('.instrument-title');
+    const instrumentSubtitle = q('.instrument-subtitle');
+    const instrumentArtwork = q('.instrument-artwork');
+    const instrumentUISurface = q('.instrument-ui-surface');
+    const instrumentControls = q('.instrument-controls');
+    const instrumentKeyboard = q('.instrument-keyboard');
+    const instrumentStatus = q('.instrument-status');
+    const instrumentVelocitySlider = q('.instrument-velocity-slider');
+    const instrumentPreviewBtn = q('.instrument-preview-note');
+    const instrumentOctaveLabel = q('.instrument-octave-label');
+    const instrumentOctDown = q('.instrument-octave-down');
+    const instrumentOctUp = q('.instrument-octave-up');
+
+    const instrumentState = {
+      descriptor: null,
+      currentPath: null,
+      octave: 4,
+      minOctave: 2,
+      maxOctave: 7,
+      velocity: 0.85,
+      keyDown: new Set(),
+      range: { min: 48, max: 72 }
+    };
 
     function log(message){
       if(!rackOutput) return;
@@ -850,6 +965,7 @@ function bootAudio(){
         if(!(li instanceof HTMLElement)) return;
         li.classList.toggle('selected', !!plugin && li.dataset.path === (plugin.path || ''));
       });
+      renderHost();
     }
 
     function renderWorkspaceNotes(status){
@@ -860,6 +976,503 @@ function bootAudio(){
         span.textContent = note;
         workspaceNotes.appendChild(span);
       });
+    }
+
+    const WHITE_NOTES = new Set([0,2,4,5,7,9,11]);
+    const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+    function ensureInstrumentRange(descriptor){
+      const keyboard = descriptor && descriptor.keyboard ? descriptor.keyboard : null;
+      const min = keyboard && typeof keyboard.min_note === 'number' ? keyboard.min_note : 48;
+      const max = keyboard && typeof keyboard.max_note === 'number' ? keyboard.max_note : 72;
+      instrumentState.range = { min, max };
+      instrumentState.minOctave = Math.max(0, Math.floor(min / 12));
+      instrumentState.maxOctave = Math.max(instrumentState.minOctave + 1, Math.floor(max / 12));
+      instrumentState.octave = clamp(instrumentState.octave, instrumentState.minOctave, instrumentState.maxOctave - 1);
+    }
+
+    function updateInstrumentOctaveLabel(){
+      if(instrumentOctaveLabel){
+        instrumentOctaveLabel.textContent = `Octave ${instrumentState.octave}`;
+      }
+      if(instrumentOctDown){
+        instrumentOctDown.disabled = instrumentState.octave <= instrumentState.minOctave;
+      }
+      if(instrumentOctUp){
+        instrumentOctUp.disabled = instrumentState.octave >= instrumentState.maxOctave - 1;
+      }
+    }
+
+    function buildInstrumentKeyboard(){
+      if(!instrumentKeyboard) return;
+      instrumentKeyboard.innerHTML = '';
+      const startNote = Math.max(instrumentState.range.min, instrumentState.octave * 12);
+      const endNote = Math.min(instrumentState.range.max, startNote + 23);
+      for(let note = startNote; note <= endNote; note++){
+        const key = document.createElement('button');
+        key.type = 'button';
+        key.dataset.note = String(note);
+        const name = NOTE_NAMES[note % 12];
+        key.textContent = name;
+        key.className = `instrument-key ${WHITE_NOTES.has(note % 12) ? 'white' : 'black'}`;
+        key.addEventListener('pointerdown', (event)=>{
+          event.preventDefault();
+          handleInstrumentKeyDown(note, key);
+        });
+        key.addEventListener('pointerup', ()=> handleInstrumentKeyUp(note, key));
+        key.addEventListener('pointerleave', ()=> handleInstrumentKeyUp(note, key));
+      instrumentKeyboard.appendChild(key);
+      }
+    }
+
+    function middleInstrumentNote(){
+      const min = instrumentState.range.min;
+      const max = instrumentState.range.max;
+      const mid = Math.round((min + max) / 2);
+      return clamp(mid, min, max);
+    }
+
+    function handleInstrumentKeyDown(note, element){
+      if(!instrumentState.descriptor) return;
+      instrumentState.keyDown.add(note);
+      if(element) element.classList.add('active');
+      triggerInstrumentPlayback(note, instrumentState.velocity);
+    }
+
+    function handleInstrumentKeyUp(note, element){
+      instrumentState.keyDown.delete(note);
+      if(element) element.classList.remove('active');
+    }
+
+    function applyInstrumentTheme(descriptor){
+      if(!instrumentPanel) return;
+      const theme = descriptor && descriptor.theme ? descriptor.theme : {};
+      if(theme.background || theme.accentSecondary){
+        const end = theme.accentSecondary || theme.background || '#1f2937';
+        instrumentPanel.style.background = `linear-gradient(160deg, ${theme.background || '#0f172a'}, ${end})`;
+      }else{
+        instrumentPanel.style.removeProperty('background');
+      }
+      instrumentPanel.style.setProperty('--instrument-accent', theme.accent || '#f97316');
+      instrumentPanel.style.setProperty('--instrument-surface', theme.panel || 'rgba(9,12,18,.78)');
+      instrumentPanel.style.setProperty('--instrument-border', theme.panelStroke || 'rgba(255,255,255,.08)');
+      if(instrumentUISurface){
+        instrumentUISurface.style.color = theme.text || '';
+      }
+      if(instrumentControls){
+        instrumentControls.style.color = theme.text || '';
+      }
+    }
+
+    function renderInstrumentControls(descriptor){
+      if(!instrumentControls){
+        return;
+      }
+      instrumentControls.innerHTML = '';
+      if(!descriptor || !Array.isArray(descriptor.panels)){
+        return;
+      }
+      const parameterLookup = {};
+      const params = (hostState.status && hostState.status.parameters) || [];
+      params.forEach((param)=>{
+        const key = (param.name || '').replace(/\s+/g, '').toLowerCase();
+        parameterLookup[key] = param;
+      });
+      descriptor.panels.forEach((panel)=>{
+        const panelEl = document.createElement('section');
+        panelEl.className = 'instrument-control-panel';
+        if(panel.title){
+          const h = document.createElement('h4');
+          h.textContent = panel.title;
+          panelEl.appendChild(h);
+        }
+        const layout = document.createElement('div');
+        layout.className = panel.layout === 'row' ? 'instrument-control-row' : 'instrument-control-grid';
+        (panel.controls || []).forEach((control)=>{
+          const key = ((control.param || control.name || '') + '').replace(/\s+/g, '').toLowerCase();
+          const param = parameterLookup[key];
+          const wrap = document.createElement('div');
+          wrap.className = `instrument-control ${control.type === 'knob' ? 'knob' : 'slider'}`;
+          const label = document.createElement('label');
+          label.textContent = control.label || (param && (param.display_name || param.name)) || (control.param || 'Parameter');
+          wrap.appendChild(label);
+          const valueSpan = document.createElement('span');
+          valueSpan.className = 'value';
+          const value = (param && (param.value ?? param.default)) ?? control.value ?? control.min ?? 0;
+          valueSpan.textContent = formatParamDisplay(param || control, value);
+          wrap.appendChild(valueSpan);
+          const slider = document.createElement('input');
+          slider.type = 'range';
+          const min = control.min !== undefined ? control.min : (param && param.min !== undefined ? param.min : 0);
+          const max = control.max !== undefined ? control.max : (param && param.max !== undefined ? param.max : 1);
+          slider.min = min;
+          slider.max = max;
+          slider.step = control.step !== undefined ? control.step : (param && param.step !== undefined ? param.step : 0.01);
+          slider.value = value;
+          slider.dataset.paramId = (param && param.id !== undefined) ? param.id : (control.id !== undefined ? control.id : control.param);
+          slider.addEventListener('input', (event)=>{
+            const val = parseFloat(event.target.value);
+            valueSpan.textContent = formatParamDisplay(param || control, val);
+          });
+          slider.addEventListener('change', (event)=>{
+            const val = parseFloat(event.target.value);
+            commitHostParameter(slider.dataset.paramId || control.param, val, valueSpan);
+          });
+          wrap.appendChild(slider);
+          layout.appendChild(wrap);
+        });
+        panelEl.appendChild(layout);
+        instrumentControls.appendChild(panelEl);
+      });
+    }
+
+    function renderInstrumentPanel(){
+      if(!instrumentPanel) return;
+      const plugin = hostState.status && hostState.status.plugin;
+      const descriptor = instrumentState.descriptor;
+      const isInstrument = descriptor && descriptor.capabilities && descriptor.capabilities.instrument;
+      if(!plugin || !isInstrument){
+        instrumentPanel.hidden = true;
+        if(instrumentStatus){
+          instrumentStatus.textContent = plugin ? 'This plugin does not expose instrument playback.' : 'Load an instrument plugin to begin.';
+        }
+        return;
+      }
+      instrumentPanel.hidden = false;
+      if(instrumentTitle){
+        instrumentTitle.textContent = descriptor.title || (plugin.metadata && plugin.metadata.name) || 'Instrument';
+      }
+      if(instrumentSubtitle){
+        instrumentSubtitle.textContent = descriptor.subtitle || (plugin.metadata && plugin.metadata.vendor) || 'Hosted instrument';
+      }
+      if(instrumentArtwork){
+        const art = descriptor.artwork && descriptor.artwork.data_uri;
+        if(art){
+          instrumentArtwork.src = art;
+          instrumentArtwork.style.display = '';
+        }else{
+          instrumentArtwork.removeAttribute('src');
+          instrumentArtwork.style.display = 'none';
+        }
+      }
+      ensureInstrumentRange(descriptor);
+      updateInstrumentOctaveLabel();
+      buildInstrumentKeyboard();
+      renderInstrumentControls(descriptor);
+      applyInstrumentTheme(descriptor);
+      if(instrumentStatus){
+        instrumentStatus.textContent = 'Tap a key to audition notes instantly.';
+      }
+      if(instrumentVelocitySlider){
+        instrumentVelocitySlider.value = instrumentState.velocity;
+      }
+    }
+
+    function triggerInstrumentPlayback(note, velocity, duration=1.25){
+      fetch('/api/vst/play', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note, velocity, duration })
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Playback failed');
+          if(payload.audio){
+            playPreviewAudio(payload.audio);
+          }
+        })
+        .catch((err)=>{
+          log('Instrument playback failed: ' + (err && err.message || err));
+        });
+    }
+
+    function fetchInstrumentDescriptor(path){
+      if(!path) return Promise.resolve(null);
+      return fetch(`/api/vst/ui?path=${encodeURIComponent(path)}`)
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Descriptor load failed');
+          instrumentState.descriptor = payload.descriptor || null;
+          instrumentState.currentPath = path;
+          renderInstrumentPanel();
+        })
+        .catch((err)=>{
+          log('Instrument descriptor failed: ' + (err && err.message || err));
+          instrumentState.descriptor = null;
+          instrumentState.currentPath = null;
+          renderInstrumentPanel();
+        });
+    }
+
+    function clearInstrument(){
+      instrumentState.descriptor = null;
+      instrumentState.currentPath = null;
+      instrumentState.keyDown.clear();
+      if(instrumentKeyboard) instrumentKeyboard.innerHTML = '';
+      if(instrumentStatus) instrumentStatus.textContent = 'Load an instrument plugin to begin.';
+      if(instrumentPanel) instrumentPanel.hidden = true;
+    }
+
+    function formatParamDisplay(param, value){
+      if(param.units && param.units.includes('%')){
+        return `${Math.round(value * 100)}${param.units}`;
+      }
+      if(param.units && param.units.toLowerCase() === 'ms'){
+        return `${Math.round(value * 1000)} ms`;
+      }
+      const min = typeof param.min === 'number' ? param.min : 0;
+      const max = typeof param.max === 'number' ? param.max : 1;
+      const precision = (max - min) <= 1 ? 2 : 3;
+      return `${value.toFixed(precision)}${param.units ? ' ' + param.units : ''}`;
+    }
+
+    function renderHost(){
+      if(!hostPanel) return;
+      const status = hostState.status;
+      const available = !!(status && status.available);
+      const plugin = status && status.plugin;
+      if(hostStatusBox){
+        if(!status){
+          hostStatusBox.textContent = 'Toolkit status pending…';
+        }else if(!available){
+          hostStatusBox.textContent = 'Flutter VST toolkit not detected. Install it to enable realtime hosting.';
+        }else if(plugin){
+          const name = plugin.metadata && plugin.metadata.name ? plugin.metadata.name : 'Plugin';
+          const vendor = plugin.metadata && plugin.metadata.vendor ? ` · ${plugin.metadata.vendor}` : '';
+          hostStatusBox.textContent = `Hosting ${name}${vendor}.`;
+        }else{
+          hostStatusBox.textContent = 'Toolkit ready. Load a plugin from the library to begin.';
+        }
+      }
+      if(hostWarnings){
+        hostWarnings.innerHTML = '';
+        if(status && status.warnings){
+          status.warnings.forEach((warning)=>{
+            const span = document.createElement('span');
+            span.textContent = warning;
+            hostWarnings.appendChild(span);
+          });
+        }
+      }
+      if(hostParamList){
+        hostParamList.innerHTML = '';
+        if(plugin && status && Array.isArray(status.parameters) && status.parameters.length){
+          status.parameters.forEach((param)=>{
+            const li = document.createElement('li');
+            const label = document.createElement('label');
+            label.className = 'hostParamLabel';
+            label.textContent = param.display_name || param.name;
+            const valueLabel = document.createElement('span');
+            valueLabel.textContent = formatParamDisplay(param, param.value ?? param.default ?? param.min);
+            label.appendChild(valueLabel);
+            li.appendChild(label);
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            const min = (param.min !== undefined) ? param.min : 0;
+            const max = (param.max !== undefined) ? param.max : 1;
+            slider.min = min;
+            slider.max = max;
+            slider.step = param.step || 0.01;
+            slider.value = (param.value !== undefined) ? param.value : (param.default ?? min);
+            slider.dataset.paramId = param.id;
+            slider.addEventListener('input', (event)=>{
+              const val = parseFloat(event.target.value);
+              valueLabel.textContent = formatParamDisplay(param, val);
+            });
+            slider.addEventListener('change', (event)=>{
+              const val = parseFloat(event.target.value);
+              commitHostParameter(param.id, val, valueLabel);
+            });
+            li.appendChild(slider);
+            if(param.description){
+              const desc = document.createElement('p');
+              desc.className = 'small';
+              desc.textContent = param.description;
+              li.appendChild(desc);
+            }
+            hostParamList.appendChild(li);
+          });
+        }
+      }
+      if(hostLoadBtn){
+        hostLoadBtn.disabled = !available || !pluginState.selected;
+      }
+      if(hostUnloadBtn){
+        hostUnloadBtn.disabled = !available || !plugin;
+      }
+      if(hostPreviewBtn){
+        hostPreviewBtn.disabled = !available || !plugin || hostState.busy;
+      }
+      renderInstrumentPanel();
+    }
+
+    function refreshHostStatus(){
+      return fetch('/api/vst/status')
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(payload && payload.status){
+            hostState.status = payload.status;
+            const pluginPath = payload.status && payload.status.plugin && payload.status.plugin.path;
+            if(pluginPath){
+              if(instrumentState.currentPath !== pluginPath){
+                fetchInstrumentDescriptor(pluginPath);
+              }
+            }else{
+              clearInstrument();
+            }
+          }
+          renderHost();
+        })
+        .catch((err)=>{
+          log('Host status failed: ' + (err && err.message || err));
+        });
+    }
+
+    function commitHostParameter(identifier, value, valueLabel){
+      fetch('/api/vst/parameter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: identifier, value }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Update failed');
+          hostState.status = payload.status;
+          if(valueLabel){
+            const paramId = parseInt(identifier, 10);
+            const updated = (payload.status && payload.status.parameters || []).find((p)=> parseInt(p.id, 10) === paramId);
+            if(updated){
+              valueLabel.textContent = formatParamDisplay(updated, updated.value ?? value);
+            }
+          }
+          renderHost();
+        })
+        .catch((err)=>{
+          log('Parameter update failed: ' + (err && err.message || err));
+          refreshHostStatus();
+        });
+    }
+
+    function playPreviewAudio(dataUrl){
+      if(!dataUrl) return;
+      try{
+        if(!ACTX) bootAudio();
+        const base64 = dataUrl.split(',')[1] || dataUrl;
+        const binary = atob(base64);
+        const len = binary.length;
+        const bytes = new Uint8Array(len);
+        for(let i=0;i<len;i++) bytes[i] = binary.charCodeAt(i);
+        ACTX.decodeAudioData(bytes.buffer)
+          .then((buffer)=>{
+            const source = ACTX.createBufferSource();
+            source.buffer = buffer;
+            const target = MASTER && MASTER.pre ? MASTER.pre : ACTX.destination;
+            source.connect(target);
+            source.start();
+          })
+          .catch((err)=>{
+            log('Preview playback failed: ' + (err && err.message || err));
+          });
+      }catch(err){
+        log('Preview decode failed: ' + (err && err.message || err));
+      }
+    }
+
+    function loadSelectedIntoHost(){
+      const plugin = pluginState.selected;
+      if(!plugin){
+        log('Select a plugin from the library first.');
+        return;
+      }
+      hostState.busy = true;
+      renderHost();
+      fetch('/api/vst/load', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: plugin.path }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Load failed');
+          hostState.status = payload.status;
+          log(`Hosting ${plugin.name || plugin.path}.`);
+          fetchInstrumentDescriptor(plugin.path);
+        })
+        .catch((err)=>{
+          log('Load failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          hostState.busy = false;
+          renderHost();
+        });
+    }
+
+    function unloadHost(){
+      hostState.busy = true;
+      renderHost();
+      fetch('/api/vst/unload', { method: 'POST' })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Unload failed');
+          hostState.status = payload.status;
+          log('Host cleared.');
+          clearInstrument();
+        })
+        .catch((err)=>{
+          log('Unload failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          hostState.busy = false;
+          renderHost();
+        });
+    }
+
+    function previewHost(){
+      if(!hostState.status || !hostState.status.plugin){
+        log('Load a plugin into the host first.');
+        return;
+      }
+      hostState.busy = true;
+      renderHost();
+      fetch('/api/vst/render', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duration: 2.0 }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Render failed');
+          playPreviewAudio(payload.audio);
+          log('Rendered preview for hosted plugin.');
+        })
+        .catch((err)=>{
+          log('Preview failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          hostState.busy = false;
+          renderHost();
+        });
     }
 
     function renderPluginLibrary(status){
@@ -1108,6 +1721,7 @@ function bootAudio(){
         renderWorkspaceNotes(data);
         renderPluginLibrary(data);
         renderStreams(data);
+        refreshHostStatus();
         if(rackNotes){
           rackNotes.textContent = count
             ? 'Select a plugin and choose a lane to start routing.'
@@ -1128,6 +1742,54 @@ function bootAudio(){
         refreshRack(true);
       });
     });
+
+    if(hostLoadBtn){
+      hostLoadBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        loadSelectedIntoHost();
+      });
+    }
+    if(hostUnloadBtn){
+      hostUnloadBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        unloadHost();
+      });
+    }
+    if(hostPreviewBtn){
+      hostPreviewBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        previewHost();
+      });
+    }
+    if(instrumentOctDown){
+      instrumentOctDown.addEventListener('click', (event)=>{
+        event.preventDefault();
+        instrumentState.octave = clamp(instrumentState.octave - 1, instrumentState.minOctave, instrumentState.maxOctave - 1);
+        updateInstrumentOctaveLabel();
+        buildInstrumentKeyboard();
+      });
+    }
+    if(instrumentOctUp){
+      instrumentOctUp.addEventListener('click', (event)=>{
+        event.preventDefault();
+        instrumentState.octave = clamp(instrumentState.octave + 1, instrumentState.minOctave, instrumentState.maxOctave - 1);
+        updateInstrumentOctaveLabel();
+        buildInstrumentKeyboard();
+      });
+    }
+    if(instrumentVelocitySlider){
+      instrumentVelocitySlider.addEventListener('input', (event)=>{
+        const val = parseFloat(event.target.value);
+        instrumentState.velocity = clamp(val, 0.2, 1.0);
+      });
+    }
+    if(instrumentPreviewBtn){
+      instrumentPreviewBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        const note = middleInstrumentNote();
+        triggerInstrumentPlayback(note, instrumentState.velocity);
+      });
+    }
 
     if(copyWorkspaceBtn){
       copyWorkspaceBtn.addEventListener('click', async ()=>{
@@ -1181,6 +1843,7 @@ function bootAudio(){
       blockEl.classList.remove('dragging');
     });
 
+    refreshHostStatus();
     refreshRack();
   }
 
@@ -2720,6 +3383,7 @@ themeFile.addEventListener('change', async (e)=>{
 
 </script>
 
+<script>
 // === Style Preset wiring (add 9x themes) ===
 (function(){
   const sel = document.getElementById('stylePreset');
