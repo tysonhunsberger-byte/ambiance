@@ -10,7 +10,8 @@ scriptable from Python.
 
 - **Composable audio engine** – Combine any number of sources and effects.
 - **Plugin rack & desktop** – Register VST/VST3, Audio Unit, mc.svt, or built-in
-  processors and assign them to specific streams or the master bus with A/B banks.
+  processors, assign them to specific streams or the master bus with A/B banks,
+  and inspect per-stream pedalboards alongside the Noisetown blocks.
 - **Interactive plugin control** – Open plug-in editors through Carla/Pluginval hosts
   directly from the UI so the processors remain usable in-app.
 - **Procedural audio sources** – Sine waves, noise beds, resonator simulations, and
@@ -62,13 +63,16 @@ scriptable from Python.
    default VST/AU locations or point the *Add Plug-in* field at any `.vst3`, `.vst`,
    `.dll`, `.component`, `.svt`, or `.mc.svt` file/directory. Entries are cached in
    `.cache/plugins/plugins.json`.
-2. **Assign processors to streams** – Choose a stream name (for example, `sine`,
-   `noise`, or `master`), pick a plug-in, and add it to the active bank. Chains render
-   in order and can target individual sources or the master bus.
-3. **A/B comparison** – Each bank maintains independent chains so you can toggle the
+2. **Assign processors to streams** – Choose a stream key (the stream picker now lists
+   every block/stream that exists in the UI), pick a plug-in, and add it to the active
+   bank. Chains render in order and can target individual sources or the master bus.
+3. **Use the pedalboard overlay** – Each Noisetown stream now exposes a *Plugin
+   Pedalboard* card. Rename the stream key from the block, then glance at the pedalboard
+   to see which processors are active on that stream without leaving the instrument view.
+4. **A/B comparison** – Each bank maintains independent chains so you can toggle the
    active bank while exploring alternate routings or parameter sets. The rack API
    persists the configuration in `.cache/plugins/rack.json`.
-4. **Open plug-in editors** – If Carla or Pluginval is available on your PATH, press
+5. **Open plug-in editors** – If Carla or Pluginval is available on your PATH, press
    *Open Editor* to spawn the plug-in UI inside a desktop bubble beneath the main
    Noisetown viewport.
 

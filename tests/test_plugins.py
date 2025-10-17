@@ -12,6 +12,7 @@ def test_plugin_manager_reports_builtins(tmp_path):
 
     assert any(item["slug"] == "builtin-gain" for item in status["plugins"])
     assert status["rack"]["active_bank"] == "A"
+    assert status["chains"] == {}
 
 
 def test_builtin_gain_chain_amplifies_signal(tmp_path):
@@ -30,7 +31,8 @@ def test_builtin_gain_chain_amplifies_signal(tmp_path):
         },
     }
 
-    rack = manager.build_rack_from_config(config)
+    manager.set_rack(config)
+    rack = manager.rack()
 
     baseline_engine = AudioEngine(sample_rate=48000)
     baseline_engine.add_source(SineWaveSource(frequency=440, amplitude=0.2))
@@ -55,3 +57,8 @@ def test_builtin_gain_chain_amplifies_signal(tmp_path):
     first = ratios[0]
     for value in ratios:
         assert abs(value - first) < 1e-3
+
+    status = manager.status()
+    assert "chains" in status
+    chain = status["chains"].get("A", {}).get("sine", [])
+    assert chain and chain[0]["slug"] == "builtin-gain"

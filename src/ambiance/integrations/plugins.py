@@ -138,6 +138,19 @@ class PluginSlot:
             data["params"] = dict(self.params)
         return data
 
+    def describe(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {
+            "slug": self.descriptor.slug,
+            "name": self.descriptor.name,
+            "format": self.descriptor.format,
+            "kind": self.descriptor.kind,
+            "params": dict(self.params),
+            "metadata": dict(self.descriptor.metadata),
+        }
+        if self.descriptor.path is not None:
+            payload["path"] = str(self.descriptor.path)
+        return payload
+
 
 @dataclass
 class PluginChain:
@@ -148,6 +161,9 @@ class PluginChain:
     def to_config(self) -> list[dict[str, Any]]:
         return [slot.to_config() for slot in self.slots]
 
+    def describe(self) -> list[dict[str, Any]]:
+        return [slot.describe() for slot in self.slots]
+
 
 @dataclass
 class PluginBank:
@@ -156,6 +172,9 @@ class PluginBank:
 
     def to_config(self) -> dict[str, list[dict[str, Any]]]:
         return {stream: chain.to_config() for stream, chain in self.streams.items()}
+
+    def describe(self) -> dict[str, list[dict[str, Any]]]:
+        return {stream: chain.describe() for stream, chain in self.streams.items()}
 
 
 @dataclass
@@ -171,6 +190,9 @@ class PluginRack:
             "active_bank": self.active_bank,
             "banks": {name: bank.to_config() for name, bank in self.banks.items()},
         }
+
+    def describe(self) -> dict[str, dict[str, list[dict[str, Any]]]]:
+        return {name: bank.describe() for name, bank in self.banks.items()}
 
     def with_host(self, host: "PluginHost" | None) -> "PluginRack":
         self.host = host
@@ -620,6 +642,7 @@ class PluginManager:
             "plugins": [descriptor.to_payload() for descriptor in self.library.list()],
             "rack": rack.to_config(),
             "active_bank": rack.active_bank,
+            "chains": rack.describe(),
             "pedalboard_available": self.host.pedalboard_available,
             "editor_commands": self.host.available_editor_commands(),
         }

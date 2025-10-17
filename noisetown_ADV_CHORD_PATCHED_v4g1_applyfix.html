@@ -44,6 +44,21 @@
   .rackBank .bankHeader{font-weight:700;font-size:13px}
   .rackStream{display:flex;flex-direction:column;gap:4px;padding:6px;background:rgba(0,0,0,0.15);border-radius:6px}
   .rackStream .streamTitle{font-weight:600;font-size:12px;color:var(--muted)}
+  .pedalboard{display:flex;flex-wrap:wrap;gap:8px;padding:8px;background:rgba(89,167,255,0.08);border:1px dashed rgba(89,167,255,0.35);border-radius:10px;min-height:44px;transition:background .15s}
+  .pedalboard.empty{justify-content:center;align-items:center;padding:12px}
+  .pedalboardEmpty{font-size:12px;color:var(--muted);font-style:italic}
+  .pedal{display:flex;flex-direction:column;gap:6px;padding:10px 12px;min-width:140px;max-width:200px;background:linear-gradient(145deg,rgba(89,167,255,0.18),rgba(28,53,86,0.65));border:1px solid rgba(89,167,255,0.45);border-radius:10px;box-shadow:0 6px 14px rgba(0,0,0,0.25)}
+  .pedalHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:600}
+  .pedalFormat{font-size:11px;color:var(--muted)}
+  .pedalParams{font-size:11px;color:var(--muted);line-height:1.35}
+  .pedalRemove{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:12px;padding:0 2px}
+  .pedalRemove:hover{color:#fff}
+  .streamPedalboardPanel{display:flex;flex-direction:column;gap:8px;margin:10px 0;padding:10px;border:1px solid #444;border-radius:8px;background:rgba(0,0,0,0.18)}
+  .streamPedalboardPanel .pedalboardHeader{display:flex;align-items:center;gap:8px}
+  .streamPedalboardPanel .pedalboardHeader input{flex:0 0 160px}
+  .streamPedalboard{display:flex;flex-wrap:wrap;gap:8px}
+  .streamPedalboard.empty{align-items:center}
+  .pedalboardHint{font-size:11px;color:var(--muted)}
   .slotList{display:flex;flex-wrap:wrap;gap:6px}
   .slotChip{display:inline-flex;align-items:center;gap:4px;background:rgba(89,167,255,0.15);border:1px solid rgba(89,167,255,0.35);border-radius:12px;padding:2px 8px;font-size:12px}
   .slotChip .chipRemove{background:transparent;border:0;color:inherit;cursor:pointer;font-size:12px;padding:0 2px}
@@ -778,6 +793,123 @@ function bootAudio(){
   const blocks = [];        // { el, bus, analyser, cvs, ctx, streams:[] }
   const streamSpectros = []; // for spectrogram draw loop
 
+  const latestRackState = { activeBank: 'A', chains: {} };
+
+  function normalizeStreamKey(name){
+    return (name || '').toString().trim().toLowerCase();
+  }
+
+  function findStreamHintList(){
+    const rack = document.querySelector('#pluginRackBlock');
+    if(!rack) return null;
+    return rack.querySelector('#streamKeyHints');
+  }
+
+  function updateStreamHints(){
+    const list = findStreamHintList();
+    if(!list) return;
+    const seen = new Set();
+    list.innerHTML = '';
+    document.querySelectorAll('.streamPedalboard').forEach((board)=>{
+      const key = (board.dataset.streamKey || '').trim();
+      if(!key || seen.has(key.toLowerCase())) return;
+      seen.add(key.toLowerCase());
+      const opt = document.createElement('option');
+      opt.value = key;
+      list.appendChild(opt);
+    });
+  }
+
+  function findChainForKey(chains, key){
+    if(!chains) return null;
+    if(key in chains) return chains[key];
+    const norm = normalizeStreamKey(key);
+    for(const [name, value] of Object.entries(chains)){
+      if(normalizeStreamKey(name) === norm){
+        return value;
+      }
+    }
+    return null;
+  }
+
+  function renderPedalCollection(container, entries, options){
+    if(!container) return;
+    const opts = options || {};
+    container.innerHTML = '';
+    if(!entries || !entries.length){
+      container.classList.add('empty');
+      const empty = ce('div','pedalboardEmpty');
+      empty.textContent = opts.emptyText || 'No plug-ins assigned yet.';
+      container.appendChild(empty);
+      return;
+    }
+    container.classList.remove('empty');
+    entries.forEach((entry, idx)=>{
+      if(!entry) return;
+      const pedal = ce('div','pedal');
+      const header = ce('div','pedalHeader');
+      const name = ce('span','pedalName');
+      name.textContent = entry.name || entry.slug || `Plug-in ${idx+1}`;
+      header.appendChild(name);
+      const format = ce('span','pedalFormat');
+      const fmt = entry.format || entry.kind;
+      format.textContent = fmt ? String(fmt).toUpperCase() : '';
+      header.appendChild(format);
+      if(opts.allowRemove){
+        const btn = ce('button','pedalRemove');
+        btn.type = 'button';
+        btn.title = 'Remove from chain';
+        btn.textContent = '✖';
+        btn.addEventListener('click', ()=>{
+          if(typeof opts.onRemove === 'function'){
+            opts.onRemove(idx);
+          }
+        });
+        header.appendChild(btn);
+      }
+      pedal.appendChild(header);
+      const metaPieces = [];
+      if(entry.metadata && entry.metadata.category){
+        metaPieces.push(entry.metadata.category);
+      }
+      if(entry.params && Object.keys(entry.params).length){
+        const params = Object.entries(entry.params)
+          .map(([k,v])=>`${k}=${Array.isArray(v)?v.join('/'):(typeof v==='number'?Number(v).toFixed(2).replace(/\.00$/,''):v)}`);
+        if(params.length){
+          metaPieces.push(params.join(', '));
+        }
+      }
+      if(metaPieces.length){
+        const paramsEl = ce('div','pedalParams');
+        paramsEl.textContent = metaPieces.join(' · ');
+        pedal.appendChild(paramsEl);
+      }
+      container.appendChild(pedal);
+    });
+  }
+
+  function refreshStreamPedalboards(){
+    const chains = latestRackState.chains && latestRackState.chains[latestRackState.activeBank] || {};
+    document.querySelectorAll('.streamPedalboard').forEach((board)=>{
+      const key = board.dataset.streamKey || '';
+      const chain = findChainForKey(chains, key) || [];
+      const decorated = (chain || []).map((slot)=>({
+        slug: slot.slug,
+        name: slot.name || slot.slug,
+        format: slot.format || slot.kind,
+        kind: slot.kind,
+        metadata: slot.metadata || {},
+        params: slot.params || {},
+      }));
+      renderPedalCollection(board, decorated, { emptyText: 'No plug-ins assigned to this stream.' });
+      const hint = board.parentElement && board.parentElement.querySelector('.pedalboardHint');
+      if(hint){
+        const label = key ? `Add plug-ins to this stream by choosing “${key}” in the Plugin Rack.` : 'Assign a key to link this stream to a plug-in chain.';
+        hint.textContent = label;
+      }
+    });
+  }
+
   let blockCount = 0;
 
   const isExternalBlock = (el)=> !!(el && el.dataset && el.dataset.role === 'plugin-rack');
@@ -832,9 +964,10 @@ function bootAudio(){
         <div class="row rackRow">
           <div class="rackControls">
             <label>Stream</label>
-            <input type="text" class="streamName" placeholder="sine, noise, master…">
+            <input type="text" class="streamName" placeholder="sine, noise, master…" list="streamKeyHints" autocomplete="off">
             <label>Plug-in</label>
             <select class="pluginSelect"></select>
+            <datalist id="streamKeyHints"></datalist>
             <button class="btn addToStream">➕ Add to Bank</button>
             <div class="bankSwitch">
               <span>Active Bank:</span>
@@ -899,7 +1032,7 @@ function bootAudio(){
     const pathList = blockEl.querySelector('#pluginPathHints');
 
     const bubbleMap = new Map();
-    let currentStatus = null;
+    let pluginStatus = null;
     let currentRack = { active_bank: 'A', banks: {} };
 
     function derivePathFromFile(file){
@@ -1031,6 +1164,8 @@ ${line}` : line;
       currentRack = status && status.rack ? status.rack : { active_bank: 'A', banks: {} };
       if(!currentRack.active_bank) currentRack.active_bank = 'A';
       if(!currentRack.banks) currentRack.banks = {};
+      latestRackState.activeBank = currentRack.active_bank;
+      latestRackState.chains = (status && status.chains) || {};
       if(rackChains){
         rackChains.innerHTML = '';
         const entries = Object.entries(currentRack.banks);
@@ -1046,6 +1181,7 @@ ${line}` : line;
           heading.textContent = `Bank ${bank}`;
           bankEl.appendChild(heading);
           const streams = info && info.streams ? info.streams : {};
+          const detail = (status && status.chains && status.chains[bank]) || {};
           if(!Object.keys(streams).length){
             const emptyStream = ce('div','small');
             emptyStream.textContent = 'No streams assigned.';
@@ -1056,18 +1192,25 @@ ${line}` : line;
             const title = ce('div','streamTitle');
             title.textContent = stream;
             streamEl.appendChild(title);
-            const slotList = ce('div','slotList');
-            (slots || []).forEach((slot, idx)=>{
-              const chip = ce('span','slotChip');
-              chip.textContent = slot && slot.slug ? slot.slug : 'plugin';
-              const removeBtn = ce('button','chipRemove');
-              removeBtn.type = 'button';
-              removeBtn.textContent = '✖';
-              removeBtn.addEventListener('click', ()=> removeSlot(bank, stream, idx));
-              chip.appendChild(removeBtn);
-              slotList.appendChild(chip);
+            const board = ce('div','pedalboard');
+            const chainDetail = findChainForKey(detail, stream) || [];
+            const combined = (slots || []).map((slot, idx)=>{
+              const info = chainDetail[idx] || { slug: slot.slug };
+              return {
+                slug: slot.slug,
+                name: info.name || slot.slug,
+                format: info.format || info.kind,
+                kind: info.kind,
+                metadata: info.metadata || {},
+                params: info.params || slot.params || {},
+              };
             });
-            streamEl.appendChild(slotList);
+            renderPedalCollection(board, combined, {
+              allowRemove: true,
+              onRemove: (index)=> removeSlot(bank, stream, index),
+              emptyText: 'No plug-ins in this chain yet.',
+            });
+            streamEl.appendChild(board);
             bankEl.appendChild(streamEl);
           });
           rackChains.appendChild(bankEl);
@@ -1078,6 +1221,7 @@ ${line}` : line;
         btn.classList.toggle('active', bank === currentRack.active_bank);
       });
       applyDefaultConfig();
+      refreshStreamPedalboards();
     }
 
     function renderTags(container, items){
@@ -1109,18 +1253,23 @@ ${line}` : line;
         const res = await fetch('/api/status');
         if(!res.ok) throw new Error('status '+res.status);
         const data = await res.json();
-        currentStatus = data.plugins || null;
-        renderPlugins(currentStatus);
-        renderRack(currentStatus);
+        pluginStatus = data.plugins || null;
+        currentRack = pluginStatus && pluginStatus.rack ? pluginStatus.rack : { active_bank: 'A', banks: {} };
+        if(!currentRack.active_bank) currentRack.active_bank = 'A';
+        latestRackState.activeBank = currentRack.active_bank;
+        latestRackState.chains = (pluginStatus && pluginStatus.chains) || {};
+        renderPlugins(pluginStatus);
+        renderRack(pluginStatus);
+        updateStreamHints();
         renderRegistry(data.registry || {});
         if(statusText){
           const pieces = [];
-          if(currentStatus && currentStatus.editor_commands && currentStatus.editor_commands.length){
+          if(pluginStatus && pluginStatus.editor_commands && pluginStatus.editor_commands.length){
             pieces.push('Editor host available');
           }else{
             pieces.push('No editor host detected');
           }
-          if(currentStatus && currentStatus.pedalboard_available){
+          if(pluginStatus && pluginStatus.pedalboard_available){
             pieces.push('Offline processing ready');
           }else{
             pieces.push('Install pedalboard for VST processing');
@@ -1143,7 +1292,7 @@ ${line}` : line;
       }catch(err){
         if(statusText) statusText.textContent = 'Rescan failed: '+(err && err.message || err);
       }
-      refreshStatus();
+      await refreshStatus();
     }
 
     async function registerPlugin(){
@@ -1164,13 +1313,13 @@ ${line}` : line;
       }catch(err){
         statusText && (statusText.textContent = 'Register failed: '+(err && err.message || err));
       }
-      refreshStatus();
+      await refreshStatus();
     }
 
     async function removePlugin(slug){
       if(!slug) return;
       await fetch(`/api/plugins/${encodeURIComponent(slug)}`,{ method:'DELETE' });
-      refreshStatus();
+      await refreshStatus();
     }
 
     async function saveRack(){
@@ -1198,9 +1347,8 @@ ${line}` : line;
           body: JSON.stringify({ bank: currentRack.active_bank || 'A', stream, slot: { slug } })
         });
         if(res.ok){
-          const data = await res.json();
-          currentRack = data.rack || currentRack;
-          renderRack({ rack: currentRack });
+          await res.json();
+          await refreshStatus();
         }
       }catch(err){
         statusText && (statusText.textContent = 'Add failed: '+(err && err.message || err));
@@ -1216,9 +1364,8 @@ ${line}` : line;
           body: JSON.stringify({ bank, stream, index })
         });
         if(res.ok){
-          const data = await res.json();
-          currentRack = data.rack || currentRack;
-          renderRack({ rack: currentRack });
+          await res.json();
+          await refreshStatus();
         }
       }catch(err){
         statusText && (statusText.textContent = 'Remove failed: '+(err && err.message || err));
@@ -1320,7 +1467,12 @@ ${line}` : line;
         const bank = btn.dataset.bank;
         if(!bank || bank === currentRack.active_bank) return;
         currentRack.active_bank = bank;
-        renderRack({ rack: currentRack });
+        if(pluginStatus){
+          pluginStatus.active_bank = bank;
+          if(pluginStatus.rack) pluginStatus.rack.active_bank = bank;
+        }
+        latestRackState.activeBank = bank;
+        renderRack(pluginStatus);
         saveRack();
       });
     });
@@ -1365,6 +1517,8 @@ ${line}` : line;
     });
 
     applyDefaultConfig();
+    updateStreamHints();
+    refreshStreamPedalboards();
     refreshStatus();
   }
 
@@ -1402,7 +1556,7 @@ ${line}` : line;
         });
       });
     })();
-const bus = ACTX.createGain(); bus.gain.value = 1.0; bus.connect(MASTER.pre);
+    const bus = ACTX.createGain(); bus.gain.value = 1.0; bus.connect(MASTER.pre); bus.__blockId = id;
     // Per-block analyser for oscilloscope
     const analyser = ACTX.createAnalyser(); analyser.fftSize = 1024;
     bus.connect(analyser);
@@ -1676,7 +1830,53 @@ return blockModel;
     </div>
   </div>`;
 
-    
+
+    const blockId = blockBus && blockBus.__blockId ? blockBus.__blockId : idx;
+    const heading = el.querySelector('h3');
+    const baseTitle = heading ? heading.textContent.trim() : `Stream ${idx}`;
+    const defaultKey = `Block ${blockId} ${baseTitle}`.replace(/\s+/g, ' ').trim();
+    const panel = ce('div','streamPedalboardPanel');
+    panel.innerHTML = `
+      <div class="pedalboardHeader">
+        <strong>Plugin Pedalboard</strong>
+        <div class="spacer"></div>
+        <label class="small">Key</label>
+        <input type="text" class="pluginKeyInput" value="${defaultKey}" aria-label="Plugin key for this stream">
+      </div>
+      <div class="streamPedalboard pedalboard" data-stream-key="${defaultKey}"></div>
+      <div class="pedalboardHint small"></div>
+    `;
+    const mods = el.querySelector('.mods');
+    if(mods && mods.parentElement){
+      mods.parentElement.insertBefore(panel, mods);
+    }else{
+      el.appendChild(panel);
+    }
+    const board = panel.querySelector('.streamPedalboard');
+    const keyInput = panel.querySelector('.pluginKeyInput');
+    function applyKey(value){
+      const trimmed = (value || '').trim();
+      const key = trimmed || defaultKey;
+      board.dataset.streamKey = key;
+      board.dataset.streamKeyNormalized = normalizeStreamKey(key);
+      if(keyInput && keyInput.value !== key){
+        keyInput.value = key;
+      }
+      refreshStreamPedalboards();
+      updateStreamHints();
+    }
+    if(keyInput){
+      keyInput.addEventListener('blur', ()=> applyKey(keyInput.value));
+      keyInput.addEventListener('change', ()=> applyKey(keyInput.value));
+      keyInput.addEventListener('keydown', (ev)=>{
+        if(ev.key === 'Enter'){
+          ev.preventDefault();
+          keyInput.blur();
+        }
+      });
+    }
+    applyKey(defaultKey);
+
     // Dropdown toggles (supports <div class="mod"><div class="mod-hdr">...</div></div>
     // and <details class="mod"><summary>...</summary> ... </details>)
     el.querySelectorAll('.mod').forEach(mod=>{
