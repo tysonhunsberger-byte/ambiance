@@ -10,6 +10,8 @@ lane-based routing, A/B comparisons, and lightweight session management.
 - **Composable audio engine** – Combine any number of sources and effects.
 - **Plugin rack integration** – Drop plugins into the workspace directory and assign
   them to streams with dedicated A/B lanes.
+- **Desktop plugin UI bridge** – Launch a JUCE-based host from the browser to open
+  the real plugin editor while keeping the Ambiance routing UI intact.
 - **Bundled Modalys starter** – A Modalys (Max) external is copied into the rack
   workspace automatically when the distribution is present, making it easy to begin
   experimenting with physical modelling textures.
@@ -54,8 +56,10 @@ lane-based routing, A/B comparisons, and lightweight session management.
    The command serves the bundled `noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html`
    interface at `http://127.0.0.1:8000/`. The UI exposes the plugin rack, lets you
    assign plugins to stream lanes for instant A/B comparison, and renders ambience
-   layers through the Python audio engine. If you place a different HTML interface on
-   disk, pass its path via `--ui`.
+   layers through the Python audio engine. The **Desktop Plugin UI Bridge** section
+   explains how to open the JUCE host when you need the native editor (see
+   `docs/vst3_hosting.md`). If you place a different HTML interface on disk, pass its
+   path via `--ui`.
 
 4. Provide a JSON configuration to customize the engine:
 

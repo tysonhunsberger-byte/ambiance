@@ -858,6 +858,21 @@ function bootAudio(){
         <ul class="hostParameters"></ul>
         <div class="hostWarnings"></div>
       </section>
+      <section class="juce-host-panel" aria-live="polite">
+        <header class="juce-host-header">
+          <div>
+            <h3>Desktop Plugin UI Bridge</h3>
+            <p class="small">Launch the JUCE host to view and play the plugin's native UI.</p>
+          </div>
+          <div class="juce-host-actions">
+            <button class="btn juceHostRefresh" type="button">🔍 Re-scan</button>
+            <button class="btn juceHostLaunch" type="button" disabled>🖥 Open in Desktop Host</button>
+            <button class="btn juceHostClose" type="button" disabled>✖ Close Host</button>
+          </div>
+        </header>
+        <div class="juceHostStatus small">Desktop host status pending…</div>
+        <div class="juceHostNotes small"></div>
+      </section>
       <section class="instrument-panel" aria-live="polite" hidden>
         <header class="instrument-header">
           <div>
@@ -914,6 +929,12 @@ function bootAudio(){
     const hostLoadBtn = q('.hostLoad');
     const hostUnloadBtn = q('.hostUnload');
     const hostPreviewBtn = q('.hostPreview');
+    const juceHostPanel = q('.juce-host-panel');
+    const juceHostStatusBox = q('.juceHostStatus');
+    const juceHostLaunchBtn = q('.juceHostLaunch');
+    const juceHostCloseBtn = q('.juceHostClose');
+    const juceHostRefreshBtn = q('.juceHostRefresh');
+    const juceHostNotes = q('.juceHostNotes');
     const instrumentPanel = q('.instrument-panel');
     const instrumentTitle = q('.instrument-title');
     const instrumentSubtitle = q('.instrument-subtitle');
@@ -937,6 +958,10 @@ function bootAudio(){
       velocity: 0.85,
       keyDown: new Set(),
       range: { min: 48, max: 72 }
+    };
+    const juceHostState = {
+      status: null,
+      busy: false
     };
 
     function log(message){
@@ -966,6 +991,7 @@ function bootAudio(){
         li.classList.toggle('selected', !!plugin && li.dataset.path === (plugin.path || ''));
       });
       renderHost();
+      renderJuceHost();
     }
 
     function renderWorkspaceNotes(status){
@@ -1310,6 +1336,64 @@ function bootAudio(){
         hostPreviewBtn.disabled = !available || !plugin || hostState.busy;
       }
       renderInstrumentPanel();
+      renderJuceHost();
+    }
+
+    function renderJuceHost(){
+      if(!juceHostPanel) return;
+      const status = juceHostState.status;
+      const available = !!(status && status.available);
+      const running = !!(status && status.running);
+      if(juceHostStatusBox){
+        if(juceHostState.busy){
+          juceHostStatusBox.textContent = 'Communicating with desktop host…';
+        }else if(!status){
+          juceHostStatusBox.textContent = 'Desktop host status pending…';
+        }else if(!available){
+          juceHostStatusBox.textContent = 'Desktop JUCE host not detected. Build cpp/juce_host to enable native plugin editors.';
+        }else if(running){
+          const path = status && status.plugin_path;
+          const plugin = pluginState.selected;
+          const name = plugin && (plugin.display_name || plugin.name);
+          if(name){
+            juceHostStatusBox.textContent = `Running ${name} in the desktop host.`;
+          }else if(path){
+            juceHostStatusBox.textContent = `Desktop host running ${path}.`;
+          }else{
+            juceHostStatusBox.textContent = 'Desktop host running.';
+          }
+        }else{
+          juceHostStatusBox.textContent = 'Desktop host ready. Select a plugin and open it to view the native UI.';
+        }
+      }
+      if(juceHostNotes){
+        juceHostNotes.innerHTML = '';
+        const lines = [];
+        if(status){
+          if(status.executable){
+            lines.push(`Executable: ${status.executable}`);
+          }
+          if(status.plugin_path){
+            lines.push(`Plugin: ${status.plugin_path}`);
+          }
+          if(status.last_error){
+            lines.push(`⚠️ ${status.last_error}`);
+          }
+        }
+        if(!lines.length){
+          lines.push('Build the JUCE host and keep it nearby. The browser will launch it when you open a plugin.');
+        }
+        juceHostNotes.textContent = lines.join(' \u2022 ');
+      }
+      if(juceHostLaunchBtn){
+        juceHostLaunchBtn.disabled = !available || !pluginState.selected || running || juceHostState.busy;
+      }
+      if(juceHostCloseBtn){
+        juceHostCloseBtn.disabled = !running;
+      }
+      if(juceHostRefreshBtn){
+        juceHostRefreshBtn.disabled = juceHostState.busy;
+      }
     }
 
     function refreshHostStatus(){
@@ -1334,6 +1418,28 @@ function bootAudio(){
         })
         .catch((err)=>{
           log('Host status failed: ' + (err && err.message || err));
+        });
+    }
+
+    function refreshJuceHostStatus(){
+      if(!juceHostPanel) return Promise.resolve();
+      return fetch('/api/juce/status')
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(payload && payload.status){
+            juceHostState.status = payload.status;
+          }else{
+            juceHostState.status = null;
+          }
+          renderJuceHost();
+        })
+        .catch((err)=>{
+          juceHostState.status = null;
+          log('Desktop host status failed: ' + (err && err.message || err));
+          renderJuceHost();
         });
     }
 
@@ -1472,6 +1578,83 @@ function bootAudio(){
         .finally(()=>{
           hostState.busy = false;
           renderHost();
+        });
+    }
+
+    function openDesktopHost(){
+      const plugin = pluginState.selected;
+      if(!plugin){
+        log('Select a plugin and try again.');
+        return;
+      }
+      juceHostState.busy = true;
+      renderJuceHost();
+      fetch('/api/juce/open', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: plugin.path })
+      })
+        .then((res)=> res.json().then((payload)=>({ ok: res.ok && payload && payload.ok, payload })))
+        .then(({ ok, payload })=>{
+          if(!ok){
+            const message = payload && (payload.error || payload.status && payload.status.last_error);
+            throw new Error(message || 'Desktop host failed to start.');
+          }
+          juceHostState.status = payload.status;
+          log('Desktop host launched. Switch to the native window to interact with the plugin.');
+        })
+        .catch((err)=>{
+          log('Desktop host launch failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          juceHostState.busy = false;
+          refreshJuceHostStatus();
+        });
+    }
+
+    function closeDesktopHost(){
+      juceHostState.busy = true;
+      renderJuceHost();
+      fetch('/api/juce/close', { method: 'POST' })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          juceHostState.status = payload.status;
+          log('Desktop host closed.');
+        })
+        .catch((err)=>{
+          log('Desktop host close failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          juceHostState.busy = false;
+          renderJuceHost();
+        });
+    }
+
+    function rescanDesktopHost(){
+      juceHostState.busy = true;
+      renderJuceHost();
+      fetch('/api/juce/refresh', { method: 'POST' })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          juceHostState.status = payload.status;
+          if(payload.status && payload.status.executable){
+            log('JUCE host discovered at ' + payload.status.executable + '.');
+          }else{
+            log('JUCE host not found. Build cpp/juce_host first.');
+          }
+        })
+        .catch((err)=>{
+          log('Desktop host refresh failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          juceHostState.busy = false;
+          renderJuceHost();
         });
     }
 
@@ -1721,7 +1904,10 @@ function bootAudio(){
         renderWorkspaceNotes(data);
         renderPluginLibrary(data);
         renderStreams(data);
-        refreshHostStatus();
+        await Promise.allSettled([
+          refreshHostStatus(),
+          refreshJuceHostStatus()
+        ]);
         if(rackNotes){
           rackNotes.textContent = count
             ? 'Select a plugin and choose a lane to start routing.'
@@ -1759,6 +1945,24 @@ function bootAudio(){
       hostPreviewBtn.addEventListener('click', (event)=>{
         event.preventDefault();
         previewHost();
+      });
+    }
+    if(juceHostLaunchBtn){
+      juceHostLaunchBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        openDesktopHost();
+      });
+    }
+    if(juceHostCloseBtn){
+      juceHostCloseBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        closeDesktopHost();
+      });
+    }
+    if(juceHostRefreshBtn){
+      juceHostRefreshBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        rescanDesktopHost();
       });
     }
     if(instrumentOctDown){
@@ -1844,6 +2048,7 @@ function bootAudio(){
     });
 
     refreshHostStatus();
+    refreshJuceHostStatus();
     refreshRack();
   }
 
