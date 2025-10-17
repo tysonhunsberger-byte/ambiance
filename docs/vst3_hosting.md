@@ -35,6 +35,15 @@ that plugins demand.
    cmake --build build
    ```
 
+   On Windows you can use the Visual Studio generator.  Make sure the JUCE path
+   uses forward slashes (or doubled backslashes) so CMake does not treat
+   sequences such as `\U` as escapes:
+
+   ```powershell
+   cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DJUCE_ROOT=C:/path/to/JUCE
+   cmake --build build --config Release
+   ```
+
 3. Optionally export the resulting binary for easier discovery:
 
    ```bash

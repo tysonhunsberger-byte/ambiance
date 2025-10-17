@@ -14,7 +14,15 @@ if(NOT DEFINED JUCE_ROOT)
   endif()
 endif()
 
-set(JUCE_SOURCE_DIR "${JUCE_ROOT}")
+# Normalise the JUCE path so Windows-style backslashes do not trigger escape
+# sequences (for example, "\U" becomes a unicode escape in CMake CLI parsing).
+file(TO_CMAKE_PATH "${JUCE_ROOT}" JUCE_SOURCE_DIR)
+
+if(NOT EXISTS "${JUCE_SOURCE_DIR}/extras/Build/CMake/JUCEUtils.cmake")
+  message(FATAL_ERROR
+    "JUCE_ROOT (${JUCE_SOURCE_DIR}) does not appear to be a JUCE checkout. "
+    "Verify the path contains extras/Build/CMake/JUCEUtils.cmake.")
+endif()
 
 list(APPEND CMAKE_MODULE_PATH "${JUCE_SOURCE_DIR}/extras/Build/CMake")
 
