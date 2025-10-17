@@ -7,6 +7,7 @@ from .server import serve
 from .sources.basic import NoiseSource, SineWaveSource
 from .sources.integrated import ResonantInstrumentSource, VocalFormantSource
 from .effects.spatial import ReverbEffect, DelayEffect, LowPassFilterEffect
+from .effects.flutter_vst import FlutterVSTEffect
 
 __all__ = [
     "AudioEngine",
@@ -18,6 +19,7 @@ __all__ = [
     "ReverbEffect",
     "DelayEffect",
     "LowPassFilterEffect",
+    "FlutterVSTEffect",
     "PluginRackManager",
     "serve",
 ]
