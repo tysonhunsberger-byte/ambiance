@@ -43,6 +43,53 @@
   .plugin-block .workspaceNotes span{display:block}
   .plugin-block .pluginLibrary li.selected{outline:2px solid rgba(89,167,255,.6);outline-offset:2px}
   .plugin-block .rack-panel{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:12px;background:rgba(9,12,19,.92);border:1px solid rgba(255,255,255,.06);box-shadow:0 20px 36px rgba(0,0,0,.35)}
+  .plugin-block .host-panel{margin-top:14px;display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:12px;background:rgba(16,20,30,.9);border:1px solid rgba(89,167,255,.25);box-shadow:0 18px 30px rgba(0,0,0,.32)}
+  .plugin-block .host-header{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .plugin-block .host-header h3{margin:0;font-size:17px}
+  .plugin-block .host-actions{display:flex;gap:8px;margin-left:auto}
+  .plugin-block .hostStatus{padding:10px;border-radius:8px;background:rgba(12,16,24,.75);border:1px solid rgba(255,255,255,.06)}
+  .plugin-block .hostParameters{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .plugin-block .hostParameters li{padding:10px;border-radius:10px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px}
+  .plugin-block .hostParamLabel{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+  .plugin-block .hostParamLabel span{font-size:12px;color:var(--muted)}
+  .plugin-block .hostWarnings{display:flex;flex-direction:column;gap:4px}
+  .plugin-block .hostWarnings span{display:block;padding:6px 8px;border-radius:6px;background:rgba(255,139,139,.1);border:1px solid rgba(255,139,139,.3);font-size:12px;color:#ff9b9b}
+  .plugin-block .instrument-panel{margin-top:14px;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:12px;background:rgba(8,12,20,.92);border:1px solid rgba(117,170,255,.18);box-shadow:0 18px 32px rgba(0,0,0,.28)}
+  .plugin-block .instrument-panel.disabled{opacity:.55;filter:grayscale(.4)}
+  .plugin-block .instrument-header{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .plugin-block .instrument-header h3{margin:0;font-size:17px}
+  .plugin-block .instrumentStatus{margin-left:auto;font-size:12px;color:var(--muted)}
+  .plugin-block .instrument-body{display:grid;grid-template-columns:minmax(280px,1fr) minmax(260px,300px);gap:16px;align-items:stretch}
+  @media (max-width:1200px){.plugin-block .instrument-body{grid-template-columns:1fr}}
+  .plugin-block .instrument-preview{position:relative;border-radius:12px;background:linear-gradient(145deg,rgba(17,22,34,.92),rgba(9,12,20,.85));border:1px solid rgba(117,170,255,.25);box-shadow:0 18px 28px rgba(0,0,0,.32);padding:18px;overflow:hidden;min-height:220px}
+  .plugin-block .instrumentPreview{height:100%;display:flex;flex-direction:column;gap:12px}
+  .plugin-block .instrumentPreview .instrumentEmpty{margin:auto;text-align:center;font-size:13px;color:var(--muted);max-width:220px;line-height:1.5}
+  .plugin-block .pluginUiCard{display:flex;flex-direction:column;gap:14px;border-radius:10px;padding:14px;background:rgba(6,12,20,.9);border:1px solid rgba(120,180,255,.28);box-shadow:0 12px 24px rgba(0,0,0,.26)}
+  .plugin-block .pluginUiCard .pluginUiHeader{display:flex;flex-direction:column;gap:4px}
+  .plugin-block .pluginUiCard .pluginUiHeader h4{margin:0;font-size:16px;letter-spacing:.3px}
+  .plugin-block .pluginUiCard .pluginUiHeader span{font-size:12px;color:var(--muted)}
+  .plugin-block .pluginUiKnobs{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
+  .plugin-block .pluginUiKnob{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:10px;background:rgba(12,18,30,.92);border:1px solid rgba(120,180,255,.22)}
+  .plugin-block .pluginUiKnob .dial{position:relative;width:78px;height:78px;border-radius:50%;margin:0 auto;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.16),rgba(60,110,180,.35));box-shadow:0 6px 12px rgba(0,0,0,.35) inset,0 10px 20px rgba(0,0,0,.35)}
+  .plugin-block .pluginUiKnob .dial::after{content:"";position:absolute;top:50%;left:50%;width:8px;height:26px;background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(120,160,255,.45));border-radius:999px;transform-origin:center 20px;transform:translate(-50%,-100%) rotate(0deg);transition:transform .2s ease}
+  .plugin-block .pluginUiKnob.active .dial::after{transform:translate(-50%,-100%) var(--dial-angle)}
+  .plugin-block .pluginUiKnob strong{font-size:13px;text-align:center}
+  .plugin-block .pluginUiKnob span{font-size:12px;color:var(--muted);text-align:center}
+  .plugin-block .instrument-controls{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:12px;background:rgba(12,16,24,.92);border:1px solid rgba(89,167,255,.18);box-shadow:0 18px 28px rgba(0,0,0,.28)}
+  .plugin-block .instrument-controls .row{margin:0;gap:10px}
+  .plugin-block .instrument-controls label{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+  .plugin-block .instrument-controls .value{margin-left:auto;font-size:12px;color:var(--muted)}
+  .plugin-block .instrument-controls select,.plugin-block .instrument-controls input[type="range"]{flex:1}
+  .plugin-block .instrument-controls input[type="range"]{accent-color:var(--accent)}
+  .instrumentKeyboard{position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(42px,1fr));gap:4px;margin-top:8px}
+  .instrumentKeyboard button{position:relative;padding:28px 0;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:linear-gradient(180deg,rgba(255,255,255,.8),rgba(180,190,210,.8));color:#000;font-weight:600;font-size:12px;cursor:pointer;transition:transform .08s ease,box-shadow .08s ease}
+  .instrumentKeyboard button.black{background:linear-gradient(180deg,rgba(40,45,60,.95),rgba(12,14,22,.95));color:#f4f4f4;margin:0 -14px;z-index:2;padding:18px 0}
+  .instrumentKeyboard button:disabled{opacity:.35;cursor:not-allowed}
+  .instrumentKeyboard button.active{transform:translateY(1px);box-shadow:0 4px 10px rgba(0,0,0,.45) inset;background:linear-gradient(180deg,rgba(99,180,255,.9),rgba(12,18,30,.95));color:#fff}
+  .instrumentKeyboard button.white{z-index:1}
+  .instrumentKeyboard button .note{display:block;font-size:10px;text-transform:uppercase;color:rgba(0,0,0,.55)}
+  .instrumentKeyboard button.black .note{color:rgba(255,255,255,.7)}
+  .instrument-controls .hint{font-size:11px;color:var(--muted);line-height:1.4}
   .plugin-block .rack-header{display:flex;flex-direction:column;gap:6px}
   .plugin-block .streamsContainer{display:flex;flex-direction:column;gap:14px}
   .plugin-block .rackStream{border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 18px 32px rgba(0,0,0,.28)}
@@ -762,6 +809,7 @@ function bootAudio(){
   let blockCount = 0;
 
   const pluginState = { status: null, selected: null };
+  const hostState = { status: null, busy: false };
   const LANE_KEYS = ['A', 'B'];
 
   const isPluginBlock = (el)=> !!(el && el.dataset && el.dataset.role === 'plugin-rack');
@@ -800,6 +848,68 @@ function bootAudio(){
           <div class="rackNotes small"></div>
         </section>
       </div>
+      <section class="host-panel" aria-live="polite">
+        <header class="host-header">
+          <div class="host-title">
+            <h3>Live VST Host</h3>
+            <p class="host-subtitle small">Powered by Flutter VST3 toolkit</p>
+          </div>
+          <div class="host-actions">
+            <button class="btn hostLoad" disabled>⬆️ Load Selected</button>
+            <button class="btn hostUnload" disabled>⏏ Unload</button>
+            <button class="btn hostPreview" disabled>▶️ Preview</button>
+          </div>
+        </header>
+        <div class="hostStatus small">Toolkit status pending…</div>
+        <ul class="hostParameters"></ul>
+        <div class="hostWarnings"></div>
+      </section>
+      <section class="instrument-panel" aria-live="polite">
+        <header class="instrument-header">
+          <h3>Digital Instrument</h3>
+          <div class="instrumentStatus small">Load a plugin to activate the instrument keyboard.</div>
+        </header>
+        <div class="instrument-body">
+          <div class="instrument-preview">
+            <div class="instrumentPreview">
+              <div class="instrumentEmpty">Load a plugin to view its editor and audition it directly from the Noisetown studio.</div>
+            </div>
+          </div>
+          <div class="instrument-controls">
+            <div class="row">
+              <label for="instrumentWaveform">Waveform</label>
+              <select id="instrumentWaveform" class="instrumentWaveform">
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="saw">Saw</option>
+                <option value="triangle">Triangle</option>
+              </select>
+            </div>
+            <div class="row">
+              <label for="instrumentVelocity">Velocity</label>
+              <input type="range" min="0.2" max="1" step="0.05" value="0.85" id="instrumentVelocity" class="instrumentVelocity">
+              <span class="value" data-instrument-key="velocity">85%</span>
+            </div>
+            <div class="row">
+              <label for="instrumentDuration">Duration</label>
+              <input type="range" min="0.3" max="3.0" step="0.1" value="1.2" id="instrumentDuration" class="instrumentDuration">
+              <span class="value" data-instrument-key="duration">1.2s</span>
+            </div>
+            <div class="row">
+              <label for="instrumentAttack">Attack</label>
+              <input type="range" min="0.005" max="0.3" step="0.005" value="0.03" id="instrumentAttack" class="instrumentAttack">
+              <span class="value" data-instrument-key="attack">30ms</span>
+            </div>
+            <div class="row">
+              <label for="instrumentRelease">Release</label>
+              <input type="range" min="0.05" max="1.5" step="0.05" value="0.4" id="instrumentRelease" class="instrumentRelease">
+              <span class="value" data-instrument-key="release">400ms</span>
+            </div>
+            <p class="hint">Click a key or use A–L on your keyboard (W/E/T/Y/U/O for sharps) to audition the hosted plugin instantly.</p>
+            <div class="instrumentKeyboard" role="group" aria-label="On-screen keyboard"></div>
+          </div>
+        </div>
+      </section>
       <section class="rack-log">
         <label style="display:block;margin-bottom:6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Rack Activity</label>
         <textarea class="rackOutput" readonly placeholder="Status updates from the plugin rack will appear here."></textarea>
@@ -823,6 +933,297 @@ function bootAudio(){
     const selectedLabel = q('.selectedPlugin');
     const streamsContainer = q('.streamsContainer');
     const rackNotes = q('.rackNotes');
+    const hostPanel = q('.host-panel');
+    const hostStatusBox = q('.hostStatus');
+    const hostParamList = q('.hostParameters');
+    const hostWarnings = q('.hostWarnings');
+    const hostLoadBtn = q('.hostLoad');
+    const hostUnloadBtn = q('.hostUnload');
+    const hostPreviewBtn = q('.hostPreview');
+    const instrumentPanel = q('.instrument-panel');
+    const instrumentStatusLabel = instrumentPanel ? instrumentPanel.querySelector('.instrumentStatus') : null;
+    const instrumentPreview = instrumentPanel ? instrumentPanel.querySelector('.instrumentPreview') : null;
+    const instrumentKeyboard = instrumentPanel ? instrumentPanel.querySelector('.instrumentKeyboard') : null;
+    const instrumentWaveformSel = instrumentPanel ? instrumentPanel.querySelector('.instrumentWaveform') : null;
+    const instrumentVelocitySlider = instrumentPanel ? instrumentPanel.querySelector('.instrumentVelocity') : null;
+    const instrumentDurationSlider = instrumentPanel ? instrumentPanel.querySelector('.instrumentDuration') : null;
+    const instrumentAttackSlider = instrumentPanel ? instrumentPanel.querySelector('.instrumentAttack') : null;
+    const instrumentReleaseSlider = instrumentPanel ? instrumentPanel.querySelector('.instrumentRelease') : null;
+    const instrumentValueLabels = instrumentPanel ? Array.from(instrumentPanel.querySelectorAll('[data-instrument-key]')) : [];
+
+    const instrumentState = {
+      waveform: instrumentWaveformSel ? instrumentWaveformSel.value : 'sine',
+      velocity: instrumentVelocitySlider ? parseFloat(instrumentVelocitySlider.value) : 0.85,
+      duration: instrumentDurationSlider ? parseFloat(instrumentDurationSlider.value) : 1.2,
+      attack: instrumentAttackSlider ? parseFloat(instrumentAttackSlider.value) : 0.03,
+      release: instrumentReleaseSlider ? parseFloat(instrumentReleaseSlider.value) : 0.4,
+    };
+    const instrumentRuntime = { busy: false };
+    const instrumentKeyMap = new Map();
+    const instrumentKeyboardMap = {
+      KeyA: 'C4',
+      KeyW: 'C#4',
+      KeyS: 'D4',
+      KeyE: 'D#4',
+      KeyD: 'E4',
+      KeyF: 'F4',
+      KeyT: 'F#4',
+      KeyG: 'G4',
+      KeyY: 'G#4',
+      KeyH: 'A4',
+      KeyU: 'A#4',
+      KeyJ: 'B4',
+      KeyK: 'C5',
+      KeyO: 'C#5',
+      KeyL: 'D5',
+      KeyP: 'D#5',
+      Semicolon: 'E5',
+      Quote: 'F5',
+    };
+
+    function formatInstrumentValue(key, value){
+      if(key === 'velocity') return `${Math.round(value * 100)}%`;
+      if(key === 'duration') return `${value.toFixed(1)}s`;
+      if(key === 'attack' || key === 'release') return `${Math.round(value * 1000)}ms`;
+      return value.toString();
+    }
+
+    function updateInstrumentValueLabel(key, value){
+      instrumentValueLabels.forEach((label)=>{
+        if(label.dataset.instrumentKey === key){
+          label.textContent = value;
+        }
+      });
+    }
+
+    function syncInstrumentLabels(){
+      Object.entries(instrumentState).forEach(([key, val])=>{
+        updateInstrumentValueLabel(key, formatInstrumentValue(key, val));
+      });
+    }
+
+    function bindInstrumentSlider(el, key){
+      if(!el) return;
+      el.addEventListener('input', (event)=>{
+        const next = parseFloat(event.target.value);
+        instrumentState[key] = next;
+        updateInstrumentValueLabel(key, formatInstrumentValue(key, next));
+      });
+    }
+
+    function setInstrumentKeyActive(note, active){
+      const btn = instrumentKeyMap.get(note);
+      if(btn){
+        btn.classList.toggle('active', active);
+      }
+    }
+
+    function buildInstrumentKeyboard(){
+      if(!instrumentKeyboard) return;
+      instrumentKeyboard.innerHTML = '';
+      instrumentKeyMap.clear();
+      const layout = [
+        { note: 'C4', type: 'white' },
+        { note: 'C#4', type: 'black' },
+        { note: 'D4', type: 'white' },
+        { note: 'D#4', type: 'black' },
+        { note: 'E4', type: 'white' },
+        { note: 'F4', type: 'white' },
+        { note: 'F#4', type: 'black' },
+        { note: 'G4', type: 'white' },
+        { note: 'G#4', type: 'black' },
+        { note: 'A4', type: 'white' },
+        { note: 'A#4', type: 'black' },
+        { note: 'B4', type: 'white' },
+        { note: 'C5', type: 'white' },
+        { note: 'C#5', type: 'black' },
+        { note: 'D5', type: 'white' },
+        { note: 'D#5', type: 'black' },
+        { note: 'E5', type: 'white' },
+        { note: 'F5', type: 'white' },
+      ];
+      layout.forEach((item)=>{
+        const btn = ce('button', `instrumentKey ${item.type}`);
+        btn.type = 'button';
+        btn.dataset.note = item.note;
+        const span = ce('span', 'note');
+        span.textContent = item.note;
+        btn.appendChild(span);
+        btn.addEventListener('mousedown', (event)=>{
+          event.preventDefault();
+          triggerInstrument(item.note);
+        });
+        btn.addEventListener('touchstart', (event)=>{
+          event.preventDefault();
+          triggerInstrument(item.note);
+        }, { passive: false });
+        instrumentKeyboard.appendChild(btn);
+        instrumentKeyMap.set(item.note, btn);
+      });
+    }
+
+    function renderPluginPreview(plugin, parameters){
+      const container = ce('div', 'pluginUiCard');
+      const header = ce('div', 'pluginUiHeader');
+      const name = (plugin.metadata && plugin.metadata.name) || plugin.display_name || plugin.name || 'Plugin';
+      const title = document.createElement('h4');
+      title.textContent = name;
+      header.appendChild(title);
+      const vendorBits = [];
+      const metadata = plugin.metadata || {};
+      if(metadata.vendor) vendorBits.push(metadata.vendor);
+      if(metadata.version) vendorBits.push(`v${metadata.version}`);
+      if(vendorBits.length){
+        const vendor = document.createElement('span');
+        vendor.textContent = vendorBits.join(' · ');
+        header.appendChild(vendor);
+      }
+      if(name.toLowerCase().includes('aspen')){
+        const badge = document.createElement('span');
+        badge.textContent = 'Optimised instrument layout ready for Aspen series brass plugins.';
+        header.appendChild(badge);
+      }
+      container.appendChild(header);
+      const grid = ce('div', 'pluginUiKnobs');
+      const params = Array.isArray(parameters) && parameters.length ? parameters : (metadata.parameters || []);
+      if(!params.length){
+        const empty = ce('div', 'instrumentEmpty');
+        empty.textContent = 'No exposed parameters for this plugin.';
+        container.appendChild(empty);
+      }else{
+        params.forEach((param)=>{
+          const knob = ce('div', 'pluginUiKnob active');
+          const dial = ce('div', 'dial');
+          const min = typeof param.min === 'number' ? param.min : 0;
+          const max = typeof param.max === 'number' ? param.max : 1;
+          const value = (param.value !== undefined) ? param.value : (param.default ?? min);
+          const span = ce('span');
+          span.textContent = formatParamDisplay(param, value);
+          const label = document.createElement('strong');
+          label.textContent = param.display_name || param.name;
+          knob.style.setProperty('--dial-angle', `rotate(${(-120 + (Math.min(Math.max((value - min) / ((max - min) || 1), 0), 1) * 240)).toFixed(2)}deg)`);
+          knob.appendChild(dial);
+          knob.appendChild(label);
+          knob.appendChild(span);
+          grid.appendChild(knob);
+        });
+        container.appendChild(grid);
+      }
+      return container;
+    }
+
+    function renderInstrument(status){
+      if(!instrumentPanel) return;
+      const available = !!(status && status.available);
+      const plugin = status && status.plugin;
+      const parameters = status && status.parameters;
+      instrumentPanel.classList.toggle('disabled', !(available && plugin) || instrumentRuntime.busy);
+      if(instrumentStatusLabel){
+        if(!status){
+          instrumentStatusLabel.textContent = 'Toolkit status pending…';
+        }else if(!available){
+          instrumentStatusLabel.textContent = 'Install the Flutter VST toolkit to audition plugins in place.';
+        }else if(!plugin){
+          instrumentStatusLabel.textContent = 'Load a plugin to activate the instrument keyboard.';
+        }else{
+          const meta = plugin.metadata || {};
+          const name = meta.name || plugin.display_name || plugin.name || 'plugin';
+          instrumentStatusLabel.textContent = `Ready to play ${name}.`;
+        }
+      }
+      if(instrumentPreview){
+        instrumentPreview.innerHTML = '';
+        if(plugin){
+          instrumentPreview.appendChild(renderPluginPreview(plugin, parameters));
+        }else{
+          const empty = ce('div', 'instrumentEmpty');
+          empty.textContent = 'Load a plugin to view its editor and audition it directly from the Noisetown studio.';
+          instrumentPreview.appendChild(empty);
+        }
+      }
+      if(instrumentKeyboard){
+        const buttons = instrumentKeyboard.querySelectorAll('button');
+        buttons.forEach((btn)=>{
+          btn.disabled = !(available && plugin) || instrumentRuntime.busy;
+        });
+      }
+    }
+
+    function triggerInstrument(note){
+      if(instrumentRuntime.busy){
+        return;
+      }
+      const status = hostState.status;
+      const available = !!(status && status.available);
+      const plugin = status && status.plugin;
+      if(!available || !plugin){
+        log('Load a plugin into the host to audition it.');
+        return;
+      }
+      instrumentRuntime.busy = true;
+      setInstrumentKeyActive(note, true);
+      renderInstrument(status);
+      fetch('/api/vst/play', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          note,
+          duration: instrumentState.duration,
+          velocity: instrumentState.velocity,
+          waveform: instrumentState.waveform,
+          attack: instrumentState.attack,
+          release: instrumentState.release,
+        }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Play failed');
+          if(payload.audio){
+            playPreviewAudio(payload.audio);
+          }
+          if(payload.status){
+            hostState.status = payload.status;
+          }
+        })
+        .catch((err)=>{
+          log('Instrument playback failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          instrumentRuntime.busy = false;
+          setInstrumentKeyActive(note, false);
+          renderInstrument(hostState.status);
+        });
+    }
+
+    if(instrumentWaveformSel){
+      instrumentWaveformSel.addEventListener('change', (event)=>{
+        instrumentState.waveform = event.target.value;
+      });
+    }
+    bindInstrumentSlider(instrumentVelocitySlider, 'velocity');
+    bindInstrumentSlider(instrumentDurationSlider, 'duration');
+    bindInstrumentSlider(instrumentAttackSlider, 'attack');
+    bindInstrumentSlider(instrumentReleaseSlider, 'release');
+    syncInstrumentLabels();
+    buildInstrumentKeyboard();
+
+    window.addEventListener('keydown', (event)=>{
+      if(event.repeat) return;
+      const note = instrumentKeyboardMap[event.code];
+      if(note){
+        event.preventDefault();
+        triggerInstrument(note);
+      }
+    });
+    window.addEventListener('keyup', (event)=>{
+      const note = instrumentKeyboardMap[event.code];
+      if(note){
+        setInstrumentKeyActive(note, false);
+      }
+    });
 
     function log(message){
       if(!rackOutput) return;
@@ -850,6 +1251,7 @@ function bootAudio(){
         if(!(li instanceof HTMLElement)) return;
         li.classList.toggle('selected', !!plugin && li.dataset.path === (plugin.path || ''));
       });
+      renderHost();
     }
 
     function renderWorkspaceNotes(status){
@@ -860,6 +1262,252 @@ function bootAudio(){
         span.textContent = note;
         workspaceNotes.appendChild(span);
       });
+    }
+
+    function formatParamDisplay(param, value){
+      if(param.units && param.units.includes('%')){
+        return `${Math.round(value * 100)}${param.units}`;
+      }
+      if(param.units && param.units.toLowerCase() === 'ms'){
+        return `${Math.round(value * 1000)} ms`;
+      }
+      const min = typeof param.min === 'number' ? param.min : 0;
+      const max = typeof param.max === 'number' ? param.max : 1;
+      const precision = (max - min) <= 1 ? 2 : 3;
+      return `${value.toFixed(precision)}${param.units ? ' ' + param.units : ''}`;
+    }
+
+    function renderHost(){
+      if(!hostPanel) return;
+      const status = hostState.status;
+      const available = !!(status && status.available);
+      const plugin = status && status.plugin;
+      if(hostStatusBox){
+        if(!status){
+          hostStatusBox.textContent = 'Toolkit status pending…';
+        }else if(!available){
+          hostStatusBox.textContent = 'Flutter VST toolkit not detected. Install it to enable realtime hosting.';
+        }else if(plugin){
+          const name = plugin.metadata && plugin.metadata.name ? plugin.metadata.name : 'Plugin';
+          const vendor = plugin.metadata && plugin.metadata.vendor ? ` · ${plugin.metadata.vendor}` : '';
+          hostStatusBox.textContent = `Hosting ${name}${vendor}.`;
+        }else{
+          hostStatusBox.textContent = 'Toolkit ready. Load a plugin from the library to begin.';
+        }
+      }
+      if(hostWarnings){
+        hostWarnings.innerHTML = '';
+        if(status && status.warnings){
+          status.warnings.forEach((warning)=>{
+            const span = document.createElement('span');
+            span.textContent = warning;
+            hostWarnings.appendChild(span);
+          });
+        }
+      }
+      renderInstrument(status);
+      if(hostParamList){
+        hostParamList.innerHTML = '';
+        if(plugin && status && Array.isArray(status.parameters) && status.parameters.length){
+          status.parameters.forEach((param)=>{
+            const li = document.createElement('li');
+            const label = document.createElement('label');
+            label.className = 'hostParamLabel';
+            label.textContent = param.display_name || param.name;
+            const valueLabel = document.createElement('span');
+            valueLabel.textContent = formatParamDisplay(param, param.value ?? param.default ?? param.min);
+            label.appendChild(valueLabel);
+            li.appendChild(label);
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            const min = (param.min !== undefined) ? param.min : 0;
+            const max = (param.max !== undefined) ? param.max : 1;
+            slider.min = min;
+            slider.max = max;
+            slider.step = param.step || 0.01;
+            slider.value = (param.value !== undefined) ? param.value : (param.default ?? min);
+            slider.dataset.paramId = param.id;
+            slider.addEventListener('input', (event)=>{
+              const val = parseFloat(event.target.value);
+              valueLabel.textContent = formatParamDisplay(param, val);
+            });
+            slider.addEventListener('change', (event)=>{
+              const val = parseFloat(event.target.value);
+              commitHostParameter(param.id, val, valueLabel);
+            });
+            li.appendChild(slider);
+            if(param.description){
+              const desc = document.createElement('p');
+              desc.className = 'small';
+              desc.textContent = param.description;
+              li.appendChild(desc);
+            }
+            hostParamList.appendChild(li);
+          });
+        }
+      }
+      if(hostLoadBtn){
+        hostLoadBtn.disabled = !available || !pluginState.selected;
+      }
+      if(hostUnloadBtn){
+        hostUnloadBtn.disabled = !available || !plugin;
+      }
+      if(hostPreviewBtn){
+        hostPreviewBtn.disabled = !available || !plugin || hostState.busy;
+      }
+    }
+
+    function refreshHostStatus(){
+      return fetch('/api/vst/status')
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(payload && payload.status){
+            hostState.status = payload.status;
+          }
+          renderHost();
+        })
+        .catch((err)=>{
+          log('Host status failed: ' + (err && err.message || err));
+        });
+    }
+
+    function commitHostParameter(identifier, value, valueLabel){
+      fetch('/api/vst/parameter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: identifier, value }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Update failed');
+          hostState.status = payload.status;
+          if(valueLabel){
+            const paramId = parseInt(identifier, 10);
+            const updated = (payload.status && payload.status.parameters || []).find((p)=> parseInt(p.id, 10) === paramId);
+            if(updated){
+              valueLabel.textContent = formatParamDisplay(updated, updated.value ?? value);
+            }
+          }
+          renderHost();
+        })
+        .catch((err)=>{
+          log('Parameter update failed: ' + (err && err.message || err));
+          refreshHostStatus();
+        });
+    }
+
+    function playPreviewAudio(dataUrl){
+      if(!dataUrl) return;
+      try{
+        if(!ACTX) bootAudio();
+        const base64 = dataUrl.split(',')[1] || dataUrl;
+        const binary = atob(base64);
+        const len = binary.length;
+        const bytes = new Uint8Array(len);
+        for(let i=0;i<len;i++) bytes[i] = binary.charCodeAt(i);
+        ACTX.decodeAudioData(bytes.buffer)
+          .then((buffer)=>{
+            const source = ACTX.createBufferSource();
+            source.buffer = buffer;
+            const target = MASTER && MASTER.pre ? MASTER.pre : ACTX.destination;
+            source.connect(target);
+            source.start();
+          })
+          .catch((err)=>{
+            log('Preview playback failed: ' + (err && err.message || err));
+          });
+      }catch(err){
+        log('Preview decode failed: ' + (err && err.message || err));
+      }
+    }
+
+    function loadSelectedIntoHost(){
+      const plugin = pluginState.selected;
+      if(!plugin){
+        log('Select a plugin from the library first.');
+        return;
+      }
+      hostState.busy = true;
+      renderHost();
+      fetch('/api/vst/load', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: plugin.path }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Load failed');
+          hostState.status = payload.status;
+          log(`Hosting ${plugin.name || plugin.path}.`);
+        })
+        .catch((err)=>{
+          log('Load failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          hostState.busy = false;
+          renderHost();
+        });
+    }
+
+    function unloadHost(){
+      hostState.busy = true;
+      renderHost();
+      fetch('/api/vst/unload', { method: 'POST' })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Unload failed');
+          hostState.status = payload.status;
+          log('Host cleared.');
+        })
+        .catch((err)=>{
+          log('Unload failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          hostState.busy = false;
+          renderHost();
+        });
+    }
+
+    function previewHost(){
+      if(!hostState.status || !hostState.status.plugin){
+        log('Load a plugin into the host first.');
+        return;
+      }
+      hostState.busy = true;
+      renderHost();
+      fetch('/api/vst/render', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duration: 2.0 }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Render failed');
+          playPreviewAudio(payload.audio);
+          log('Rendered preview for hosted plugin.');
+        })
+        .catch((err)=>{
+          log('Preview failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          hostState.busy = false;
+          renderHost();
+        });
     }
 
     function renderPluginLibrary(status){
@@ -1108,6 +1756,7 @@ function bootAudio(){
         renderWorkspaceNotes(data);
         renderPluginLibrary(data);
         renderStreams(data);
+        refreshHostStatus();
         if(rackNotes){
           rackNotes.textContent = count
             ? 'Select a plugin and choose a lane to start routing.'
@@ -1128,6 +1777,25 @@ function bootAudio(){
         refreshRack(true);
       });
     });
+
+    if(hostLoadBtn){
+      hostLoadBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        loadSelectedIntoHost();
+      });
+    }
+    if(hostUnloadBtn){
+      hostUnloadBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        unloadHost();
+      });
+    }
+    if(hostPreviewBtn){
+      hostPreviewBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        previewHost();
+      });
+    }
 
     if(copyWorkspaceBtn){
       copyWorkspaceBtn.addEventListener('click', async ()=>{
@@ -1181,6 +1849,7 @@ function bootAudio(){
       blockEl.classList.remove('dragging');
     });
 
+    refreshHostStatus();
     refreshRack();
   }
 
@@ -2720,6 +3389,7 @@ themeFile.addEventListener('change', async (e)=>{
 
 </script>
 
+<script>
 // === Style Preset wiring (add 9x themes) ===
 (function(){
   const sel = document.getElementById('stylePreset');
