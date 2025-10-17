@@ -44,13 +44,18 @@ that plugins demand.
    cmake --build build --config Release
    ```
 
-3. Optionally export the resulting binary for easier discovery:
+3. Optionally export the resulting binary for easier discovery.  The Visual
+   Studio generator places the executable under
+   `build/JucePluginHost/Release/JucePluginHost.exe`, while single-config
+   generators use `build/JucePluginHost`.  Point the variable at whichever path
+   your toolchain produced:
 
    ```bash
-   export JUCE_VST3_HOST="$(pwd)/build/JucePluginHost"
+   export JUCE_VST3_HOST="$(pwd)/build/JucePluginHost/Release/JucePluginHost.exe"
    ```
 
-On Windows the executable will be `JucePluginHost.exe`.
+On macOS the JUCE app bundle lives inside
+`build/JucePluginHost/JucePluginHost.app`.
 
 ## Using the Desktop Plugin UI Bridge
 

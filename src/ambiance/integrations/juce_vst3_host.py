@@ -33,14 +33,38 @@ from typing import Any
 def _candidate_paths(base_dir: Path) -> list[Path]:
     """Return likely locations for the JUCE host executable."""
 
-    suffixes = [
-        Path("cpp") / "juce_host" / "build" / "JucePluginHost",
-        Path("cpp") / "juce_host" / "build" / "JucePluginHost.exe",
-        Path("build") / "juce_host" / "JucePluginHost",
-        Path("build") / "juce_host" / "JucePluginHost.exe",
-        Path("cpp") / "juce_host" / "build" / "juce_plugin_host",
+    roots = [
+        Path("cpp") / "juce_host" / "build",
+        Path("build") / "juce_host",
     ]
-    return [base_dir / suffix for suffix in suffixes]
+    binary_names = [
+        Path("JucePluginHost"),
+        Path("JucePluginHost.exe"),
+        Path("juce_plugin_host"),
+    ]
+
+    # Visual Studio generators drop the executable in per-configuration
+    # subdirectories (e.g. Release/JucePluginHost.exe).  Xcode places the
+    # binary inside a .app bundle.  Collect all of these common variants so the
+    # host is discovered regardless of the chosen toolchain.
+    variants: list[Path] = []
+    configs = ["Release", "Debug"]
+
+    for root in roots:
+        for name in binary_names:
+            variants.append(root / name)
+            for config in configs:
+                variants.append(root / config / name)
+                variants.append(root / "JucePluginHost" / config / name)
+            variants.append(root / "JucePluginHost" / name)
+
+        app_binary = Path("JucePluginHost.app") / "Contents" / "MacOS" / "JucePluginHost"
+        variants.append(root / app_binary)
+        for config in configs:
+            variants.append(root / config / app_binary)
+            variants.append(root / "JucePluginHost" / config / app_binary)
+
+    return [base_dir / variant for variant in variants]
 
 
 @dataclass(slots=True)
@@ -80,10 +104,10 @@ class JuceVST3Host:
         env = os.environ.get("JUCE_VST3_HOST")
         if env:
             candidate = Path(env)
-            if candidate.exists() and os.access(candidate, os.X_OK):
+            if candidate.exists() and candidate.is_file() and os.access(candidate, os.X_OK):
                 return candidate
         for path in _candidate_paths(self.base_dir):
-            if path.exists() and os.access(path, os.X_OK):
+            if path.exists() and path.is_file() and os.access(path, os.X_OK):
                 return path
         return None
 

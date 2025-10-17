@@ -29,3 +29,23 @@ def test_terminate_safe_when_not_running(tmp_path: Path) -> None:
     status = host.terminate()
     assert not status.running
     assert status.plugin_path is None
+
+
+def test_discovers_visual_studio_release_binary(tmp_path: Path) -> None:
+    exe = (
+        tmp_path
+        / "cpp"
+        / "juce_host"
+        / "build"
+        / "JucePluginHost"
+        / "Release"
+        / "JucePluginHost.exe"
+    )
+    exe.parent.mkdir(parents=True)
+    exe.write_text("", encoding="utf-8")
+    exe.chmod(0o755)
+
+    host = JuceVST3Host(base_dir=tmp_path)
+    status = host.status()
+    assert status.available
+    assert status.executable == str(exe)
