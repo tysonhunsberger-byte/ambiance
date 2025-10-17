@@ -43,6 +43,17 @@
   .plugin-block .workspaceNotes span{display:block}
   .plugin-block .pluginLibrary li.selected{outline:2px solid rgba(89,167,255,.6);outline-offset:2px}
   .plugin-block .rack-panel{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:12px;background:rgba(9,12,19,.92);border:1px solid rgba(255,255,255,.06);box-shadow:0 20px 36px rgba(0,0,0,.35)}
+  .plugin-block .host-panel{margin-top:14px;display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:12px;background:rgba(16,20,30,.9);border:1px solid rgba(89,167,255,.25);box-shadow:0 18px 30px rgba(0,0,0,.32)}
+  .plugin-block .host-header{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .plugin-block .host-header h3{margin:0;font-size:17px}
+  .plugin-block .host-actions{display:flex;gap:8px;margin-left:auto}
+  .plugin-block .hostStatus{padding:10px;border-radius:8px;background:rgba(12,16,24,.75);border:1px solid rgba(255,255,255,.06)}
+  .plugin-block .hostParameters{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .plugin-block .hostParameters li{padding:10px;border-radius:10px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px}
+  .plugin-block .hostParamLabel{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+  .plugin-block .hostParamLabel span{font-size:12px;color:var(--muted)}
+  .plugin-block .hostWarnings{display:flex;flex-direction:column;gap:4px}
+  .plugin-block .hostWarnings span{display:block;padding:6px 8px;border-radius:6px;background:rgba(255,139,139,.1);border:1px solid rgba(255,139,139,.3);font-size:12px;color:#ff9b9b}
   .plugin-block .rack-header{display:flex;flex-direction:column;gap:6px}
   .plugin-block .streamsContainer{display:flex;flex-direction:column;gap:14px}
   .plugin-block .rackStream{border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 18px 32px rgba(0,0,0,.28)}
@@ -762,6 +773,7 @@ function bootAudio(){
   let blockCount = 0;
 
   const pluginState = { status: null, selected: null };
+  const hostState = { status: null, busy: false };
   const LANE_KEYS = ['A', 'B'];
 
   const isPluginBlock = (el)=> !!(el && el.dataset && el.dataset.role === 'plugin-rack');
@@ -800,6 +812,22 @@ function bootAudio(){
           <div class="rackNotes small"></div>
         </section>
       </div>
+      <section class="host-panel" aria-live="polite">
+        <header class="host-header">
+          <div class="host-title">
+            <h3>Live VST Host</h3>
+            <p class="host-subtitle small">Powered by Flutter VST3 toolkit</p>
+          </div>
+          <div class="host-actions">
+            <button class="btn hostLoad" disabled>⬆️ Load Selected</button>
+            <button class="btn hostUnload" disabled>⏏ Unload</button>
+            <button class="btn hostPreview" disabled>▶️ Preview</button>
+          </div>
+        </header>
+        <div class="hostStatus small">Toolkit status pending…</div>
+        <ul class="hostParameters"></ul>
+        <div class="hostWarnings"></div>
+      </section>
       <section class="rack-log">
         <label style="display:block;margin-bottom:6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Rack Activity</label>
         <textarea class="rackOutput" readonly placeholder="Status updates from the plugin rack will appear here."></textarea>
@@ -823,6 +851,13 @@ function bootAudio(){
     const selectedLabel = q('.selectedPlugin');
     const streamsContainer = q('.streamsContainer');
     const rackNotes = q('.rackNotes');
+    const hostPanel = q('.host-panel');
+    const hostStatusBox = q('.hostStatus');
+    const hostParamList = q('.hostParameters');
+    const hostWarnings = q('.hostWarnings');
+    const hostLoadBtn = q('.hostLoad');
+    const hostUnloadBtn = q('.hostUnload');
+    const hostPreviewBtn = q('.hostPreview');
 
     function log(message){
       if(!rackOutput) return;
@@ -850,6 +885,7 @@ function bootAudio(){
         if(!(li instanceof HTMLElement)) return;
         li.classList.toggle('selected', !!plugin && li.dataset.path === (plugin.path || ''));
       });
+      renderHost();
     }
 
     function renderWorkspaceNotes(status){
@@ -860,6 +896,251 @@ function bootAudio(){
         span.textContent = note;
         workspaceNotes.appendChild(span);
       });
+    }
+
+    function formatParamDisplay(param, value){
+      if(param.units && param.units.includes('%')){
+        return `${Math.round(value * 100)}${param.units}`;
+      }
+      if(param.units && param.units.toLowerCase() === 'ms'){
+        return `${Math.round(value * 1000)} ms`;
+      }
+      const min = typeof param.min === 'number' ? param.min : 0;
+      const max = typeof param.max === 'number' ? param.max : 1;
+      const precision = (max - min) <= 1 ? 2 : 3;
+      return `${value.toFixed(precision)}${param.units ? ' ' + param.units : ''}`;
+    }
+
+    function renderHost(){
+      if(!hostPanel) return;
+      const status = hostState.status;
+      const available = !!(status && status.available);
+      const plugin = status && status.plugin;
+      if(hostStatusBox){
+        if(!status){
+          hostStatusBox.textContent = 'Toolkit status pending…';
+        }else if(!available){
+          hostStatusBox.textContent = 'Flutter VST toolkit not detected. Install it to enable realtime hosting.';
+        }else if(plugin){
+          const name = plugin.metadata && plugin.metadata.name ? plugin.metadata.name : 'Plugin';
+          const vendor = plugin.metadata && plugin.metadata.vendor ? ` · ${plugin.metadata.vendor}` : '';
+          hostStatusBox.textContent = `Hosting ${name}${vendor}.`;
+        }else{
+          hostStatusBox.textContent = 'Toolkit ready. Load a plugin from the library to begin.';
+        }
+      }
+      if(hostWarnings){
+        hostWarnings.innerHTML = '';
+        if(status && status.warnings){
+          status.warnings.forEach((warning)=>{
+            const span = document.createElement('span');
+            span.textContent = warning;
+            hostWarnings.appendChild(span);
+          });
+        }
+      }
+      if(hostParamList){
+        hostParamList.innerHTML = '';
+        if(plugin && status && Array.isArray(status.parameters) && status.parameters.length){
+          status.parameters.forEach((param)=>{
+            const li = document.createElement('li');
+            const label = document.createElement('label');
+            label.className = 'hostParamLabel';
+            label.textContent = param.display_name || param.name;
+            const valueLabel = document.createElement('span');
+            valueLabel.textContent = formatParamDisplay(param, param.value ?? param.default ?? param.min);
+            label.appendChild(valueLabel);
+            li.appendChild(label);
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            const min = (param.min !== undefined) ? param.min : 0;
+            const max = (param.max !== undefined) ? param.max : 1;
+            slider.min = min;
+            slider.max = max;
+            slider.step = param.step || 0.01;
+            slider.value = (param.value !== undefined) ? param.value : (param.default ?? min);
+            slider.dataset.paramId = param.id;
+            slider.addEventListener('input', (event)=>{
+              const val = parseFloat(event.target.value);
+              valueLabel.textContent = formatParamDisplay(param, val);
+            });
+            slider.addEventListener('change', (event)=>{
+              const val = parseFloat(event.target.value);
+              commitHostParameter(param.id, val, valueLabel);
+            });
+            li.appendChild(slider);
+            if(param.description){
+              const desc = document.createElement('p');
+              desc.className = 'small';
+              desc.textContent = param.description;
+              li.appendChild(desc);
+            }
+            hostParamList.appendChild(li);
+          });
+        }
+      }
+      if(hostLoadBtn){
+        hostLoadBtn.disabled = !available || !pluginState.selected;
+      }
+      if(hostUnloadBtn){
+        hostUnloadBtn.disabled = !available || !plugin;
+      }
+      if(hostPreviewBtn){
+        hostPreviewBtn.disabled = !available || !plugin || hostState.busy;
+      }
+    }
+
+    function refreshHostStatus(){
+      return fetch('/api/vst/status')
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(payload && payload.status){
+            hostState.status = payload.status;
+          }
+          renderHost();
+        })
+        .catch((err)=>{
+          log('Host status failed: ' + (err && err.message || err));
+        });
+    }
+
+    function commitHostParameter(identifier, value, valueLabel){
+      fetch('/api/vst/parameter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: identifier, value }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Update failed');
+          hostState.status = payload.status;
+          if(valueLabel){
+            const paramId = parseInt(identifier, 10);
+            const updated = (payload.status && payload.status.parameters || []).find((p)=> parseInt(p.id, 10) === paramId);
+            if(updated){
+              valueLabel.textContent = formatParamDisplay(updated, updated.value ?? value);
+            }
+          }
+          renderHost();
+        })
+        .catch((err)=>{
+          log('Parameter update failed: ' + (err && err.message || err));
+          refreshHostStatus();
+        });
+    }
+
+    function playPreviewAudio(dataUrl){
+      if(!dataUrl) return;
+      try{
+        if(!ACTX) bootAudio();
+        const base64 = dataUrl.split(',')[1] || dataUrl;
+        const binary = atob(base64);
+        const len = binary.length;
+        const bytes = new Uint8Array(len);
+        for(let i=0;i<len;i++) bytes[i] = binary.charCodeAt(i);
+        ACTX.decodeAudioData(bytes.buffer)
+          .then((buffer)=>{
+            const source = ACTX.createBufferSource();
+            source.buffer = buffer;
+            const target = MASTER && MASTER.pre ? MASTER.pre : ACTX.destination;
+            source.connect(target);
+            source.start();
+          })
+          .catch((err)=>{
+            log('Preview playback failed: ' + (err && err.message || err));
+          });
+      }catch(err){
+        log('Preview decode failed: ' + (err && err.message || err));
+      }
+    }
+
+    function loadSelectedIntoHost(){
+      const plugin = pluginState.selected;
+      if(!plugin){
+        log('Select a plugin from the library first.');
+        return;
+      }
+      hostState.busy = true;
+      renderHost();
+      fetch('/api/vst/load', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: plugin.path }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Load failed');
+          hostState.status = payload.status;
+          log(`Hosting ${plugin.name || plugin.path}.`);
+        })
+        .catch((err)=>{
+          log('Load failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          hostState.busy = false;
+          renderHost();
+        });
+    }
+
+    function unloadHost(){
+      hostState.busy = true;
+      renderHost();
+      fetch('/api/vst/unload', { method: 'POST' })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Unload failed');
+          hostState.status = payload.status;
+          log('Host cleared.');
+        })
+        .catch((err)=>{
+          log('Unload failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          hostState.busy = false;
+          renderHost();
+        });
+    }
+
+    function previewHost(){
+      if(!hostState.status || !hostState.status.plugin){
+        log('Load a plugin into the host first.');
+        return;
+      }
+      hostState.busy = true;
+      renderHost();
+      fetch('/api/vst/render', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duration: 2.0 }),
+      })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'Render failed');
+          playPreviewAudio(payload.audio);
+          log('Rendered preview for hosted plugin.');
+        })
+        .catch((err)=>{
+          log('Preview failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          hostState.busy = false;
+          renderHost();
+        });
     }
 
     function renderPluginLibrary(status){
@@ -1108,6 +1389,7 @@ function bootAudio(){
         renderWorkspaceNotes(data);
         renderPluginLibrary(data);
         renderStreams(data);
+        refreshHostStatus();
         if(rackNotes){
           rackNotes.textContent = count
             ? 'Select a plugin and choose a lane to start routing.'
@@ -1128,6 +1410,25 @@ function bootAudio(){
         refreshRack(true);
       });
     });
+
+    if(hostLoadBtn){
+      hostLoadBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        loadSelectedIntoHost();
+      });
+    }
+    if(hostUnloadBtn){
+      hostUnloadBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        unloadHost();
+      });
+    }
+    if(hostPreviewBtn){
+      hostPreviewBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        previewHost();
+      });
+    }
 
     if(copyWorkspaceBtn){
       copyWorkspaceBtn.addEventListener('click', async ()=>{
@@ -1181,6 +1482,7 @@ function bootAudio(){
       blockEl.classList.remove('dragging');
     });
 
+    refreshHostStatus();
     refreshRack();
   }
 
