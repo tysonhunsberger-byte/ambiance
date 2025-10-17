@@ -30,6 +30,45 @@ import subprocess
 from typing import Any
 
 
+def _search_for_host_binaries(root: Path, max_depth: int = 5) -> list[Path]:
+    """Search ``root`` for executables that look like the JUCE host."""
+
+    if not root.exists():
+        return []
+
+    matches: list[Path] = []
+    stack: list[tuple[Path, int]] = [(root, 0)]
+
+    while stack:
+        current, depth = stack.pop()
+        if depth > max_depth or not current.exists():
+            continue
+
+        if current.is_file():
+            name = current.name.lower()
+            looks_like_host = "pluginhost" in name or (
+                "plugin" in name and "host" in name
+            )
+            if looks_like_host and (
+                current.suffix in {"", ".exe"} or name.endswith(".app")
+            ):
+                matches.append(current)
+            continue
+
+        if not current.is_dir():
+            continue
+
+        try:
+            entries = list(current.iterdir())
+        except PermissionError:  # pragma: no cover - defensive on Windows paths
+            continue
+
+        for entry in entries:
+            stack.append((entry, depth + 1))
+
+    return matches
+
+
 def _candidate_paths(base_dir: Path) -> list[Path]:
     """Return likely locations for the JUCE host executable."""
 
@@ -52,19 +91,35 @@ def _candidate_paths(base_dir: Path) -> list[Path]:
 
     for root in roots:
         for name in binary_names:
-            variants.append(root / name)
+            variants.append(base_dir / root / name)
             for config in configs:
-                variants.append(root / config / name)
-                variants.append(root / "JucePluginHost" / config / name)
-            variants.append(root / "JucePluginHost" / name)
+                variants.append(base_dir / root / config / name)
+                variants.append(base_dir / root / "JucePluginHost" / config / name)
+            variants.append(base_dir / root / "JucePluginHost" / name)
 
         app_binary = Path("JucePluginHost.app") / "Contents" / "MacOS" / "JucePluginHost"
-        variants.append(root / app_binary)
+        variants.append(base_dir / root / app_binary)
         for config in configs:
-            variants.append(root / config / app_binary)
-            variants.append(root / "JucePluginHost" / config / app_binary)
+            variants.append(base_dir / root / config / app_binary)
+            variants.append(base_dir / root / "JucePluginHost" / config / app_binary)
 
-    return [base_dir / variant for variant in variants]
+    # Some toolchains (notably Visual Studio with default multi-config
+    # generators) emit executables in nested "*_artefacts/Release/Standalone"
+    # folders.  Fall back to a bounded search so we surface those layouts as
+    # well without forcing the user to manually configure JUCE_VST3_HOST.
+    for root in roots:
+        root_path = base_dir / root
+        variants.extend(_search_for_host_binaries(root_path))
+
+    final_variants: list[Path] = []
+    seen: set[Path] = set()
+
+    for variant in variants:
+        if variant not in seen:
+            final_variants.append(variant)
+            seen.add(variant)
+
+    return final_variants
 
 
 @dataclass(slots=True)
