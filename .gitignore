@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dylib
+.env
+.venv
+.envrc
+.cache/
+external_apps/
+*.wav
+
+# Installer artifacts
+Modalys*/
+Praat*/

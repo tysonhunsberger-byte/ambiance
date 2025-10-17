@@ -19,6 +19,85 @@
   .block.dragging{opacity:.95;outline:2px dashed var(--accent)}
   .block h2{margin:0 0 8px}
   .block .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
+  .block.external-block{max-width:720px}
+  .external-block textarea{width:100%;min-height:180px;padding:8px;background:#0f0f0f;color:inherit;border:1px solid #555;border-radius:6px;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;font-size:12px}
+  .external-block .runOutput{min-height:120px;resize:vertical}
+  .external-block .status-panels{display:flex;flex-wrap:wrap;gap:10px;width:100%}
+  .external-block .status-panel{flex:1;min-width:200px;background:var(--card);border:1px solid #555;border-radius:6px;padding:8px}
+  .external-block .status-panel strong{display:block;margin-bottom:4px}
+  .external-block .statusList{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+  .external-block .statusItem{padding:4px;border-radius:4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04)}
+  .external-block .statusItem strong{font-size:12px;margin:0 0 2px;display:block;color:var(--text)}
+  .external-block .statusItem span{display:block}
+  .external-block .registry-tags{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+  .external-block .registry-tags span{padding:2px 6px;border:1px solid #555;border-radius:4px;background:var(--card);font-size:12px}
+  .external-block .status-text{font-size:12px;color:var(--muted)}
+  .external-block.server-offline .status-text{color:#ff8585}
+  .pluginWorkbench .rackRow{align-items:flex-start;gap:16px}
+  .pluginWorkbench .rackControls{display:flex;flex-direction:column;gap:8px;min-width:240px}
+  .pluginWorkbench .bankSwitch{display:flex;align-items:center;gap:6px}
+  .pluginWorkbench .bankSwitch .btn{padding:4px 8px;font-size:12px}
+  .pluginWorkbench .rackDisplay{flex:1;min-width:260px;display:flex;flex-direction:column;gap:8px}
+  .rackChains{display:flex;flex-wrap:wrap;gap:12px}
+  .rackBank{flex:1 1 240px;background:var(--card);border:1px solid #555;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:8px}
+  .rackBank.active{border-color:var(--accent)}
+  .rackBank .bankHeader{font-weight:700;font-size:13px}
+  .rackStream{display:flex;flex-direction:column;gap:4px;padding:6px;background:rgba(0,0,0,0.15);border-radius:6px}
+  .rackStream .streamTitle{font-weight:600;font-size:12px;color:var(--muted)}
+  .pedalboard{display:flex;flex-wrap:wrap;gap:8px;padding:8px;background:rgba(89,167,255,0.08);border:1px dashed rgba(89,167,255,0.35);border-radius:10px;min-height:44px;transition:background .15s}
+  .pedalboard.empty{justify-content:center;align-items:center;padding:12px}
+  .pedalboardEmpty{font-size:12px;color:var(--muted);font-style:italic}
+  .pedal{display:flex;flex-direction:column;gap:6px;padding:10px 12px;min-width:140px;max-width:200px;background:linear-gradient(145deg,rgba(89,167,255,0.18),rgba(28,53,86,0.65));border:1px solid rgba(89,167,255,0.45);border-radius:10px;box-shadow:0 6px 14px rgba(0,0,0,0.25)}
+  .pedalHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:600}
+  .pedalFormat{font-size:11px;color:var(--muted)}
+  .pedalParams{font-size:11px;color:var(--muted);line-height:1.35}
+  .pedalRemove{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:12px;padding:0 2px}
+  .pedalRemove:hover{color:#fff}
+  .streamPedalboardPanel{display:flex;flex-direction:column;gap:8px;margin:10px 0;padding:10px;border:1px solid #444;border-radius:8px;background:rgba(0,0,0,0.18)}
+  .streamPedalboardPanel .pedalboardHeader{display:flex;align-items:center;gap:8px}
+  .streamPedalboardPanel .pedalboardHeader input{flex:0 0 160px}
+  .streamPedalboard{display:flex;flex-wrap:wrap;gap:8px}
+  .streamPedalboard.empty{align-items:center}
+  .pedalboardHint{font-size:11px;color:var(--muted)}
+  .slotList{display:flex;flex-wrap:wrap;gap:6px}
+  .slotChip{display:inline-flex;align-items:center;gap:4px;background:rgba(89,167,255,0.15);border:1px solid rgba(89,167,255,0.35);border-radius:12px;padding:2px 8px;font-size:12px}
+  .slotChip .chipRemove{background:transparent;border:0;color:inherit;cursor:pointer;font-size:12px;padding:0 2px}
+  .slotChip .chipRemove:hover{color:#fff}
+  #pluginDesktop{background:var(--panel);border:1px solid #444;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+  #pluginDesktop.collapsed{padding:8px}
+  #pluginDesktop.collapsed .desktopShelf,#pluginDesktop.collapsed .desktopEmpty{display:none}
+  #pluginDesktop .desktopHdr{display:flex;align-items:center;gap:8px;font-weight:700}
+  #pluginDesktop .desktopShelf{display:flex;flex-wrap:wrap;gap:12px}
+  #pluginDesktop .desktopEmpty{display:none;font-style:italic;color:var(--muted)}
+  #pluginDesktop.empty .desktopEmpty{display:block}
+  .external-block .workbenchPanel{display:flex;flex-direction:column;gap:14px}
+  .fileInputRow{display:flex;align-items:center;gap:8px;width:100%;flex-wrap:wrap}
+  .fileInputRow input[type="text"]{flex:1 1 auto;min-width:180px}
+  .appBubble{background:var(--card);border:1px solid #555;border-radius:8px;padding:10px;min-width:260px;flex:1 1 320px;max-width:520px;position:relative;display:flex;flex-direction:column;gap:8px}
+  .appBubble iframe{width:100%;height:220px;border:0;border-radius:6px;background:#000}
+  .appBubble .bubbleTitle{display:flex;align-items:center;gap:8px;font-weight:700}
+  .appBubble .bubbleKind{font-size:12px;color:var(--muted)}
+  .appBubble .bubbleActions{display:flex;flex-wrap:wrap;gap:8px}
+  .appBubble .bubbleActions .bubbleArgs{padding:4px 6px;border:1px solid #555;border-radius:4px;background:var(--select);color:inherit;min-width:140px}
+  .appBubble .bubbleActions label{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
+  .appBubble .bubbleContent{display:flex;flex-direction:column;gap:8px}
+  .bubbleLog{width:100%;min-height:120px;max-height:240px;overflow:auto;background:#0f0f0f;color:inherit;border:1px solid #444;border-radius:6px;padding:8px;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;font-size:12px;white-space:pre-wrap}
+  .bubbleInfo{font-size:12px;color:var(--muted)}
+  .bubbleClose{position:absolute;top:6px;right:6px;background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:14px}
+  .bubbleClose:hover{color:#fff}
+  .workspaceList{width:100%;max-height:200px;overflow:auto;border:1px solid #444;border-radius:6px;padding:8px;background:var(--card);display:flex;flex-direction:column;gap:8px}
+  .workspaceList.empty{justify-content:center;align-items:flex-start}
+  .workspaceRow{display:flex;flex-direction:column;gap:4px;background:rgba(0,0,0,0.2);padding:6px 8px;border-radius:6px}
+  .workspaceRow strong{font-size:13px}
+  .workspaceRow .workspaceMeta{font-size:12px;color:var(--muted)}
+  .workspaceRow .workspaceActions{display:flex;flex-wrap:wrap;gap:6px}
+  .workspaceRow button{padding:4px 8px;font-size:12px}
+  body.theme-xp #pluginDesktop, body.theme-98 #pluginDesktop{background:linear-gradient(#f9f9ff,#dee6fb);border:1px solid #8aa8d8}
+  body.theme-xp .appBubble, body.theme-98 .appBubble{background:#fff;border-color:#9ab4e0}
+  body.theme-xp .bubbleLog, body.theme-98 .bubbleLog{background:#fff;border-color:#9ab4e0;color:#000}
+  body.theme-xp .workspaceList, body.theme-98 .workspaceList{background:#fff;border-color:#9ab4e0}
+  body.theme-xp .external-block textarea,
+  body.theme-98 .external-block textarea{background:#fff;color:#000;border:1px solid #7b7b7b}
   .scope{flex:1;min-width:220px;height:60px;background:#000;border:1px solid #666;border-radius:6px}
   .stream{background:var(--card);border:1px solid #555;border-radius:8px;padding:10px;margin:8px 0}
   .stream h3{margin:0 0 6px}
@@ -714,7 +793,734 @@ function bootAudio(){
   const blocks = [];        // { el, bus, analyser, cvs, ctx, streams:[] }
   const streamSpectros = []; // for spectrogram draw loop
 
+  const latestRackState = { activeBank: 'A', chains: {} };
+
+  function normalizeStreamKey(name){
+    return (name || '').toString().trim().toLowerCase();
+  }
+
+  function findStreamHintList(){
+    const rack = document.querySelector('#pluginRackBlock');
+    if(!rack) return null;
+    return rack.querySelector('#streamKeyHints');
+  }
+
+  function updateStreamHints(){
+    const list = findStreamHintList();
+    if(!list) return;
+    const seen = new Set();
+    list.innerHTML = '';
+    document.querySelectorAll('.streamPedalboard').forEach((board)=>{
+      const key = (board.dataset.streamKey || '').trim();
+      if(!key || seen.has(key.toLowerCase())) return;
+      seen.add(key.toLowerCase());
+      const opt = document.createElement('option');
+      opt.value = key;
+      list.appendChild(opt);
+    });
+  }
+
+  function findChainForKey(chains, key){
+    if(!chains) return null;
+    if(key in chains) return chains[key];
+    const norm = normalizeStreamKey(key);
+    for(const [name, value] of Object.entries(chains)){
+      if(normalizeStreamKey(name) === norm){
+        return value;
+      }
+    }
+    return null;
+  }
+
+  function renderPedalCollection(container, entries, options){
+    if(!container) return;
+    const opts = options || {};
+    container.innerHTML = '';
+    if(!entries || !entries.length){
+      container.classList.add('empty');
+      const empty = ce('div','pedalboardEmpty');
+      empty.textContent = opts.emptyText || 'No plug-ins assigned yet.';
+      container.appendChild(empty);
+      return;
+    }
+    container.classList.remove('empty');
+    entries.forEach((entry, idx)=>{
+      if(!entry) return;
+      const pedal = ce('div','pedal');
+      const header = ce('div','pedalHeader');
+      const name = ce('span','pedalName');
+      name.textContent = entry.name || entry.slug || `Plug-in ${idx+1}`;
+      header.appendChild(name);
+      const format = ce('span','pedalFormat');
+      const fmt = entry.format || entry.kind;
+      format.textContent = fmt ? String(fmt).toUpperCase() : '';
+      header.appendChild(format);
+      if(opts.allowRemove){
+        const btn = ce('button','pedalRemove');
+        btn.type = 'button';
+        btn.title = 'Remove from chain';
+        btn.textContent = '✖';
+        btn.addEventListener('click', ()=>{
+          if(typeof opts.onRemove === 'function'){
+            opts.onRemove(idx);
+          }
+        });
+        header.appendChild(btn);
+      }
+      pedal.appendChild(header);
+      const metaPieces = [];
+      if(entry.metadata && entry.metadata.category){
+        metaPieces.push(entry.metadata.category);
+      }
+      if(entry.params && Object.keys(entry.params).length){
+        const params = Object.entries(entry.params)
+          .map(([k,v])=>`${k}=${Array.isArray(v)?v.join('/'):(typeof v==='number'?Number(v).toFixed(2).replace(/\.00$/,''):v)}`);
+        if(params.length){
+          metaPieces.push(params.join(', '));
+        }
+      }
+      if(metaPieces.length){
+        const paramsEl = ce('div','pedalParams');
+        paramsEl.textContent = metaPieces.join(' · ');
+        pedal.appendChild(paramsEl);
+      }
+      container.appendChild(pedal);
+    });
+  }
+
+  function refreshStreamPedalboards(){
+    const chains = latestRackState.chains && latestRackState.chains[latestRackState.activeBank] || {};
+    document.querySelectorAll('.streamPedalboard').forEach((board)=>{
+      const key = board.dataset.streamKey || '';
+      const chain = findChainForKey(chains, key) || [];
+      const decorated = (chain || []).map((slot)=>({
+        slug: slot.slug,
+        name: slot.name || slot.slug,
+        format: slot.format || slot.kind,
+        kind: slot.kind,
+        metadata: slot.metadata || {},
+        params: slot.params || {},
+      }));
+      renderPedalCollection(board, decorated, { emptyText: 'No plug-ins assigned to this stream.' });
+      const hint = board.parentElement && board.parentElement.querySelector('.pedalboardHint');
+      if(hint){
+        const label = key ? `Add plug-ins to this stream by choosing “${key}” in the Plugin Rack.` : 'Assign a key to link this stream to a plug-in chain.';
+        hint.textContent = label;
+      }
+    });
+  }
+
   let blockCount = 0;
+
+  const isExternalBlock = (el)=> !!(el && el.dataset && el.dataset.role === 'plugin-rack');
+
+  function ensureExternalAppsWorkspace(){
+    if(qs('#pluginRackBlock')) return null;
+    const blockEl = ce('div','block external-block');
+    blockEl.id = 'pluginRackBlock';
+    blockEl.dataset.role = 'plugin-rack';
+    blockEl.innerHTML = `
+      <h2><span class="dragHandle" style="cursor:move">⣿</span> Plugin Rack</h2>
+      <div id="pluginDesktop" class="empty" aria-label="Plugin desktop">
+        <div class="desktopHdr">
+          <span class="desktopTitle">Plugin Desktop</span>
+          <div class="spacer"></div>
+          <button type="button" class="btn btn-xs toggleDesktop">⬇️ Collapse</button>
+        </div>
+        <div class="desktopEmpty small">No plugin editors yet. Launch a plug-in to pin it here.</div>
+        <div class="desktopShelf"></div>
+      </div>
+      <div class="workbenchPanel pluginWorkbench">
+        <div class="row statusRow">
+          <button class="btn refreshPlugins">🔄 Refresh</button>
+          <button class="btn rescanPlugins">🔍 Rescan</button>
+          <div class="spacer"></div>
+          <span class="status-text">Waiting for server…</span>
+        </div>
+        <div class="status-panels libraryRow">
+          <div class="status-panel">
+            <strong>Registered Plug-ins</strong>
+            <div class="pluginList statusList"></div>
+          </div>
+          <div class="status-panel">
+            <strong>Add Plug-in</strong>
+            <div class="fileInputRow">
+              <input type="text" class="pluginPath" list="pluginPathHints" placeholder="C:\\Path\\to\\plugin.vst3 or /Library/Audio/...">
+              <button type="button" class="btn btn-xs browsePlugin">📁 Choose File…</button>
+              <input type="file" class="pluginPicker" accept=".vst3,.vst,.dll,.component,.svt,.mc.svt,.so,.dylib" style="display:none">
+            </div>
+            <input type="text" class="pluginName" placeholder="Display name (optional)">
+            <button class="btn registerPlugin">➕ Add Plug-in</button>
+            <datalist id="pluginPathHints"></datalist>
+          </div>
+          <div class="status-panel registryPanel">
+            <strong>Registry</strong>
+            <div class="small">Sources</div>
+            <div class="registry-tags registrySources"></div>
+            <div class="small" style="margin-top:6px">Effects</div>
+            <div class="registry-tags registryEffects"></div>
+          </div>
+        </div>
+        <div class="row rackRow">
+          <div class="rackControls">
+            <label>Stream</label>
+            <input type="text" class="streamName" placeholder="sine, noise, master…" list="streamKeyHints" autocomplete="off">
+            <label>Plug-in</label>
+            <select class="pluginSelect"></select>
+            <datalist id="streamKeyHints"></datalist>
+            <button class="btn addToStream">➕ Add to Bank</button>
+            <div class="bankSwitch">
+              <span>Active Bank:</span>
+              <button class="btn btn-xs bankToggle" data-bank="A">A</button>
+              <button class="btn btn-xs bankToggle" data-bank="B">B</button>
+            </div>
+          </div>
+          <div class="rackDisplay">
+            <strong>Chains</strong>
+            <div class="rackChains"></div>
+          </div>
+        </div>
+        <div class="row renderRow">
+          <label>Duration (s)</label><input type="number" class="durationInput" min="1" max="120" step="1" value="8">
+          <label>Sample Rate</label><input type="number" class="sampleRateInput" min="8000" max="96000" step="1000" value="44100">
+        </div>
+        <div class="row">
+          <label style="width:100%">Engine Config (JSON)</label>
+          <textarea class="engineConfig" aria-label="Engine configuration JSON"></textarea>
+        </div>
+        <div class="row">
+          <button class="btn renderNow">🎧 Render with Engine</button>
+          <div class="spacer"></div>
+          <span class="small renderInfo">Idle.</span>
+        </div>
+        <div class="row">
+          <audio class="enginePreview" controls style="width:100%"></audio>
+        </div>
+      </div>
+    `;
+
+    main.appendChild(blockEl);
+    wireExternalAppsWorkspace(blockEl);
+    return blockEl;
+  }
+
+  function wireExternalAppsWorkspace(blockEl){
+    const q = (sel)=> blockEl.querySelector(sel);
+    const statusText = q('.status-text');
+    const pluginList = q('.pluginList');
+    const pluginSelect = q('.pluginSelect');
+    const pluginPathInput = q('.pluginPath');
+    const pluginNameInput = q('.pluginName');
+    const pluginPicker = q('.pluginPicker');
+    const browsePluginBtn = q('.browsePlugin');
+    const rescanBtn = q('.rescanPlugins');
+    const refreshBtn = q('.refreshPlugins');
+    const addBtn = q('.addToStream');
+    const streamInput = q('.streamName');
+    const bankButtons = Array.from(blockEl.querySelectorAll('.bankToggle'));
+    const rackChains = q('.rackChains');
+    const durationInput = q('.durationInput');
+    const sampleInput = q('.sampleRateInput');
+    const configArea = q('.engineConfig');
+    const renderInfo = q('.renderInfo');
+    const preview = q('.enginePreview');
+    const desktop = blockEl.querySelector('#pluginDesktop');
+    const desktopShelf = desktop ? desktop.querySelector('.desktopShelf') : null;
+    const desktopToggle = desktop ? desktop.querySelector('.toggleDesktop') : null;
+    const registrySources = q('.registrySources');
+    const registryEffects = q('.registryEffects');
+    const pathList = blockEl.querySelector('#pluginPathHints');
+
+    const bubbleMap = new Map();
+    let pluginStatus = null;
+    let currentRack = { active_bank: 'A', banks: {} };
+
+    function derivePathFromFile(file){
+      if(!file) return '';
+      if(file.path) return file.path;
+      if(file.webkitRelativePath){
+        const parts = file.webkitRelativePath.split(/[\\/]/).filter(Boolean);
+        if(parts.length > 1) return parts.slice(0, -1).join('/');
+        if(parts.length) return parts[0];
+      }
+      return file.name || '';
+    }
+
+    function pushPathSuggestion(path){
+      if(!pathList || !path) return;
+      const exists = Array.from(pathList.options || []).some(opt=> opt.value === path);
+      if(exists) return;
+      const opt = document.createElement('option');
+      opt.value = path;
+      pathList.appendChild(opt);
+    }
+
+    function setDesktopEmptyState(state){
+      if(!desktop) return;
+      desktop.classList.toggle('empty', state);
+    }
+
+    function updateDesktopToggleLabel(){
+      if(!desktop || !desktopToggle) return;
+      const collapsed = desktop.classList.contains('collapsed');
+      desktopToggle.textContent = collapsed ? '⬆️ Expand' : '⬇️ Collapse';
+    }
+
+    function ensureBubble(slug, name){
+      if(!desktopShelf || !slug) return null;
+      let record = bubbleMap.get(slug);
+      if(record) return record;
+      const bubble = ce('div','appBubble');
+      bubble.dataset.slug = slug;
+      const closeBtn = ce('button','bubbleClose'); closeBtn.type='button'; closeBtn.textContent='✖';
+      const titleRow = ce('div','bubbleTitle');
+      const nameEl = ce('span','bubbleName'); nameEl.textContent = name || slug;
+      titleRow.appendChild(nameEl);
+      const bodyEl = ce('div','bubbleContent');
+      bubble.appendChild(closeBtn);
+      bubble.appendChild(titleRow);
+      bubble.appendChild(bodyEl);
+      closeBtn.addEventListener('click', ()=>{ bubbleMap.delete(slug); bubble.remove(); setDesktopEmptyState(!bubbleMap.size); });
+      desktopShelf.appendChild(bubble);
+      record = { el:bubble, bodyEl, logEl:null };
+      bubbleMap.set(slug, record);
+      setDesktopEmptyState(false);
+      return record;
+    }
+
+    function logBubble(slug, name, message){
+      const record = ensureBubble(slug, name);
+      if(!record) return;
+      if(!record.logEl){
+        record.logEl = ce('pre','bubbleLog');
+        record.bodyEl.appendChild(record.logEl);
+      }
+      const stamp = new Date().toLocaleTimeString();
+      const line = `[${stamp}] ${message}`;
+      record.logEl.textContent = record.logEl.textContent ? `${record.logEl.textContent}
+${line}` : line;
+      record.logEl.scrollTop = record.logEl.scrollHeight;
+      if(desktop){
+        desktop.classList.remove('collapsed');
+        updateDesktopToggleLabel();
+      }
+    }
+
+    function renderPlugins(status){
+      const plugins = (status && status.plugins) || [];
+      if(pluginList){
+        pluginList.innerHTML = '';
+        if(!plugins.length){
+          const empty = ce('div','statusItem');
+          empty.textContent = 'No plug-ins registered yet.';
+          pluginList.appendChild(empty);
+        }
+        plugins.forEach((plugin)=>{
+          if(!plugin) return;
+          const row = ce('div','statusItem');
+          const header = ce('div','statusHeader');
+          header.style.display = 'flex';
+          header.style.justifyContent = 'space-between';
+          header.style.alignItems = 'center';
+          const title = ce('strong');
+          title.textContent = plugin.name || plugin.slug;
+          header.appendChild(title);
+          if(plugin.kind !== 'builtin'){
+            const removeBtn = ce('button','btn btn-xs');
+            removeBtn.textContent = '🗑 Remove';
+            removeBtn.addEventListener('click', ()=> removePlugin(plugin.slug));
+            header.appendChild(removeBtn);
+          }
+          if(plugin.kind !== 'builtin' && plugin.available && status.editor_commands && status.editor_commands.length){
+            const openBtn = ce('button','btn btn-xs');
+            openBtn.textContent = '🪟 Open';
+            openBtn.addEventListener('click', ()=> openPluginEditor(plugin.slug, plugin.name));
+            header.appendChild(openBtn);
+          }
+          row.appendChild(header);
+          const meta = ce('div','small');
+          const pieces = [plugin.format?.toUpperCase() || 'UNKNOWN'];
+          if(plugin.path) pieces.push(plugin.path);
+          row.appendChild(meta);
+          meta.textContent = pieces.join(' · ');
+          pluginList.appendChild(row);
+          if(plugin.path) pushPathSuggestion(plugin.path);
+        });
+      }
+      if(pluginSelect){
+        pluginSelect.innerHTML = '';
+        plugins
+          .filter(Boolean)
+          .forEach((plugin)=>{
+            const opt = document.createElement('option');
+            opt.value = plugin.slug;
+            opt.textContent = `${plugin.name || plugin.slug} (${plugin.format || plugin.kind})`;
+            pluginSelect.appendChild(opt);
+          });
+      }
+    }
+
+    function renderRack(status){
+      currentRack = status && status.rack ? status.rack : { active_bank: 'A', banks: {} };
+      if(!currentRack.active_bank) currentRack.active_bank = 'A';
+      if(!currentRack.banks) currentRack.banks = {};
+      latestRackState.activeBank = currentRack.active_bank;
+      latestRackState.chains = (status && status.chains) || {};
+      if(rackChains){
+        rackChains.innerHTML = '';
+        const entries = Object.entries(currentRack.banks);
+        if(!entries.length){
+          const empty = ce('div','small');
+          empty.textContent = 'No chains configured. Choose a stream and add a plug-in.';
+          rackChains.appendChild(empty);
+        }
+        entries.forEach(([bank, info])=>{
+          const bankEl = ce('div','rackBank');
+          if(bank === currentRack.active_bank) bankEl.classList.add('active');
+          const heading = ce('div','bankHeader');
+          heading.textContent = `Bank ${bank}`;
+          bankEl.appendChild(heading);
+          const streams = info && info.streams ? info.streams : {};
+          const detail = (status && status.chains && status.chains[bank]) || {};
+          if(!Object.keys(streams).length){
+            const emptyStream = ce('div','small');
+            emptyStream.textContent = 'No streams assigned.';
+            bankEl.appendChild(emptyStream);
+          }
+          Object.entries(streams).forEach(([stream, slots])=>{
+            const streamEl = ce('div','rackStream');
+            const title = ce('div','streamTitle');
+            title.textContent = stream;
+            streamEl.appendChild(title);
+            const board = ce('div','pedalboard');
+            const chainDetail = findChainForKey(detail, stream) || [];
+            const combined = (slots || []).map((slot, idx)=>{
+              const info = chainDetail[idx] || { slug: slot.slug };
+              return {
+                slug: slot.slug,
+                name: info.name || slot.slug,
+                format: info.format || info.kind,
+                kind: info.kind,
+                metadata: info.metadata || {},
+                params: info.params || slot.params || {},
+              };
+            });
+            renderPedalCollection(board, combined, {
+              allowRemove: true,
+              onRemove: (index)=> removeSlot(bank, stream, index),
+              emptyText: 'No plug-ins in this chain yet.',
+            });
+            streamEl.appendChild(board);
+            bankEl.appendChild(streamEl);
+          });
+          rackChains.appendChild(bankEl);
+        });
+      }
+      bankButtons.forEach(btn=>{
+        const bank = btn.dataset.bank;
+        btn.classList.toggle('active', bank === currentRack.active_bank);
+      });
+      applyDefaultConfig();
+      refreshStreamPedalboards();
+    }
+
+    function renderTags(container, items){
+      if(!container) return;
+      container.innerHTML = '';
+      const list = Array.isArray(items) ? items : [];
+      if(!list.length){
+        const empty = ce('span','tag empty');
+        empty.textContent = '—';
+        container.appendChild(empty);
+        return;
+      }
+      list.forEach((item)=>{
+        const tag = ce('span','tag');
+        tag.textContent = item;
+        container.appendChild(tag);
+      });
+    }
+
+    function renderRegistry(tags){
+      const sources = (tags && tags.sources) || [];
+      const effects = (tags && tags.effects) || [];
+      renderTags(registrySources, sources);
+      renderTags(registryEffects, effects);
+    }
+
+    async function refreshStatus(){
+      try{
+        const res = await fetch('/api/status');
+        if(!res.ok) throw new Error('status '+res.status);
+        const data = await res.json();
+        pluginStatus = data.plugins || null;
+        currentRack = pluginStatus && pluginStatus.rack ? pluginStatus.rack : { active_bank: 'A', banks: {} };
+        if(!currentRack.active_bank) currentRack.active_bank = 'A';
+        latestRackState.activeBank = currentRack.active_bank;
+        latestRackState.chains = (pluginStatus && pluginStatus.chains) || {};
+        renderPlugins(pluginStatus);
+        renderRack(pluginStatus);
+        updateStreamHints();
+        renderRegistry(data.registry || {});
+        if(statusText){
+          const pieces = [];
+          if(pluginStatus && pluginStatus.editor_commands && pluginStatus.editor_commands.length){
+            pieces.push('Editor host available');
+          }else{
+            pieces.push('No editor host detected');
+          }
+          if(pluginStatus && pluginStatus.pedalboard_available){
+            pieces.push('Offline processing ready');
+          }else{
+            pieces.push('Install pedalboard for VST processing');
+          }
+          statusText.textContent = pieces.join(' · ');
+        }
+      }catch(err){
+        if(statusText) statusText.textContent = 'Status unavailable: '+(err && err.message || err);
+        renderPlugins(null);
+        renderRack(null);
+        renderRegistry({});
+      }
+    }
+
+    async function rescanPlugins(){
+      if(statusText) statusText.textContent = 'Rescanning plug-in folders…';
+      try{
+        const res = await fetch('/api/plugins/rescan',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({}) });
+        if(!res.ok) throw new Error('status '+res.status);
+      }catch(err){
+        if(statusText) statusText.textContent = 'Rescan failed: '+(err && err.message || err);
+      }
+      await refreshStatus();
+    }
+
+    async function registerPlugin(){
+      const path = pluginPathInput && pluginPathInput.value.trim();
+      if(!path){
+        statusText && (statusText.textContent = 'Provide a plug-in path first.');
+        return;
+      }
+      try{
+        const res = await fetch('/api/plugins/register',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ path, name: pluginNameInput && pluginNameInput.value.trim() || undefined })
+        });
+        if(!res.ok) throw new Error('status '+res.status);
+        pluginNameInput && (pluginNameInput.value = '');
+        pushPathSuggestion(path);
+      }catch(err){
+        statusText && (statusText.textContent = 'Register failed: '+(err && err.message || err));
+      }
+      await refreshStatus();
+    }
+
+    async function removePlugin(slug){
+      if(!slug) return;
+      await fetch(`/api/plugins/${encodeURIComponent(slug)}`,{ method:'DELETE' });
+      await refreshStatus();
+    }
+
+    async function saveRack(){
+      if(!currentRack) return;
+      try{
+        await fetch('/api/plugins/rack',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ rack: currentRack })
+        });
+      }catch(_err){ /* ignore */ }
+    }
+
+    async function addSlot(){
+      const stream = streamInput && streamInput.value.trim();
+      const slug = pluginSelect && pluginSelect.value;
+      if(!stream || !slug){
+        statusText && (statusText.textContent = 'Pick a stream and plug-in first.');
+        return;
+      }
+      try{
+        const res = await fetch('/api/plugins/add',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ bank: currentRack.active_bank || 'A', stream, slot: { slug } })
+        });
+        if(res.ok){
+          await res.json();
+          await refreshStatus();
+        }
+      }catch(err){
+        statusText && (statusText.textContent = 'Add failed: '+(err && err.message || err));
+      }
+      streamInput && (streamInput.value = '');
+    }
+
+    async function removeSlot(bank, stream, index){
+      try{
+        const res = await fetch('/api/plugins/remove',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ bank, stream, index })
+        });
+        if(res.ok){
+          await res.json();
+          await refreshStatus();
+        }
+      }catch(err){
+        statusText && (statusText.textContent = 'Remove failed: '+(err && err.message || err));
+      }
+    }
+
+    async function openPluginEditor(slug, name){
+      try{
+        const res = await fetch('/api/plugins/open',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ slug })
+        });
+        if(!res.ok) throw new Error('status '+res.status);
+        const data = await res.json();
+        if(data.ok){
+          logBubble(slug, name || slug, `Launched editor (PID ${data.pid || 'unknown'})`);
+        }else{
+          logBubble(slug, name || slug, data.error || 'Launch failed');
+        }
+      }catch(err){
+        logBubble(slug, name || slug, 'Launch failed: '+(err && err.message || err));
+      }
+    }
+
+    function applyDefaultConfig(){
+      if(!configArea) return;
+      const payload = {
+        duration: parseFloat(durationInput && durationInput.value) || 8,
+        sample_rate: parseInt(sampleInput && sampleInput.value) || 44100,
+        sources: [
+          { name:'sine', frequency:432, amplitude:0.18 },
+          { name:'bundled-resonator', preset:'string-resonator', amplitude:0.22 },
+          { name:'formant-voice', vowel:'o', amplitude:0.16 }
+        ],
+        effects: [
+          { name:'reverb', decay:0.45, mix:0.3 },
+          { name:'delay', time:0.32, feedback:0.22 },
+          { name:'lowpass', cutoff:4600 }
+        ],
+        plugins: currentRack
+      };
+      configArea.value = JSON.stringify(payload, null, 2);
+    }
+
+    async function renderEngine(){
+      if(!configArea) return;
+      let payload;
+      try{
+        payload = JSON.parse(configArea.value || '{}');
+      }catch(err){
+        renderInfo.textContent = 'Invalid JSON: '+(err && err.message || err);
+        return;
+      }
+      if(!payload.duration) payload.duration = parseFloat(durationInput && durationInput.value) || 8;
+      if(!payload.sample_rate) payload.sample_rate = parseInt(sampleInput && sampleInput.value) || 44100;
+      if(!payload.plugins) payload.plugins = currentRack;
+      renderInfo.textContent = 'Rendering…';
+      try{
+        const res = await fetch('/api/render',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        if(!res.ok) throw new Error('status '+res.status);
+        const data = await res.json();
+        if(!data.ok) throw new Error(data.error || 'Render failed');
+        preview.src = data.audio;
+        renderInfo.textContent = `Rendered ${data.duration.toFixed(2)}s @ ${data.sample_rate} Hz`;
+        try{ preview.play(); }catch(_){ }
+      }catch(err){
+        renderInfo.textContent = 'Render failed: '+(err && err.message || err);
+      }
+    }
+
+    if(browsePluginBtn && pluginPicker){
+      browsePluginBtn.addEventListener('click', ()=> pluginPicker.click());
+      pluginPicker.addEventListener('change', ()=>{
+        const file = pluginPicker.files && pluginPicker.files[0];
+        const value = derivePathFromFile(file);
+        if(value && pluginPathInput){
+          pluginPathInput.value = value;
+          pushPathSuggestion(value);
+        }
+      });
+    }
+
+    if(desktopToggle){
+      desktopToggle.addEventListener('click', ()=>{
+        if(!desktop) return;
+        desktop.classList.toggle('collapsed');
+        updateDesktopToggleLabel();
+      });
+      updateDesktopToggleLabel();
+    }
+
+    bankButtons.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const bank = btn.dataset.bank;
+        if(!bank || bank === currentRack.active_bank) return;
+        currentRack.active_bank = bank;
+        if(pluginStatus){
+          pluginStatus.active_bank = bank;
+          if(pluginStatus.rack) pluginStatus.rack.active_bank = bank;
+        }
+        latestRackState.activeBank = bank;
+        renderRack(pluginStatus);
+        saveRack();
+      });
+    });
+
+    if(rescanBtn) rescanBtn.addEventListener('click', ()=> rescanPlugins());
+    if(refreshBtn) refreshBtn.addEventListener('click', ()=> refreshStatus());
+    if(addBtn) addBtn.addEventListener('click', ()=> addSlot());
+    if(pluginPathInput) pluginPathInput.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); registerPlugin(); } });
+    if(pluginNameInput) pluginNameInput.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); registerPlugin(); } });
+    const registerBtn = q('.registerPlugin');
+    if(registerBtn) registerBtn.addEventListener('click', ()=> registerPlugin());
+    if(durationInput) durationInput.addEventListener('change', ()=> applyDefaultConfig());
+    if(sampleInput) sampleInput.addEventListener('change', ()=> applyDefaultConfig());
+    const renderBtn = q('.renderNow');
+    if(renderBtn) renderBtn.addEventListener('click', ()=> renderEngine());
+
+    const dragHandle = blockEl.querySelector('.dragHandle');
+    let drag = null;
+    dragHandle.addEventListener('mousedown', (e)=>{
+      if(!editMode) return;
+      const r = blockEl.getBoundingClientRect();
+      const parentR = main.getBoundingClientRect();
+      drag = {dx:e.clientX - r.left, dy:e.clientY - r.top, parentR, w:r.width};
+      blockEl.classList.add('dragging');
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e)=>{
+      if(!drag) return;
+      let x = e.clientX - drag.parentR.left - drag.dx + main.scrollLeft;
+      let y = e.clientY - drag.parentR.top - drag.dy + main.scrollTop;
+      x = Math.round(x / GRID) * GRID;
+      y = Math.round(y / GRID) * GRID;
+      blockEl.style.left = x + 'px';
+      blockEl.style.top = y + 'px';
+      blockEl.style.position = 'absolute';
+      blockEl.style.width = Math.max(560, Math.floor(drag.w)) + 'px';
+    });
+    window.addEventListener('mouseup', ()=>{
+      if(!drag) return;
+      drag = null;
+      blockEl.classList.remove('dragging');
+    });
+
+    applyDefaultConfig();
+    updateStreamHints();
+    refreshStreamPedalboards();
+    refreshStatus();
+  }
 
   function addBlock(){
     if(!ACTX){ bootAudio(); /* resume only on Start Audio click */ }
@@ -750,7 +1556,7 @@ function bootAudio(){
         });
       });
     })();
-const bus = ACTX.createGain(); bus.gain.value = 1.0; bus.connect(MASTER.pre);
+    const bus = ACTX.createGain(); bus.gain.value = 1.0; bus.connect(MASTER.pre); bus.__blockId = id;
     // Per-block analyser for oscilloscope
     const analyser = ACTX.createAnalyser(); analyser.fftSize = 1024;
     bus.connect(analyser);
@@ -1024,7 +1830,53 @@ return blockModel;
     </div>
   </div>`;
 
-    
+
+    const blockId = blockBus && blockBus.__blockId ? blockBus.__blockId : idx;
+    const heading = el.querySelector('h3');
+    const baseTitle = heading ? heading.textContent.trim() : `Stream ${idx}`;
+    const defaultKey = `Block ${blockId} ${baseTitle}`.replace(/\s+/g, ' ').trim();
+    const panel = ce('div','streamPedalboardPanel');
+    panel.innerHTML = `
+      <div class="pedalboardHeader">
+        <strong>Plugin Pedalboard</strong>
+        <div class="spacer"></div>
+        <label class="small">Key</label>
+        <input type="text" class="pluginKeyInput" value="${defaultKey}" aria-label="Plugin key for this stream">
+      </div>
+      <div class="streamPedalboard pedalboard" data-stream-key="${defaultKey}"></div>
+      <div class="pedalboardHint small"></div>
+    `;
+    const mods = el.querySelector('.mods');
+    if(mods && mods.parentElement){
+      mods.parentElement.insertBefore(panel, mods);
+    }else{
+      el.appendChild(panel);
+    }
+    const board = panel.querySelector('.streamPedalboard');
+    const keyInput = panel.querySelector('.pluginKeyInput');
+    function applyKey(value){
+      const trimmed = (value || '').trim();
+      const key = trimmed || defaultKey;
+      board.dataset.streamKey = key;
+      board.dataset.streamKeyNormalized = normalizeStreamKey(key);
+      if(keyInput && keyInput.value !== key){
+        keyInput.value = key;
+      }
+      refreshStreamPedalboards();
+      updateStreamHints();
+    }
+    if(keyInput){
+      keyInput.addEventListener('blur', ()=> applyKey(keyInput.value));
+      keyInput.addEventListener('change', ()=> applyKey(keyInput.value));
+      keyInput.addEventListener('keydown', (ev)=>{
+        if(ev.key === 'Enter'){
+          ev.preventDefault();
+          keyInput.blur();
+        }
+      });
+    }
+    applyKey(defaultKey);
+
     // Dropdown toggles (supports <div class="mod"><div class="mod-hdr">...</div></div>
     // and <details class="mod"><summary>...</summary> ... </details>)
     el.querySelectorAll('.mod').forEach(mod=>{
@@ -1687,9 +2539,12 @@ return blockModel;
   function gatherSession(){
     const data = { blocks:[] };
     qsa('.block', main).forEach(blk=>{
+      if(isExternalBlock(blk)) return;
+      const volEl = qs('.blockVol', blk);
+      if(!volEl) return;
       const b = {
         pos: { left: blk.style.left, top: blk.style.top, width: blk.style.width, position: blk.style.position },
-        vol: parseFloat(qs('.blockVol', blk).value)||1,
+        vol: parseFloat(volEl.value)||1,
         streams: []
       };
       qsa('.stream', blk).forEach(st=>{
@@ -1715,7 +2570,7 @@ return blockModel;
     return data;
   }
   function applySession(data){
-    qsa('.block', main).forEach(b=>b.remove());
+    qsa('.block', main).forEach(b=>{ if(isExternalBlock(b)) return; b.remove(); });
     if(!ACTX){ bootAudio(); ACTX.resume(); }
     (data.blocks||[]).forEach(b=>{
       const blk = addBlock();
@@ -1835,7 +2690,7 @@ return blockModel;
   async function gatherPresetWithAudio(){
     const session = gatherSession();
     let blockIdx = 0;
-    const blockEls = qsa('.block', main);
+    const blockEls = qsa('.block', main).filter(blk=> !isExternalBlock(blk));
     for (const blk of blockEls){
       const streams = qsa('.stream', blk);
       let sidx = 0;
@@ -2242,12 +3097,14 @@ themeFile.addEventListener('change', async (e)=>{
   _editBtn.addEventListener('click', ()=> enableEditReorder(editMode));
 
   // Also enable on newly created streams
-  // Start with one block for convenience
+  // Start with one block for convenience and mount the plugin rack
+  ensureExternalAppsWorkspace();
   addBlock();
 })();
 
 </script>
 
+<script>
 // === Style Preset wiring (add 9x themes) ===
 (function(){
   const sel = document.getElementById('stylePreset');
