@@ -88,6 +88,13 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
             raise ValueError("Invalid JSON payload") from exc
 
     # --- Routing -----------------------------------------------------
+    def do_HEAD(self) -> None:  # noqa: N802 - stdlib signature
+        path = urlparse(self.path).path
+        if path in {"/", "", "/ui", "/ui/"}:
+            self._serve_ui(head=True)
+            return
+        super().do_HEAD()
+
     def do_GET(self) -> None:  # noqa: N802 - stdlib signature
         path = urlparse(self.path).path
         if path in {"/api/status", "/api/plugins"}:
@@ -98,7 +105,7 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
             payload = {"sources": list(registry.sources()), "effects": list(registry.effects())}
             self._send_json(payload)
             return
-        if path in {"/", "", "/ui"}:
+        if path in {"/", "", "/ui", "/ui/"}:
             self._serve_ui()
             return
         super().do_GET()
@@ -157,16 +164,36 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
         self.send_error(HTTPStatus.NOT_FOUND, "Unknown endpoint")
 
     # --- Static helpers ----------------------------------------------
-    def _serve_ui(self) -> None:
+    def _serve_ui(self, *, head: bool = False) -> None:
         if not self.ui_path.exists():
             self.send_error(HTTPStatus.NOT_FOUND, "UI file missing")
             return
-        data = self.ui_path.read_bytes()
-        self.send_response(HTTPStatus.OK)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        try:
+            base_dir = Path(getattr(self, "directory", "")).resolve()
+        except (OSError, RuntimeError):  # pragma: no cover - defensive fallback
+            base_dir = self.ui_path.parent
+        try:
+            relative = self.ui_path.resolve().relative_to(base_dir)
+        except ValueError:
+            data = self.ui_path.read_bytes()
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            if not head:
+                self.wfile.write(data)
+            return
+
+        mapped = "/" + relative.as_posix()
+        old_path = self.path
+        self.path = mapped
+        try:
+            if head:
+                SimpleHTTPRequestHandler.do_HEAD(self)
+            else:
+                SimpleHTTPRequestHandler.do_GET(self)
+        finally:
+            self.path = old_path
 
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):

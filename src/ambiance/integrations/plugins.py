@@ -137,6 +137,15 @@ class PluginRackManager:
                     info[key] = metadata[key]
         return info
 
+    def _normalize_plugin_path(self, path: str | Path) -> Path:
+        candidate = Path(path).expanduser()
+        if not candidate.is_absolute():
+            candidate = self.workspace_path() / candidate
+        try:
+            return candidate.resolve()
+        except OSError:
+            return candidate
+
     def _format_for(self, path: Path) -> str:
         suffix = self._normalize_suffix(path)
         if suffix == ".mc.svt" or suffix == ".mcsvt":
@@ -209,9 +218,10 @@ class PluginRackManager:
         lane: str = "A",
         slot: int | None = None,
     ) -> dict[str, object]:
-        plugin_path = Path(path).expanduser()
+        plugin_path = self._normalize_plugin_path(path)
         if not plugin_path.exists():
             raise FileNotFoundError(f"Plugin not found: {plugin_path}")
+        plugin_path = plugin_path.resolve()
         lane_key = lane.upper()
         if lane_key not in LANES:
             raise ValueError(f"Unsupported lane '{lane}'")
@@ -275,15 +285,24 @@ class PluginRackManager:
 
         removed: list[dict[str, object]] = []
         keep: list[dict[str, object]] = []
+        target_path: Path | None = None
+        if path is not None:
+            target_path = self._normalize_plugin_path(path)
+
         for entry in lane_entries:
             entry_slot = int(entry.get("slot", -1))
             entry_path = entry.get("path")
             if slot is not None and entry_slot == int(slot):
                 removed.append(entry)
-            elif path is not None and Path(entry_path or "") == Path(path).expanduser():
-                removed.append(entry)
-            else:
-                keep.append(entry)
+                continue
+            if target_path is not None:
+                entry_path_text = str(entry_path or "")
+                if entry_path_text:
+                    entry_target = self._normalize_plugin_path(entry_path_text)
+                    if entry_target == target_path:
+                        removed.append(entry)
+                        continue
+            keep.append(entry)
         lane_entries[:] = keep
         self._save_config(config)
         return {
