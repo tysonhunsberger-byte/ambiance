@@ -64,6 +64,52 @@
   .plugin-block .rack-log textarea{width:100%;min-height:140px;padding:10px;background:#090b10;color:inherit;border:1px solid rgba(89,167,255,.35);border-radius:10px;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;font-size:12px;box-shadow:0 14px 28px rgba(0,0,0,.32) inset}
   body.theme-xp .plugin-block .rack-log textarea,
   body.theme-98 .plugin-block .rack-log textarea{background:#fff;color:#000;border:1px solid #7b7b7b}
+  .pedalboard{margin-top:14px;padding:10px 4px 6px;display:flex;align-items:center;gap:12px;overflow-x:auto;border-top:1px solid rgba(255,255,255,.06)}
+  .pedalboard.empty{justify-content:center;color:var(--muted);font-style:italic}
+  .pedal{min-width:140px;max-width:200px;padding:12px;border-radius:12px;border:1px solid rgba(89,167,255,.35);background:linear-gradient(155deg,rgba(89,167,255,.24),rgba(21,36,58,.92));box-shadow:0 16px 32px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:6px;position:relative}
+  .pedal strong{font-size:14px}
+  .pedal .pedal-slot{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+  .pedal .pedal-format{font-size:11px;color:var(--muted)}
+  .pedal-connector{font-size:22px;color:rgba(255,255,255,.35);flex:none}
+  body.theme-xp .pedal{background:linear-gradient(160deg,#f7faff,#d8e6ff);border:1px solid #6b8ccc;color:#123169;box-shadow:0 14px 32px rgba(63,114,210,.35)}
+  body.theme-xp .pedal .pedal-slot, body.theme-xp .pedal .pedal-format{color:#30508f}
+  body.theme-98 .pedal{background:#f0f0f0;border:2px solid;border-color:#fff #7b7b7b #7b7b7b #fff;color:#000;box-shadow:none}
+  body.theme-98 .pedal .pedal-slot, body.theme-98 .pedal .pedal-format{color:#333}
+  .digital-instrument{min-width:720px;padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,.06);background:linear-gradient(155deg,rgba(12,16,24,.95),rgba(10,14,22,.9));box-shadow:0 24px 42px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:18px}
+  .digital-instrument .studio-header{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+  .digital-instrument .studio-header .tagline{font-size:13px;color:var(--muted)}
+  .digital-instrument .instrument-grid{display:grid;gap:18px;grid-template-columns:minmax(260px,320px) minmax(360px,1fr);align-items:start}
+  @media (max-width:1100px){.digital-instrument .instrument-grid{grid-template-columns:1fr}}
+  .digital-instrument .instrument-controls{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:12px;background:rgba(12,16,24,.9);border:1px solid rgba(255,255,255,.08)}
+  .digital-instrument .instrument-controls header{font-size:16px;margin:0 0 6px}
+  .digital-instrument .instrument-controls .row{margin:0;gap:10px}
+  .digital-instrument .instrument-controls .row + .row{margin-top:6px}
+  .digital-instrument .instrument-controls .controlHint{font-size:12px;color:var(--muted)}
+  .digital-instrument .instrument-play{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:12px;background:rgba(9,12,19,.92);border:1px solid rgba(255,255,255,.06)}
+  .digital-instrument .instrument-keys{position:relative;height:180px;user-select:none;touch-action:none}
+  .digital-instrument .instrument-white-keys{display:flex;height:100%}
+  .digital-instrument .instrument-key{border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .12s ease}
+  .digital-instrument .instrument-key.white{flex:1;margin:0 2px;background:linear-gradient(#fefefe,#d9d9d9);border-radius:0 0 8px 8px;border:1px solid rgba(255,255,255,.08);color:#111;position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;box-shadow:0 10px 24px rgba(0,0,0,.3)}
+  .digital-instrument .instrument-key.white span{pointer-events:none}
+  .digital-instrument .instrument-key.white.active{background:linear-gradient(#ffd1f5,#f884c9);box-shadow:0 0 0 2px rgba(89,167,255,.6) inset,0 14px 32px rgba(0,0,0,.35)}
+  .digital-instrument .instrument-white-keys .instrument-key.white:first-child{margin-left:0}
+  .digital-instrument .instrument-white-keys .instrument-key.white:last-child{margin-right:0}
+  .digital-instrument .instrument-black-keys{position:absolute;top:0;left:0;right:0;bottom:40%;pointer-events:none}
+  .digital-instrument .instrument-key.black{pointer-events:auto;position:absolute;transform:translateX(-50%);left:var(--offset,50%);width:calc(100% / var(--digital-key-count,14) * 0.6);height:120px;background:linear-gradient(#444,#111);color:#fff;border-radius:0 0 6px 6px;border:1px solid #000;box-shadow:0 12px 24px rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px}
+  .digital-instrument .instrument-key.black span{pointer-events:none}
+  .digital-instrument .instrument-key.black.active{background:linear-gradient(#59a7ff,#1958d8);box-shadow:0 0 0 2px rgba(255,255,255,.35) inset,0 16px 32px rgba(0,0,0,.45)}
+  .digital-instrument .instrument-meta{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted)}
+  .digital-instrument .instrument-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .digital-instrument .instrument-actions .btn{flex:none}
+  .digital-instrument .instrument-status{font-size:12px;color:var(--muted)}
+  body.theme-xp .digital-instrument{background:linear-gradient(160deg,#f7faff,#dce7ff);border:1px solid #6b8ccc;color:#123169;box-shadow:0 20px 36px rgba(63,114,210,.35)}
+  body.theme-xp .digital-instrument .instrument-controls{background:linear-gradient(#f7faff,#d8e6ff);border:1px solid #6b8ccc}
+  body.theme-xp .digital-instrument .instrument-play{background:linear-gradient(#f7faff,#e1e9ff);border:1px solid #6b8ccc}
+  body.theme-xp .digital-instrument .instrument-key.white{border:1px solid rgba(107,140,204,.55)}
+  body.theme-98 .digital-instrument{background:#c0c0c0;border:2px solid;border-color:#fff #7b7b7b #7b7b7b #fff;box-shadow:none;color:#000}
+  body.theme-98 .digital-instrument .instrument-controls, body.theme-98 .digital-instrument .instrument-play{background:#c0c0c0;border:2px solid;border-color:#fff #7b7b7b #7b7b7b #fff;color:#000}
+  body.theme-98 .digital-instrument .instrument-key.white{background:linear-gradient(#fefefe,#d0d0d0);border:1px solid #7b7b7b;color:#000}
+  body.theme-98 .digital-instrument .instrument-key.black{background:linear-gradient(#333,#000);border-color:#000}
   .scope{flex:1;min-width:220px;height:60px;background:#000;border:1px solid #666;border-radius:6px}
   .stream{background:var(--card);border:1px solid #555;border-radius:8px;padding:10px;margin:8px 0}
   .stream h3{margin:0 0 6px}
@@ -764,6 +810,46 @@ function bootAudio(){
   const pluginState = { status: null, selected: null };
   const LANE_KEYS = ['A', 'B'];
 
+  const DIGITAL_WHITE_KEYS = [
+    { midi: 48, label: 'C3', black: { midi: 49, label: 'C♯3' } },
+    { midi: 50, label: 'D3', black: { midi: 51, label: 'D♯3' } },
+    { midi: 52, label: 'E3' },
+    { midi: 53, label: 'F3', black: { midi: 54, label: 'F♯3' } },
+    { midi: 55, label: 'G3', black: { midi: 56, label: 'G♯3' } },
+    { midi: 57, label: 'A3', black: { midi: 58, label: 'A♯3' } },
+    { midi: 59, label: 'B3' },
+    { midi: 60, label: 'C4', black: { midi: 61, label: 'C♯4' } },
+    { midi: 62, label: 'D4', black: { midi: 63, label: 'D♯4' } },
+    { midi: 64, label: 'E4' },
+    { midi: 65, label: 'F4', black: { midi: 66, label: 'F♯4' } },
+    { midi: 67, label: 'G4', black: { midi: 68, label: 'G♯4' } },
+    { midi: 69, label: 'A4', black: { midi: 70, label: 'A♯4' } },
+    { midi: 71, label: 'B4' },
+    { midi: 72, label: 'C5', black: { midi: 73, label: 'C♯5' } },
+    { midi: 74, label: 'D5', black: { midi: 75, label: 'D♯5' } },
+    { midi: 76, label: 'E5' },
+  ];
+
+  const DIGITAL_KEYBOARD_BINDINGS = {
+    KeyA: 60,
+    KeyW: 61,
+    KeyS: 62,
+    KeyE: 63,
+    KeyD: 64,
+    KeyF: 65,
+    KeyT: 66,
+    KeyG: 67,
+    KeyY: 68,
+    KeyH: 69,
+    KeyU: 70,
+    KeyJ: 71,
+    KeyK: 72,
+    KeyO: 73,
+    KeyL: 74,
+    KeyP: 75,
+    Semicolon: 76,
+  };
+
   const isPluginBlock = (el)=> !!(el && el.dataset && el.dataset.role === 'plugin-rack');
 
   function ensurePluginRack(){
@@ -1074,6 +1160,42 @@ function bootAudio(){
             });
           }
           laneEl.appendChild(list);
+          const board = ce('div', 'pedalboard');
+          if(!laneData.length){
+            board.classList.add('empty');
+            board.textContent = 'Connect plugins to visualize the signal chain.';
+          } else {
+            laneData.forEach((assignment, idx)=>{
+              const pedal = ce('div', 'pedal');
+              const slotIndex = typeof assignment.slot === 'number'
+                ? assignment.slot
+                : parseInt(assignment.slot || '0', 10);
+              const pluginInfo = assignment.plugin || pluginLookup.get(assignment.path);
+              const slotBadge = ce('span', 'pedal-slot');
+              slotBadge.textContent = `Slot ${slotIndex + 1}`;
+              pedal.appendChild(slotBadge);
+              const title = ce('strong');
+              title.textContent = pluginInfo ? (pluginInfo.display_name || pluginInfo.name) : (assignment.path || 'Unknown plugin');
+              pedal.appendChild(title);
+              const metaBits = [];
+              if(pluginInfo && pluginInfo.format) metaBits.push(pluginInfo.format);
+              if(pluginInfo && pluginInfo.origin) metaBits.push(pluginInfo.origin);
+              const rel = pluginInfo && pluginInfo.relative_path ? pluginInfo.relative_path : assignment.path;
+              if(rel) metaBits.push(rel);
+              if(metaBits.length){
+                const meta = ce('span', 'pedal-format');
+                meta.textContent = metaBits.join(' · ');
+                pedal.appendChild(meta);
+              }
+              board.appendChild(pedal);
+              if(idx < laneData.length - 1){
+                const connector = ce('span', 'pedal-connector');
+                connector.textContent = '➜';
+                board.appendChild(connector);
+              }
+            });
+          }
+          laneEl.appendChild(board);
           const controls = ce('div', 'laneControls');
           const assignBtn = ce('button', 'btn btn-xs assignBtn');
           assignBtn.textContent = '＋ Assign selected';
@@ -1182,6 +1304,378 @@ function bootAudio(){
     });
 
     refreshRack();
+  }
+
+  function ensureDigitalInstrument(){
+    if(qs('#digitalInstrumentBlock')) return null;
+    const blockEl = ce('div', 'block digital-instrument');
+    blockEl.id = 'digitalInstrumentBlock';
+    blockEl.dataset.role = 'digital-instrument';
+    blockEl.tabIndex = 0;
+    blockEl.innerHTML = `
+      <div class="studio-header">
+        <h2><span class="dragHandle" style="cursor:move">⣿</span> Digital Instrument</h2>
+        <span class="tagline">Play the built-in synth alongside your Noisetown sessions.</span>
+        <div class="instrument-actions">
+          <button class="btn instrument-start">▶ Start Audio</button>
+          <button class="btn instrument-panic">🛑 Panic</button>
+        </div>
+      </div>
+      <div class="instrument-grid">
+        <section class="instrument-controls">
+          <header>Sound Design</header>
+          <div class="row">
+            <label>Waveform</label>
+            <select class="waveform">
+              <option value="sine">Sine</option>
+              <option value="triangle">Triangle</option>
+              <option value="sawtooth">Saw</option>
+              <option value="square">Square</option>
+              <option value="custom">Warmth</option>
+            </select>
+          </div>
+          <div class="row">
+            <label>Attack</label>
+            <input class="attack midiable" type="range" min="0.001" max="1" step="0.001" value="0.02">
+            <span class="small attackVal">20 ms</span>
+          </div>
+          <div class="row">
+            <label>Release</label>
+            <input class="release midiable" type="range" min="0.05" max="3" step="0.01" value="0.45">
+            <span class="small releaseVal">0.45 s</span>
+          </div>
+          <div class="row">
+            <label>Sustain</label>
+            <input class="sustain midiable" type="range" min="0" max="1" step="0.01" value="0.7">
+            <span class="small sustainVal">70%</span>
+          </div>
+          <div class="row">
+            <label>Volume</label>
+            <input class="volume midiable" type="range" min="0" max="1" step="0.01" value="0.6">
+            <span class="small volumeVal">60%</span>
+          </div>
+          <div class="row">
+            <label><input class="holdToggle" type="checkbox"> Sustain pedal</label>
+            <span class="controlHint">Hold notes until the pedal releases.</span>
+          </div>
+        </section>
+        <section class="instrument-play">
+          <header>Keyboard</header>
+          <div class="instrument-keys">
+            <div class="instrument-white-keys"></div>
+            <div class="instrument-black-keys"></div>
+          </div>
+          <div class="instrument-meta">
+            <span class="voice-count">Voices: 0</span>
+            <span class="last-note">Last: —</span>
+          </div>
+          <div class="instrument-status">Click the keys or use A–; with W/E/T/Y/U/O for sharps.</div>
+        </section>
+      </div>
+    `;
+    main.appendChild(blockEl);
+    wireDigitalInstrument(blockEl);
+    return blockEl;
+  }
+
+  function wireDigitalInstrument(blockEl){
+    if(blockEl.__wired) return;
+    blockEl.__wired = true;
+    const keysRoot = blockEl.querySelector('.instrument-keys');
+    const whiteWrap = blockEl.querySelector('.instrument-white-keys');
+    const blackWrap = blockEl.querySelector('.instrument-black-keys');
+    const startBtn = blockEl.querySelector('.instrument-start');
+    const panicBtn = blockEl.querySelector('.instrument-panic');
+    const voiceLabel = blockEl.querySelector('.voice-count');
+    const lastNoteLabel = blockEl.querySelector('.last-note');
+    const statusLabel = blockEl.querySelector('.instrument-status');
+    const waveformSel = blockEl.querySelector('.waveform');
+    const attackSlider = blockEl.querySelector('.attack');
+    const releaseSlider = blockEl.querySelector('.release');
+    const sustainSlider = blockEl.querySelector('.sustain');
+    const volumeSlider = blockEl.querySelector('.volume');
+    const sustainToggle = blockEl.querySelector('.holdToggle');
+    const attackVal = blockEl.querySelector('.attackVal');
+    const releaseVal = blockEl.querySelector('.releaseVal');
+    const sustainVal = blockEl.querySelector('.sustainVal');
+    const volumeVal = blockEl.querySelector('.volumeVal');
+
+    if(!keysRoot || !whiteWrap || !blackWrap) return;
+
+    const keyElements = new Map();
+    const heldNotes = new Set();
+    const sustainedNotes = new Set();
+    const pointerNotes = new Map();
+    const activeCodes = new Set();
+
+    const state = {
+      bus: null,
+      waveform: waveformSel ? waveformSel.value : 'sine',
+      attack: attackSlider ? parseFloat(attackSlider.value) || 0.02 : 0.02,
+      release: releaseSlider ? parseFloat(releaseSlider.value) || 0.45 : 0.45,
+      sustain: sustainSlider ? parseFloat(sustainSlider.value) || 0.7 : 0.7,
+      volume: volumeSlider ? parseFloat(volumeSlider.value) || 0.6 : 0.6,
+      sustainPedal: false,
+      voices: new Map(),
+    };
+
+    let customWave = null;
+
+    function ensureBus(){
+      bootAudio();
+      if(!state.bus){
+        state.bus = ACTX.createGain();
+        state.bus.gain.value = state.volume;
+        state.bus.connect(MASTER.pre);
+      }
+      return state.bus;
+    }
+
+    function ensureCustomWave(){
+      if(customWave) return customWave;
+      ensureBus();
+      const real = new Float32Array([0, 0, 1, 0.45, 0.25, 0.12]);
+      const imag = new Float32Array(real.length);
+      customWave = ACTX.createPeriodicWave(real, imag);
+      return customWave;
+    }
+
+    const NOTE_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+    const midiName = (midi)=>{
+      const note = NOTE_NAMES[midi % 12] || 'N';
+      const oct = Math.floor(midi / 12) - 1;
+      return `${note}${oct}`;
+    };
+    const midiFreq = (midi)=> 440 * Math.pow(2, (midi - 69) / 12);
+    const updateVoiceCount = ()=>{ if(voiceLabel) voiceLabel.textContent = `Voices: ${state.voices.size}`; };
+    const highlight = (midi, on)=>{ const el = keyElements.get(midi); if(!el) return; el.classList.toggle('active', !!on); };
+
+    function startVoice(midi){
+      ensureBus();
+      const now = ACTX.currentTime;
+      const osc = ACTX.createOscillator();
+      if(state.waveform === 'custom'){
+        osc.setPeriodicWave(ensureCustomWave());
+      } else {
+        osc.type = state.waveform;
+      }
+      osc.frequency.setValueAtTime(midiFreq(midi), now);
+      const gain = ACTX.createGain();
+      const attackTime = Math.max(0.001, state.attack);
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(1, now + attackTime);
+      const sustainLevel = Math.max(0, Math.min(1, state.sustain));
+      gain.gain.setTargetAtTime(sustainLevel, now + attackTime, 0.08);
+      osc.connect(gain);
+      gain.connect(state.bus);
+      osc.start(now);
+      state.voices.set(midi, { osc, gain });
+      updateVoiceCount();
+      if(lastNoteLabel) lastNoteLabel.textContent = `Last: ${midiName(midi)}`;
+    }
+
+    function stopVoiceInternal(midi, immediate = false){
+      const voice = state.voices.get(midi);
+      if(!voice) return;
+      const now = ACTX.currentTime;
+      const releaseDur = immediate ? 0.05 : Math.max(0.02, state.release);
+      voice.gain.gain.cancelScheduledValues(now);
+      const current = voice.gain.gain.value;
+      voice.gain.gain.setValueAtTime(current, now);
+      voice.gain.gain.linearRampToValueAtTime(0, now + releaseDur);
+      voice.osc.stop(now + releaseDur + 0.05);
+      state.voices.delete(midi);
+      updateVoiceCount();
+    }
+
+    function stopNote(midi, immediate = false){
+      if(!state.voices.has(midi)) return;
+      highlight(midi, false);
+      stopVoiceInternal(midi, immediate);
+    }
+
+    function noteOn(midi){
+      heldNotes.add(midi);
+      sustainedNotes.delete(midi);
+      if(!state.voices.has(midi)){
+        startVoice(midi);
+      }
+      highlight(midi, true);
+    }
+
+    function noteOff(midi){
+      if(!heldNotes.has(midi) && !state.voices.has(midi)) return;
+      heldNotes.delete(midi);
+      if(state.sustainPedal){
+        sustainedNotes.add(midi);
+        return;
+      }
+      sustainedNotes.delete(midi);
+      if(!heldNotes.has(midi)){
+        stopNote(midi);
+      }
+    }
+
+    function releaseSustain(){
+      const toRelease = Array.from(sustainedNotes);
+      sustainedNotes.clear();
+      toRelease.forEach((midi)=>{
+        if(!heldNotes.has(midi)){
+          stopNote(midi);
+        }
+      });
+    }
+
+    const attachPointerHandlers = (el, midi)=>{
+      el.addEventListener('pointerdown', (event)=>{
+        event.preventDefault();
+        el.setPointerCapture(event.pointerId);
+        pointerNotes.set(event.pointerId, midi);
+        noteOn(midi);
+      });
+      el.addEventListener('pointerup', (event)=>{
+        event.preventDefault();
+        const id = event.pointerId;
+        const mapped = pointerNotes.get(id) ?? midi;
+        pointerNotes.delete(id);
+        noteOff(mapped);
+      });
+      el.addEventListener('pointercancel', (event)=>{
+        const id = event.pointerId;
+        const mapped = pointerNotes.get(id) ?? midi;
+        pointerNotes.delete(id);
+        noteOff(mapped);
+      });
+      el.addEventListener('lostpointercapture', (event)=>{
+        const id = event.pointerId;
+        const mapped = pointerNotes.get(id);
+        if(mapped != null){
+          pointerNotes.delete(id);
+          if(!state.sustainPedal || !heldNotes.has(mapped)){
+            noteOff(mapped);
+          }
+        }
+      });
+    };
+
+    keysRoot.style.setProperty('--digital-key-count', DIGITAL_WHITE_KEYS.length);
+    DIGITAL_WHITE_KEYS.forEach((white, idx)=>{
+      const whiteKey = ce('button', 'instrument-key white');
+      whiteKey.dataset.note = String(white.midi);
+      whiteKey.innerHTML = `<span>${white.label}</span>`;
+      whiteWrap.appendChild(whiteKey);
+      keyElements.set(white.midi, whiteKey);
+      attachPointerHandlers(whiteKey, white.midi);
+      if(white.black){
+        const blackKey = ce('button', 'instrument-key black');
+        blackKey.dataset.note = String(white.black.midi);
+        blackKey.innerHTML = `<span>${white.black.label}</span>`;
+        const offset = ((idx + 1) - 0.5) / DIGITAL_WHITE_KEYS.length * 100;
+        blackKey.style.setProperty('--offset', offset + '%');
+        blackWrap.appendChild(blackKey);
+        keyElements.set(white.black.midi, blackKey);
+        attachPointerHandlers(blackKey, white.black.midi);
+      }
+    });
+
+    const fmtMs = (sec)=> `${Math.round(sec * 1000)} ms`;
+    const fmtSec = (sec)=> `${sec.toFixed(2)} s`;
+    const fmtPct = (val)=> `${Math.round(val * 100)}%`;
+
+    if(attackSlider){
+      const update = ()=>{ state.attack = parseFloat(attackSlider.value) || 0.02; if(attackVal) attackVal.textContent = fmtMs(state.attack); };
+      attackSlider.addEventListener('input', update);
+      update();
+    }
+    if(releaseSlider){
+      const update = ()=>{ state.release = parseFloat(releaseSlider.value) || 0.45; if(releaseVal) releaseVal.textContent = fmtSec(state.release); };
+      releaseSlider.addEventListener('input', update);
+      update();
+    }
+    if(sustainSlider){
+      const update = ()=>{ state.sustain = Math.max(0, Math.min(1, parseFloat(sustainSlider.value) || 0)); if(sustainVal) sustainVal.textContent = fmtPct(state.sustain); };
+      sustainSlider.addEventListener('input', update);
+      update();
+    }
+    if(volumeSlider){
+      const update = ()=>{
+        state.volume = Math.max(0, Math.min(1, parseFloat(volumeSlider.value) || 0));
+        if(volumeVal) volumeVal.textContent = fmtPct(state.volume);
+        if(state.bus){
+          state.bus.gain.setTargetAtTime(state.volume, ACTX.currentTime, 0.05);
+        }
+      };
+      volumeSlider.addEventListener('input', update);
+      update();
+    }
+
+    if(sustainToggle){
+      sustainToggle.addEventListener('change', ()=>{
+        state.sustainPedal = sustainToggle.checked;
+        if(!state.sustainPedal){
+          releaseSustain();
+        }
+      });
+    }
+
+    if(waveformSel){
+      waveformSel.addEventListener('change', ()=>{
+        state.waveform = waveformSel.value;
+      });
+    }
+
+    if(startBtn){
+      startBtn.addEventListener('click', ()=>{
+        ensureBus();
+        if(ACTX && typeof ACTX.resume === 'function'){ ACTX.resume().catch(()=>{}); }
+        if(statusLabel) statusLabel.textContent = 'Instrument ready. Use your keyboard or click the piano.';
+      });
+    }
+
+    const panic = ()=>{
+      heldNotes.clear();
+      sustainedNotes.clear();
+      pointerNotes.clear();
+      const active = Array.from(state.voices.keys());
+      active.forEach((midi)=> stopNote(midi, true));
+      keyElements.forEach((el)=> el.classList.remove('active'));
+      if(statusLabel) statusLabel.textContent = 'All voices cleared.';
+    };
+
+    if(panicBtn){
+      panicBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        panic();
+      });
+    }
+
+    const typingTarget = (el)=>{
+      if(!el) return false;
+      if(el.isContentEditable) return true;
+      const tag = el.tagName ? el.tagName.toLowerCase() : '';
+      return tag === 'input' || tag === 'textarea' || tag === 'select';
+    };
+
+    const handleKeyDown = (event)=>{
+      if(typingTarget(event.target)) return;
+      const midi = DIGITAL_KEYBOARD_BINDINGS[event.code];
+      if(midi == null) return;
+      if(activeCodes.has(event.code)) return;
+      activeCodes.add(event.code);
+      event.preventDefault();
+      noteOn(midi);
+    };
+    const handleKeyUp = (event)=>{
+      if(typingTarget(event.target)) return;
+      const midi = DIGITAL_KEYBOARD_BINDINGS[event.code];
+      if(midi == null) return;
+      activeCodes.delete(event.code);
+      event.preventDefault();
+      noteOff(midi);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+
   }
 
   function addBlock(){
@@ -2715,6 +3209,7 @@ themeFile.addEventListener('change', async (e)=>{
   // Also enable on newly created streams
   // Start with one block for convenience and keep the external workspace present
   ensurePluginRack();
+  ensureDigitalInstrument();
   addBlock();
 })();
 
