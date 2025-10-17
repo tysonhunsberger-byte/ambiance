@@ -31,13 +31,15 @@ public:
         description.category = "Instrument";
 
         juce::String error;
-        instance.reset(formatManager.createPluginInstance(description, 48000.0, 512, error));
+        auto createdInstance = formatManager.createPluginInstance(description, 48000.0, 512, error);
 
-        if (instance == nullptr)
+        if (createdInstance == nullptr)
         {
             errorMessage = error.isNotEmpty() ? error : juce::String("Unable to create plugin instance.");
             return;
         }
+
+        instance = std::move(createdInstance);
 
         deviceManager.initialiseWithDefaultDevices(0, instance->getTotalNumOutputChannels());
         deviceManager.addAudioCallback(&player);
