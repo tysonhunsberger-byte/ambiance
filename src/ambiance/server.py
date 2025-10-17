@@ -9,7 +9,6 @@ from http import HTTPStatus
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from socketserver import ThreadingMixIn
-from string import Template
 from typing import Any
 from urllib.parse import urlparse
 
@@ -56,85 +55,6 @@ def render_payload(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-HOMEPAGE_TEMPLATE = Template("""<!DOCTYPE html>
-<html lang=\"en\">
-  <head>
-    <meta charset=\"utf-8\">
-    <title>Ambiance server</title>
-    <style>
-      body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;background:#0f1117;color:#f8f9fb}
-      header{background:#1b1e27;padding:2.5rem 1.5rem 2rem 1.5rem;text-align:center;border-bottom:1px solid #2a2f3a}
-      header h1{margin:0;font-size:2rem;font-weight:600}
-      main{padding:2rem 1.5rem;max-width:720px;margin:0 auto;line-height:1.6}
-      a{color:#7cc7ff;text-decoration:none}
-      a:hover{text-decoration:underline}
-      .card{background:#181b23;border:1px solid #2a2f3a;border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 18px 45px rgba(0,0,0,0.25)}
-      code{background:#11141b;padding:0.1rem 0.35rem;border-radius:6px;font-size:0.95em}
-      ul{margin:0;padding-left:1.25rem}
-      li{margin-bottom:0.35rem}
-      .meta{display:flex;flex-wrap:wrap;gap:1rem;margin-top:1rem;font-size:0.95em;color:#c5c9d3}
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>Ambiance control surface</h1>
-      <p>Launch the interactive experience or explore the HTTP API below.</p>
-    </header>
-    <main>
-      <section class=\"card\">
-        <h2>Open the interface</h2>
-        <p><a href=\"$ui_href\">Start the Noisetown UI</a> to browse the plugin rack and render ambience layers.</p>
-        <p class=\"meta\">Currently serving <code>$ui_label</code>.</p>
-      </section>
-      <section class=\"card\">
-        <h2>Plugin workspace</h2>
-        <p>The rack watches <code>$workspace</code> for compatible plugins.</p>
-        <div class=\"meta\">$plugin_summary</div>
-      </section>
-      <section class=\"card\">
-        <h2>HTTP endpoints</h2>
-        <ul>
-          <li><code>GET /api/status</code> – Current rack status.</li>
-          <li><code>GET /api/plugins</code> – Detailed plugin inventory and streams.</li>
-          <li><code>POST /api/render</code> – Render ambience from JSON payloads.</li>
-        </ul>
-      </section>
-    </main>
-  </body>
-</html>
-""")
-
-
-def build_homepage(status: dict[str, Any], ui_path: Path) -> str:
-    """Render a compact landing page that links to the UI."""
-
-    plugins = status.get("plugins") or []
-    plugin_count = len(plugins)
-    if plugin_count == 0:
-        plugin_summary = "No plugins discovered yet. Drop VST, VST3, Audio Unit, or mc.svt files into the workspace."
-    elif plugin_count == 1:
-        plugin_summary = "1 plugin available."
-    else:
-        plugin_summary = f"{plugin_count} plugins available."
-
-    workspace = status.get("workspace") or "Unavailable"
-    if status.get("workspace_exists") is False:
-        workspace_text = f"{workspace} (not found)"
-    else:
-        workspace_text = workspace
-
-    ui_href = "/ui/" if status else "/ui/"
-
-    ui_label = ui_path.name or "interface"
-
-    return HOMEPAGE_TEMPLATE.substitute(
-        ui_href=ui_href,
-        workspace=workspace_text,
-        plugin_summary=plugin_summary,
-        ui_label=ui_label,
-    )
-
-
 class AmbianceRequestHandler(SimpleHTTPRequestHandler):
     """Serve static assets and lightweight JSON APIs."""
 
@@ -178,10 +98,7 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
             payload = {"sources": list(registry.sources()), "effects": list(registry.effects())}
             self._send_json(payload)
             return
-        if path in {"/", ""}:
-            self._serve_homepage()
-            return
-        if path in {"/ui", "/ui/"}:
+        if path in {"/", "", "/ui", "/ui/"}:
             self._serve_ui()
             return
         super().do_GET()
@@ -240,15 +157,6 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
         self.send_error(HTTPStatus.NOT_FOUND, "Unknown endpoint")
 
     # --- Static helpers ----------------------------------------------
-    def _serve_homepage(self) -> None:
-        status = self.manager.status()
-        data = build_homepage(status, self.ui_path).encode("utf-8")
-        self.send_response(HTTPStatus.OK)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
-
     def _serve_ui(self) -> None:
         if not self.ui_path.exists():
             self.send_error(HTTPStatus.NOT_FOUND, "UI file missing")
