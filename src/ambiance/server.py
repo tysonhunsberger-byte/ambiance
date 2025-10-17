@@ -10,7 +10,7 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from socketserver import ThreadingMixIn
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from .core.engine import AudioEngine
 from .core.registry import registry
@@ -88,17 +88,41 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
             raise ValueError("Invalid JSON payload") from exc
 
     # --- Routing -----------------------------------------------------
-    def do_GET(self) -> None:  # noqa: N802 - stdlib signature
+    def do_HEAD(self) -> None:  # noqa: N802 - stdlib signature
         path = urlparse(self.path).path
+        if path in {"/", "", "/ui", "/ui/"}:
+            self._serve_ui(head=True)
+            return
+        super().do_HEAD()
+
+    def do_GET(self) -> None:  # noqa: N802 - stdlib signature
+        parsed = urlparse(self.path)
+        path = parsed.path
         if path in {"/api/status", "/api/plugins"}:
             payload = self.manager.status()
             self._send_json(payload)
+            return
+        if path == "/api/plugins/preview":
+            params = parse_qs(parsed.query or "")
+            plugin_path = (params.get("path") or [""])[0]
+            if not plugin_path:
+                self._send_json({"ok": False, "error": "Missing 'path'"}, HTTPStatus.BAD_REQUEST)
+                return
+            try:
+                preview = self.manager.plugin_preview(plugin_path)
+            except FileNotFoundError as exc:
+                self._send_json({"ok": False, "error": str(exc)}, HTTPStatus.NOT_FOUND)
+                return
+            except ValueError as exc:
+                self._send_json({"ok": False, "error": str(exc)}, HTTPStatus.BAD_REQUEST)
+                return
+            self._send_json({"ok": True, "preview": preview})
             return
         if path == "/api/registry":
             payload = {"sources": list(registry.sources()), "effects": list(registry.effects())}
             self._send_json(payload)
             return
-        if path in {"/", "", "/ui"}:
+        if path in {"/", "", "/ui", "/ui/"}:
             self._serve_ui()
             return
         super().do_GET()
@@ -157,16 +181,36 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
         self.send_error(HTTPStatus.NOT_FOUND, "Unknown endpoint")
 
     # --- Static helpers ----------------------------------------------
-    def _serve_ui(self) -> None:
+    def _serve_ui(self, *, head: bool = False) -> None:
         if not self.ui_path.exists():
             self.send_error(HTTPStatus.NOT_FOUND, "UI file missing")
             return
-        data = self.ui_path.read_bytes()
-        self.send_response(HTTPStatus.OK)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        try:
+            base_dir = Path(getattr(self, "directory", "")).resolve()
+        except (OSError, RuntimeError):  # pragma: no cover - defensive fallback
+            base_dir = self.ui_path.parent
+        try:
+            relative = self.ui_path.resolve().relative_to(base_dir)
+        except ValueError:
+            data = self.ui_path.read_bytes()
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            if not head:
+                self.wfile.write(data)
+            return
+
+        mapped = "/" + relative.as_posix()
+        old_path = self.path
+        self.path = mapped
+        try:
+            if head:
+                SimpleHTTPRequestHandler.do_HEAD(self)
+            else:
+                SimpleHTTPRequestHandler.do_GET(self)
+        finally:
+            self.path = old_path
 
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
