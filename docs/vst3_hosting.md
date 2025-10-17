@@ -40,7 +40,7 @@ that plugins demand.
    sequences such as `\U` as escapes:
 
    ```powershell
-   cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DJUCE_ROOT=C:/path/to/JUCE
+   cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DJUCE_ROOT=C:/dev/JUCE-master
    cmake --build build --config Release
    ```
 
