@@ -39,20 +39,12 @@ public:
             return;
         }
 
-        auto* processor = instance->getProcessor();
-        if (processor == nullptr)
-        {
-            errorMessage = "Plugin has no processor.";
-            instance.reset();
-            return;
-        }
-
-        deviceManager.initialiseWithDefaultDevices(0, processor->getTotalNumOutputChannels());
+        deviceManager.initialiseWithDefaultDevices(0, instance->getTotalNumOutputChannels());
         deviceManager.addAudioCallback(&player);
         deviceManager.addMidiInputCallback({}, &player);
-        player.setProcessor(processor);
+        player.setProcessor(instance.get());
 
-        editor.reset(processor->createEditor());
+        editor.reset(instance->createEditor());
         if (editor == nullptr)
         {
             errorMessage = "Plugin does not provide a UI editor.";
