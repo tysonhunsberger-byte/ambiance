@@ -44,18 +44,24 @@ that plugins demand.
    cmake --build build --config Release
    ```
 
-3. Optionally export the resulting binary for easier discovery.  The Visual
-   Studio generator places the executable under
-   `build/JucePluginHost/Release/JucePluginHost.exe`, while single-config
-   generators use `build/JucePluginHost`.  Point the variable at whichever path
-   your toolchain produced:
+3. Optionally export the resulting binary for easier discovery.  JUCE's CMake
+   helpers place artefacts inside a `_artefacts` folder by default.  On Visual
+   Studio you'll find the executable at
+   `build/JucePluginHost_artefacts/Release/JucePluginHost.exe`; single-config
+   generators produce `build/JucePluginHost_artefacts/JucePluginHost`.  Point
+   the variable at whichever path your toolchain produced:
 
    ```bash
-   export JUCE_VST3_HOST="$(pwd)/build/JucePluginHost/Release/JucePluginHost.exe"
+   export JUCE_VST3_HOST="$(pwd)/build/JucePluginHost_artefacts/Release/JucePluginHost.exe"
    ```
 
+   Replace `Release` with `Debug` (or the appropriate configuration) if you
+   built a different flavour, and substitute the non-suffixed
+   `JucePluginHost_artefacts/JucePluginHost` path when using a single-config
+   generator such as Ninja or Makefiles.
+
 On macOS the JUCE app bundle lives inside
-`build/JucePluginHost/JucePluginHost.app`.
+`build/JucePluginHost_artefacts/JucePluginHost.app`.
 
 ### Loading different plugin packages
 
