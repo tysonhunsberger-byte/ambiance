@@ -18,6 +18,11 @@ endif()
 # sequences (for example, "\U" becomes a unicode escape in CMake CLI parsing).
 file(TO_CMAKE_PATH "${JUCE_ROOT}" JUCE_SOURCE_DIR)
 
+# Also normalise the cached JUCE_ROOT entry so downstream JUCE utilities read the
+# forward-slash variant when they inspect the cache directly (avoids Windows
+# "\\d" style escape parsing during try_compile checks).
+set(JUCE_ROOT "${JUCE_SOURCE_DIR}" CACHE PATH "Path to JUCE sources" FORCE)
+
 if(NOT EXISTS "${JUCE_SOURCE_DIR}/extras/Build/CMake/JUCEUtils.cmake")
   message(FATAL_ERROR
     "JUCE_ROOT (${JUCE_SOURCE_DIR}) does not appear to be a JUCE checkout. "
