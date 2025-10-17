@@ -57,6 +57,20 @@ that plugins demand.
 On macOS the JUCE app bundle lives inside
 `build/JucePluginHost/JucePluginHost.app`.
 
+### Loading different plugin packages
+
+The host understands common VST packaging conventions:
+
+* **Loose files** – point it at a `.vst3`, `.dll`, `.vst`, `.component`, or
+  `.vstbundle` and the correct JUCE format loader is selected automatically.
+* **Archives** – if you have a plugin zipped up (for example,
+  `AwesomeSynth.vst3.zip`), pass the zip path on the command line.  The host
+  extracts the archive to a temporary directory, locates the plugin bundle, and
+  loads it before presenting the native editor.
+
+Any temporary extraction directory is removed when you close the host window, so
+you can keep archives around without manually unpacking them each time.
+
 ## Using the Desktop Plugin UI Bridge
 
 * Start the Ambiance server (`python -m ambiance.server`).

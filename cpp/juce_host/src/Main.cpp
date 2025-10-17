@@ -2,6 +2,8 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <juce_gui_extra/juce_gui_extra.h>
 
+#include <optional>
+
 namespace
 {
 
@@ -12,36 +14,26 @@ class PluginComponent : public juce::Component,
                         private juce::Timer
 {
 public:
-    explicit PluginComponent(const juce::File& pluginFile)
+    explicit PluginComponent(const juce::File& pluginCandidate)
     {
-        if (!pluginFile.existsAsFile())
-        {
-            errorMessage = "Plugin file does not exist: " + pluginFile.getFullPathName();
-            return;
-        }
-
         formatManager.addDefaultFormats();
 
-        juce::PluginDescription description;
-        description.fileOrIdentifier = pluginFile.getFullPathName();
-        description.pluginFormatName = "VST3";
-        description.name = pluginFile.getFileNameWithoutExtension();
-        description.descriptiveName = description.name;
-        description.manufacturerName = "Unknown";
-        description.category = "Instrument";
+        auto resolvedPlugin = resolvePluginSource(pluginCandidate);
+        if (!resolvedPlugin.has_value())
+            return;
 
-        juce::String error;
-        auto createdInstance = formatManager.createPluginInstance(description, 48000.0, 512, error);
+        if (!initialisePluginInstance(*resolvedPlugin))
+            return;
 
-        if (createdInstance == nullptr)
+        auto audioError = deviceManager.initialiseWithDefaultDevices(instance->getTotalNumInputChannels(),
+                                                                     juce::jmax(1, instance->getTotalNumOutputChannels()));
+        if (audioError.isNotEmpty())
         {
-            errorMessage = error.isNotEmpty() ? error : juce::String("Unable to create plugin instance.");
+            errorMessage = audioError;
+            teardownInstance();
             return;
         }
 
-        instance = std::move(createdInstance);
-
-        deviceManager.initialiseWithDefaultDevices(0, instance->getTotalNumOutputChannels());
         deviceManager.addAudioCallback(&player);
         deviceManager.addMidiInputCallback({}, &player);
         player.setProcessor(instance.get());
@@ -50,6 +42,7 @@ public:
         if (editor == nullptr)
         {
             errorMessage = "Plugin does not provide a UI editor.";
+            teardownInstance();
             return;
         }
 
@@ -61,11 +54,9 @@ public:
     ~PluginComponent() override
     {
         stopTimer();
-        player.setProcessor(nullptr);
-        deviceManager.removeMidiInputCallback({}, &player);
-        deviceManager.removeAudioCallback(&player);
-        editor.reset();
-        instance.reset();
+        teardownInstance();
+        if (extractedTempRoot.isDirectory())
+            extractedTempRoot.deleteRecursively();
     }
 
     bool isValid() const noexcept { return instance != nullptr && editor != nullptr && errorMessage.isEmpty(); }
@@ -79,6 +70,151 @@ public:
     }
 
 private:
+    struct ResolvedPlugin
+    {
+        juce::File location;
+        juce::File extractionRoot;
+    };
+
+    std::optional<ResolvedPlugin> resolvePluginSource(const juce::File& candidate)
+    {
+        if (!candidate.exists())
+        {
+            errorMessage = "Plugin path does not exist: " + candidate.getFullPathName();
+            return std::nullopt;
+        }
+
+        if (candidate.hasFileExtension("zip"))
+        {
+            auto extracted = extractZipArchive(candidate);
+            if (!extracted.isDirectory())
+                return std::nullopt;
+
+            auto plugin = locatePluginEntry(extracted);
+            if (!plugin.exists())
+            {
+                errorMessage = "No VST plugin found inside zip archive: " + candidate.getFullPathName();
+                extracted.deleteRecursively();
+                return std::nullopt;
+            }
+
+            return ResolvedPlugin{plugin, extracted};
+        }
+
+        if (candidate.isDirectory())
+        {
+            auto plugin = locatePluginEntry(candidate);
+            if (plugin.exists())
+                return ResolvedPlugin{plugin, {}};
+
+            errorMessage = "Unable to locate a plugin inside " + candidate.getFullPathName();
+            return std::nullopt;
+        }
+
+        if (candidate.existsAsFile())
+            return ResolvedPlugin{candidate, {}};
+
+        errorMessage = "Unsupported plugin path: " + candidate.getFullPathName();
+        return std::nullopt;
+    }
+
+    juce::File extractZipArchive(const juce::File& zipFile)
+    {
+        auto tempRoot = juce::File::getSpecialLocation(juce::File::tempDirectory)
+                             .getChildFile("ambiance_plugin_" + juce::Uuid().toString());
+
+        if (!tempRoot.createDirectory())
+        {
+            errorMessage = "Unable to create temporary directory for zip extraction.";
+            return {};
+        }
+
+        juce::ZipFile archive(zipFile);
+        if (archive.getNumEntries() == 0 || !archive.uncompressTo(tempRoot))
+        {
+            errorMessage = "Failed to extract zip archive: " + zipFile.getFileName();
+            tempRoot.deleteRecursively();
+            return {};
+        }
+
+        return tempRoot;
+    }
+
+    static juce::File locatePluginEntry(const juce::File& root)
+    {
+        if (isSupportedPluginPath(root))
+            return root;
+
+        if (!root.isDirectory())
+            return {};
+
+        juce::DirectoryIterator iterator(root, true, "*", juce::File::findFilesAndDirectories);
+        while (iterator.next())
+        {
+            auto file = iterator.getFile();
+            if (isSupportedPluginPath(file))
+                return file;
+        }
+
+        return {};
+    }
+
+    static bool isSupportedPluginPath(const juce::File& file)
+    {
+        return file.hasFileExtension("vst3") || file.hasFileExtension("dll") || file.hasFileExtension("vst")
+               || file.hasFileExtension("component") || file.hasFileExtension("vstbundle");
+    }
+
+    bool initialisePluginInstance(const ResolvedPlugin& resolved)
+    {
+        extractedTempRoot = resolved.extractionRoot;
+
+        juce::Array<juce::String> errorMessages;
+        for (int i = 0; i < formatManager.getNumFormats(); ++i)
+        {
+            auto* format = formatManager.getFormat(i);
+            if (format == nullptr)
+                continue;
+
+            if (!format->fileMightContainThisPluginType(resolved.location.getFullPathName()))
+                continue;
+
+            juce::PluginDescription description;
+            description.fileOrIdentifier = resolved.location.getFullPathName();
+            description.pluginFormatName = format->getName();
+            description.name = resolved.location.getFileNameWithoutExtension();
+            description.descriptiveName = description.name;
+            description.manufacturerName = "Unknown";
+
+            juce::String error;
+            auto createdInstance = formatManager.createPluginInstance(description, 48000.0, 512, error);
+            if (createdInstance != nullptr)
+            {
+                instance = std::move(createdInstance);
+                return true;
+            }
+
+            if (error.isNotEmpty())
+                errorMessages.add(format->getName() + ": " + error);
+        }
+
+        if (errorMessages.isEmpty())
+            errorMessage = "No compatible plugin format found for " + resolved.location.getFullPathName();
+        else
+            errorMessage = "Unable to create plugin instance:\n" + errorMessages.joinIntoString("\n");
+
+        return false;
+    }
+
+    void teardownInstance()
+    {
+        player.setProcessor(nullptr);
+        deviceManager.removeMidiInputCallback({}, &player);
+        deviceManager.removeAudioCallback(&player);
+        editor.reset();
+        instance.reset();
+    }
+
     void timerCallback() override
     {
         if (editor == nullptr)
@@ -94,6 +230,7 @@ private:
     std::unique_ptr<juce::AudioProcessorEditor> editor;
     juce::AudioDeviceManager deviceManager;
     juce::AudioProcessorPlayer player;
+    juce::File extractedTempRoot;
     juce::String errorMessage;
 };
 
