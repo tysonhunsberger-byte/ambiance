@@ -14,8 +14,8 @@
   html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Tahoma,Arial,sans-serif}
   #app{display:flex;flex-direction:column;height:100%}
   #toolbar{display:flex;gap:10px;align-items:center;padding:10px;background:var(--panel);border-bottom:1px solid #444;position:sticky;top:0;z-index:5}
-  #main{flex:1;overflow:auto;padding:10px;display:flex;gap:10px;flex-wrap:wrap;position:relative}
-  .block{background:var(--panel);border:1px solid #444;border-radius:8px;padding:10px;min-width:520px}
+  #main{flex:1;overflow:auto;padding:10px;display:flex;gap:10px;flex-wrap:wrap;align-content:flex-start;position:relative}
+  .block{background:var(--panel);border:1px solid #444;border-radius:8px;padding:10px;min-width:520px;flex:1 1 520px;max-width:1000px}
   .block.dragging{opacity:.95;outline:2px dashed var(--accent)}
   .block h2{margin:0 0 8px}
   .block .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
@@ -51,6 +51,23 @@
   .plugin-block .workspaceList li.empty{font-size:13px;color:var(--muted);background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.12);text-align:center}
   .plugin-block .workspaceNotes{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
   .plugin-block .workspaceNotes span{display:block}
+  .plugin-block .workspaceToolkit{border-radius:10px;border:1px solid rgba(89,167,255,.28);background:rgba(12,18,28,.7);padding:12px;display:flex;flex-direction:column;gap:10px;font-size:12px;color:var(--muted);transition:border-color .2s ease,background .2s ease}
+  .plugin-block .workspaceToolkit header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .plugin-block .workspaceToolkit .title{display:flex;flex-direction:column;gap:6px}
+  .plugin-block .workspaceToolkit h4{margin:0;font-size:15px;color:var(--text)}
+  .plugin-block .workspaceToolkit .toolkitState{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 8px;background:rgba(89,167,255,.18);border:1px solid rgba(89,167,255,.35);font-size:11px;letter-spacing:.3px;text-transform:uppercase}
+  .plugin-block .workspaceToolkit .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .plugin-block .workspaceToolkit .actions .btn{font-size:11px;padding:4px 8px}
+  .plugin-block .workspaceToolkit .toolkitSummary{margin:0;color:var(--muted);line-height:1.5}
+  .plugin-block .workspaceToolkit .toolkitMeta{margin:0;display:grid;gap:10px}
+  .plugin-block .workspaceToolkit .toolkitMeta div{display:flex;flex-direction:column;gap:4px}
+  .plugin-block .workspaceToolkit .toolkitMeta dt{margin:0;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .plugin-block .workspaceToolkit .toolkitMeta dd{margin:0}
+  .plugin-block .workspaceToolkit .toolkitMeta code{display:block;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;padding:4px 6px;border-radius:6px;background:rgba(255,255,255,.05);color:inherit;word-break:break-all}
+  .plugin-block .workspaceToolkit .toolkitNotes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+  .plugin-block .workspaceToolkit .toolkitNotes li{line-height:1.4}
+  .plugin-block .workspaceToolkit.is-missing{border-style:dashed;border-color:rgba(255,139,139,.35);background:rgba(32,10,14,.6)}
+  .plugin-block .workspaceToolkit.is-missing .toolkitState{background:rgba(255,139,139,.18);border-color:rgba(255,139,139,.45);color:#ff9c9c}
   .plugin-block .pluginLibrary li.selected{outline:2px solid rgba(89,167,255,.6);outline-offset:2px}
   .plugin-block .pluginLibrary li .badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 8px;background:rgba(89,167,255,.18);border:1px solid rgba(89,167,255,.35);font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted)}
   .plugin-block .pluginLibrary li .flutterMeta{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted)}
@@ -162,6 +179,7 @@
   option{background:var(--panel);color:#fff}
   .title{font-weight:800;letter-spacing:.3px}
   .spacer{flex:1}
+  .hidden{display:none!important}
 
   /* Vertical dropdown modules */
   .mods{display:flex;flex-direction:column;gap:8px;margin-top:6px}
@@ -1258,6 +1276,28 @@ function bootAudio(){
     return Math.abs(hash);
   }
 
+  async function copyToClipboard(button, text){
+    if(!text) return false;
+    if(!navigator.clipboard || !navigator.clipboard.writeText) return false;
+    const el = button instanceof HTMLElement ? button : null;
+    const original = el ? el.textContent : '';
+    try{
+      await navigator.clipboard.writeText(text);
+      if(el){
+        el.textContent = 'Copied!';
+        setTimeout(()=>{ if(el) el.textContent = original; }, 1500);
+      }
+      return true;
+    }catch(err){
+      console.warn('Clipboard copy failed', err);
+      if(el){
+        el.textContent = 'Copy failed';
+        setTimeout(()=>{ if(el) el.textContent = original; }, 2000);
+      }
+      return false;
+    }
+  }
+
   function makeStageCurve(amount){
     const k = Math.max(0.001, amount);
     const samples = 256;
@@ -1499,6 +1539,34 @@ function bootAudio(){
             <code class="workspacePath">Not available</code>
             <button class="btn copyWorkspace">📋 Copy Path</button>
           </div>
+          <section class="workspaceToolkit is-missing" aria-live="polite">
+            <header>
+              <div class="title">
+                <h4>Flutter VST3 Toolkit</h4>
+                <span class="toolkitState">Checking…</span>
+              </div>
+              <div class="actions">
+                <button class="btn btn-xs copyToolkitDir" disabled>📂 Copy Folder</button>
+                <button class="btn btn-xs copyToolkitArchive" disabled>🗜️ Copy Archive</button>
+              </div>
+            </header>
+            <p class="toolkitSummary">Drop <code>flutter_vst3_toolkit.zip</code> into the workspace to enable Flutter/Dart plugin scaffolding.</p>
+            <dl class="toolkitMeta">
+              <div>
+                <dt>Folder</dt>
+                <dd><code class="toolkitDir">Not detected</code></dd>
+              </div>
+              <div>
+                <dt>Archive</dt>
+                <dd><code class="toolkitArchive">Not detected</code></dd>
+              </div>
+              <div>
+                <dt>Assets</dt>
+                <dd><code class="toolkitAssets">Not detected</code></dd>
+              </div>
+            </dl>
+            <ul class="toolkitNotes"></ul>
+          </section>
           <ul class="workspaceList pluginLibrary"></ul>
           <div class="workspaceNotes"></div>
         </section>
@@ -1534,6 +1602,16 @@ function bootAudio(){
     const selectedLabel = q('.selectedPlugin');
     const streamsContainer = q('.streamsContainer');
     const rackNotes = q('.rackNotes');
+    const toolkitCard = q('.workspaceToolkit');
+    const toolkitStateBadge = toolkitCard ? toolkitCard.querySelector('.toolkitState') : null;
+    const toolkitSummary = toolkitCard ? toolkitCard.querySelector('.toolkitSummary') : null;
+    const toolkitDirLabel = toolkitCard ? toolkitCard.querySelector('.toolkitDir') : null;
+    const toolkitArchiveLabel = toolkitCard ? toolkitCard.querySelector('.toolkitArchive') : null;
+    const toolkitAssetsLabel = toolkitCard ? toolkitCard.querySelector('.toolkitAssets') : null;
+    const toolkitNotesList = toolkitCard ? toolkitCard.querySelector('.toolkitNotes') : null;
+    const copyToolkitDirBtn = toolkitCard ? toolkitCard.querySelector('.copyToolkitDir') : null;
+    const copyToolkitArchiveBtn = toolkitCard ? toolkitCard.querySelector('.copyToolkitArchive') : null;
+    let toolkitPaths = { dir: '', archive: '' };
 
     function log(message){
       if(!rackOutput) return;
@@ -1571,6 +1649,62 @@ function bootAudio(){
         span.textContent = note;
         workspaceNotes.appendChild(span);
       });
+    }
+
+    function renderToolkit(status){
+      if(!toolkitCard) return;
+      const meta = status.flutter_toolkit || {};
+      const ready = !!meta.ready;
+      const hasArchive = !!meta.has_archive;
+      const present = ready || hasArchive;
+      toolkitCard.classList.toggle('is-missing', !ready);
+      if(toolkitStateBadge){
+        toolkitStateBadge.textContent = ready ? 'Ready' : hasArchive ? 'Archive found' : 'Missing';
+      }
+      if(toolkitSummary){
+        toolkitSummary.textContent = meta.summary || 'Drop flutter_vst3_toolkit.zip into the workspace to enable Flutter/Dart plugin scaffolding.';
+      }
+      if(toolkitDirLabel){
+        const label = meta.directory_relative || meta.directory || (present ? 'Detected archive only' : 'Not detected');
+        toolkitDirLabel.textContent = label;
+      }
+      if(toolkitArchiveLabel){
+        const label = meta.archive_relative || meta.archive || 'Not detected';
+        toolkitArchiveLabel.textContent = label;
+      }
+      if(toolkitAssetsLabel){
+        const label = meta.assets_relative || meta.assets || (ready ? 'flutter_assets not found' : 'Not detected');
+        toolkitAssetsLabel.textContent = label;
+      }
+      toolkitPaths = {
+        dir: ready ? (meta.directory || meta.directory_relative || '') : '',
+        archive: hasArchive ? (meta.archive || meta.archive_relative || '') : '',
+      };
+      if(copyToolkitDirBtn){
+        copyToolkitDirBtn.disabled = !toolkitPaths.dir;
+      }
+      if(copyToolkitArchiveBtn){
+        copyToolkitArchiveBtn.disabled = !toolkitPaths.archive;
+      }
+      if(toolkitNotesList){
+        toolkitNotesList.innerHTML = '';
+        const notes = Array.isArray(meta.notes) && meta.notes.length ? meta.notes.slice() : [];
+        const assetsNote = meta.assets_relative || meta.assets;
+        if(ready && assetsNote && !notes.some((note)=>note.includes('flutter_assets'))){
+          notes.push(`Toolkit assets located at ${assetsNote}`);
+        }
+        if(!notes.length){
+          notes.push('Drop the Flutter toolkit archive into the workspace to auto-unpack it.');
+        }
+        notes.slice(0, 5).forEach((note)=>{
+          const li = document.createElement('li');
+          li.textContent = note;
+          toolkitNotesList.appendChild(li);
+        });
+      }
+      if(!present && !ready){
+        toolkitCard.classList.add('is-missing');
+      }
     }
 
     function renderPluginLibrary(status){
@@ -1939,6 +2073,7 @@ function bootAudio(){
           workspacePathLabel.textContent = data.workspace || 'Unavailable';
         }
         renderWorkspaceNotes(data);
+        renderToolkit(data);
         renderPluginLibrary(data);
         renderStreams(data);
         if(rackNotes){
@@ -1973,17 +2108,38 @@ function bootAudio(){
           log('Clipboard access is not available in this browser.');
           return;
         }
-        const original = copyWorkspaceBtn.textContent;
-        try{
-          await navigator.clipboard.writeText(text);
-          copyWorkspaceBtn.textContent = 'Copied!';
-          setTimeout(()=>{ copyWorkspaceBtn.textContent = original; }, 1500);
-          log('Workspace path copied to clipboard.');
-        }catch(err){
-          copyWorkspaceBtn.textContent = 'Copy failed';
-          setTimeout(()=>{ copyWorkspaceBtn.textContent = original; }, 2000);
-          log('Copy failed: ' + (err && err.message || err));
+        const ok = await copyToClipboard(copyWorkspaceBtn, text);
+        log(ok ? 'Workspace path copied to clipboard.' : 'Copy failed: clipboard write was rejected.');
+      });
+    }
+
+    if(copyToolkitDirBtn){
+      copyToolkitDirBtn.addEventListener('click', async ()=>{
+        if(!toolkitPaths.dir){
+          log('Toolkit folder not available yet.');
+          return;
         }
+        if(!navigator.clipboard || !navigator.clipboard.writeText){
+          log('Clipboard access is not available in this browser.');
+          return;
+        }
+        const ok = await copyToClipboard(copyToolkitDirBtn, toolkitPaths.dir);
+        log(ok ? 'Toolkit folder path copied to clipboard.' : 'Copy failed while copying the toolkit folder path.');
+      });
+    }
+
+    if(copyToolkitArchiveBtn){
+      copyToolkitArchiveBtn.addEventListener('click', async ()=>{
+        if(!toolkitPaths.archive){
+          log('Toolkit archive not detected.');
+          return;
+        }
+        if(!navigator.clipboard || !navigator.clipboard.writeText){
+          log('Clipboard access is not available in this browser.');
+          return;
+        }
+        const ok = await copyToClipboard(copyToolkitArchiveBtn, toolkitPaths.archive);
+        log(ok ? 'Toolkit archive path copied to clipboard.' : 'Copy failed while copying the toolkit archive path.');
       });
     }
 

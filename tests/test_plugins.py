@@ -206,3 +206,24 @@ def test_detect_flutter_vst3(tmp_path):
 
     status = manager.status()
     assert any("Flutter/Dart VST3" in note for note in status["notes"])
+
+
+def test_flutter_toolkit_archive_unpack(tmp_path):
+    manager = PluginRackManager(base_dir=tmp_path)
+    workspace = manager.workspace_path()
+
+    archive = workspace / "flutter_vst3_toolkit.zip"
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.writestr("flutter_vst3_toolkit/README.md", "Toolkit docs")
+        zf.writestr("flutter_vst3_toolkit/flutter_assets/placeholder.txt", "asset")
+
+    status = manager.status()
+    toolkit = status.get("flutter_toolkit")
+
+    assert toolkit
+    assert toolkit.get("present") is True
+    assert toolkit.get("ready") is True
+    assert toolkit.get("archive", "").endswith("flutter_vst3_toolkit.zip")
+    assert toolkit.get("directory")
+    assert toolkit.get("assets")
+    assert any("toolkit" in note.lower() for note in toolkit.get("notes", []))

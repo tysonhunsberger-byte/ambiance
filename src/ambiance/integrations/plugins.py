@@ -348,6 +348,7 @@ class PluginRackManager:
     # ------------------------------------------------------------------
     # Status reporting
     def status(self) -> dict[str, object]:
+        toolkit = self._flutter_toolkit_status()
         plugins = self.discover_plugins()
         plugin_lookup = {item["path"]: item for item in plugins}
         config = self._load_config()
@@ -383,13 +384,160 @@ class PluginRackManager:
             notes.append(
                 "Modalys (Max) is bundled for quick experiments. Route it through a lane to explore physical modelling textures."
             )
+        if toolkit and toolkit.get("notes"):
+            for note in toolkit["notes"]:
+                if note not in notes:
+                    notes.append(note)
         return {
             "workspace": str(self.workspace_path()),
             "workspace_exists": self.workspace_path().exists(),
             "plugins": plugins,
             "streams": streams,
             "notes": notes,
+            "flutter_toolkit": toolkit,
         }
+
+    # ------------------------------------------------------------------
+    # Flutter toolkit helpers
+    def _flutter_toolkit_status(self) -> dict[str, object]:
+        workspace = self.workspace_path()
+        status: dict[str, object] = {
+            "present": False,
+            "ready": False,
+            "has_archive": False,
+            "notes": [],
+        }
+        archive = self._find_flutter_toolkit_archive()
+        directory = self._existing_flutter_toolkit_dir()
+        target_dir = workspace / "flutter_vst3_toolkit"
+        if archive:
+            status["has_archive"] = True
+            status["archive"] = str(archive)
+            try:
+                status["archive_relative"] = str(archive.relative_to(workspace))
+            except ValueError:
+                status["archive_relative"] = ""
+            extracted = self._ensure_flutter_toolkit_unpacked(archive, target_dir)
+            if extracted:
+                directory = extracted
+            elif not directory:
+                status["notes"].append(
+                    "A flutter_vst3_toolkit archive was found but could not be unpacked. Verify the download and retry."
+                )
+        if directory and directory.exists():
+            status["present"] = True
+            status["ready"] = True
+            status["directory"] = str(directory)
+            try:
+                status["directory_relative"] = str(directory.relative_to(workspace))
+            except ValueError:
+                status["directory_relative"] = ""
+            assets_dir = self._locate_flutter_assets(directory)
+            if assets_dir:
+                status["assets"] = str(assets_dir)
+                try:
+                    status["assets_relative"] = str(assets_dir.relative_to(workspace))
+                except ValueError:
+                    status["assets_relative"] = ""
+            status.setdefault(
+                "notes",
+                [],
+            ).append(
+                "Flutter VST3 toolkit unpacked — use it to scaffold Dart-driven plugins alongside your rack."
+            )
+            status["summary"] = "Toolkit unpacked and ready to scaffold Flutter VST3 plugins."
+        elif archive:
+            status["present"] = True
+            status.setdefault("notes", []).append(
+                "Flutter VST3 toolkit archive detected. It will be unpacked into the workspace on refresh."
+            )
+            status["summary"] = "Toolkit archive detected — unpacking in progress."
+        else:
+            status["summary"] = (
+                "Drop flutter_vst3_toolkit.zip into the workspace to enable Flutter/Dart plugin scaffolding."
+            )
+        return status
+
+    def _find_flutter_toolkit_archive(self) -> Path | None:
+        candidates: list[Path] = []
+        for root in {self.workspace_path(), self.base_dir}:
+            try:
+                if not root.exists():
+                    continue
+            except OSError:
+                continue
+            try:
+                for candidate in root.glob("flutter_vst3_toolkit*.zip"):
+                    if candidate.is_file():
+                        try:
+                            if zipfile.is_zipfile(candidate):
+                                candidates.append(candidate)
+                        except OSError:
+                            continue
+            except OSError:
+                continue
+        if not candidates:
+            return None
+        try:
+            candidates.sort(key=lambda item: (item.stat().st_mtime, item.name))
+        except OSError:
+            candidates.sort(key=lambda item: item.name)
+        return candidates[-1]
+
+    def _existing_flutter_toolkit_dir(self) -> Path | None:
+        workspace_candidate = self.workspace_path() / "flutter_vst3_toolkit"
+        if workspace_candidate.exists() and workspace_candidate.is_dir():
+            return workspace_candidate
+        base_candidate = self.base_dir / "flutter_vst3_toolkit"
+        if base_candidate.exists() and base_candidate.is_dir():
+            return base_candidate
+        return None
+
+    def _ensure_flutter_toolkit_unpacked(self, archive: Path, target: Path) -> Path | None:
+        try:
+            stamp = f"{archive.resolve()}|{archive.stat().st_mtime_ns}"
+        except OSError:
+            stamp = str(archive)
+        marker = target / ".toolkit-source"
+        if target.exists() and marker.exists():
+            try:
+                if marker.read_text().strip() == stamp:
+                    return target
+            except OSError:
+                pass
+        try:
+            with zipfile.ZipFile(archive) as zf:
+                temp_dir = target.with_name(target.name + "__tmp__")
+                if temp_dir.exists():
+                    shutil.rmtree(temp_dir, ignore_errors=True)
+                temp_dir.mkdir(parents=True, exist_ok=True)
+                zf.extractall(temp_dir)
+        except (OSError, zipfile.BadZipFile):
+            return None
+        extracted_root = self._collapse_single_directory(temp_dir)
+        try:
+            if target.exists():
+                shutil.rmtree(target, ignore_errors=True)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if extracted_root != temp_dir:
+                shutil.move(str(extracted_root), str(target))
+                shutil.rmtree(temp_dir, ignore_errors=True)
+            else:
+                temp_dir.rename(target)
+            marker.write_text(stamp)
+        except OSError:
+            return None
+        return target
+
+    @staticmethod
+    def _collapse_single_directory(directory: Path) -> Path:
+        try:
+            entries = [entry for entry in directory.iterdir() if entry.name != ".toolkit-source"]
+        except OSError:
+            return directory
+        if len(entries) == 1 and entries[0].is_dir():
+            return entries[0]
+        return directory
 
     # ------------------------------------------------------------------
     # Modalys helpers
