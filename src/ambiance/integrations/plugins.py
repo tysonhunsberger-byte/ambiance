@@ -330,6 +330,7 @@ class PluginRackManager:
         notes = [
             "Drop VST, VST3, Audio Unit, or mc.svt plugins into this folder to load them into the rack.",
             "Assign plugins to lane A or B to build parallel chains and toggle them for instant A/B comparisons.",
+            "Use the Carla bridge controls to spin up VST2/VST3 plugins even when the embedded JUCE host is unavailable.",
         ]
         if any(plugin.get("origin") == "Bundled Modalys package" for plugin in plugins):
             notes.append(
