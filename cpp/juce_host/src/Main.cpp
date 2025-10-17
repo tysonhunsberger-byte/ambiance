@@ -169,7 +169,7 @@ private:
     {
         extractedTempRoot = resolved.extractionRoot;
 
-        juce::Array<juce::String> errorMessages;
+        juce::StringArray errorMessages;
         for (int i = 0; i < formatManager.getNumFormats(); ++i)
         {
             auto* format = formatManager.getFormat(i);
