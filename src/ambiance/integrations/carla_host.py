@@ -118,6 +118,8 @@ class CarlaBackend:
         self._idle_stop: threading.Event | None = None
         self._idle_interval = 1.0 / 120.0
         self._plugin_paths: dict[int, set[Path]] = {}
+        self._dll_directories: dict[Path, Any] = {}
+        self._enable_dll_registration = os.name == "nt"
 
         if not self.root:
             self.warnings.append("Carla source tree not found – set CARLA_ROOT")
@@ -293,6 +295,60 @@ class CarlaBackend:
             self.host.set_engine_option(option, int(plugin_type), directories)
         except Exception as exc:  # pragma: no cover - backend specific failure
             self.warnings.append(f"Failed to register plugin directory {resolved}: {exc}")
+
+    @staticmethod
+    def _dependency_directories_for(path: Path) -> list[Path]:
+        directories: list[Path] = []
+        candidate = Path(path)
+        parent = candidate.parent
+        if parent.exists():
+            directories.append(parent)
+        if candidate.is_dir():
+            directories.append(candidate)
+            contents = candidate / "Contents"
+            if contents.exists():
+                directories.append(contents)
+                for child in contents.iterdir():
+                    if not child.is_dir():
+                        continue
+                    directories.append(child)
+                    if "win" in child.name.lower():
+                        for nested in child.iterdir():
+                            if nested.is_dir():
+                                directories.append(nested)
+        unique: list[Path] = []
+        seen: set[Path] = set()
+        for directory in directories:
+            resolved = directory.resolve(strict=False)
+            if resolved in seen:
+                continue
+            if resolved.exists():
+                unique.append(resolved)
+                seen.add(resolved)
+        return unique
+
+    def _register_dependency_directories(self, plugin_path: Path) -> None:
+        if not self._enable_dll_registration:
+            return
+        self._clear_dependency_directories()
+        for directory in self._dependency_directories_for(plugin_path):
+            if directory in self._dll_directories:
+                continue
+            try:
+                handle = os.add_dll_directory(str(directory))
+            except (FileNotFoundError, OSError) as exc:  # pragma: no cover - platform specific failure
+                self.warnings.append(f"Failed to register DLL directory {directory}: {exc}")
+                continue
+            self._dll_directories[directory] = handle
+
+    def _clear_dependency_directories(self) -> None:
+        handles = list(self._dll_directories.items())
+        self._dll_directories.clear()
+        for directory, handle in handles:
+            try:
+                handle.close()
+            except Exception:  # pragma: no cover - defensive cleanup
+                self.warnings.append(f"Failed to release DLL directory {directory}")
 
     def _default_plugin_directories(self) -> dict[int, list[Path]]:
         mapping: dict[int, list[Path]] = {}
@@ -493,6 +549,7 @@ class CarlaBackend:
             self._register_plugin_path(plugin_type, path.parent)
             if path.suffix.lower() == ".vst3" and path.is_dir():
                 self._register_plugin_path(plugin_type, path)
+            self._register_dependency_directories(path)
             binary_type = self.module.BINARY_NATIVE if self.module else 0
             options = getattr(self.module, "PLUGIN_OPTIONS_NULL", 0) if self.module else 0
             added = self.host.add_plugin(
@@ -539,6 +596,7 @@ class CarlaBackend:
             self._plugin_path = None
             self._parameters = []
             self._ui_visible = False
+            self._clear_dependency_directories()
 
     def close(self) -> None:
         with self._lock:
@@ -553,6 +611,7 @@ class CarlaBackend:
                     self.warnings.append(f"Failed to close Carla engine: {exc}")
             self._engine_running = False
             self._driver_name = None
+            self._clear_dependency_directories()
 
     def set_parameter(self, identifier: int | str, value: float) -> dict[str, Any]:
         with self._lock:

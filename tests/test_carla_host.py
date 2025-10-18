@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -88,6 +89,72 @@ class _DummyFlutterHost:
 class _FailingBackend(_DummyBackend):
     def load_plugin(self, plugin_path: Path, parameters=None, *, show_ui: bool = False) -> dict:
         raise carla_host.CarlaHostError("backend rejected plugin")
+
+
+def test_dependency_directories_for_vst3_bundle(tmp_path):
+    bundle = tmp_path / "Plugin.vst3"
+    arch_dir = bundle / "Contents" / "x86_64-win"
+    resources_dir = bundle / "Contents" / "Resources"
+    arch_dir.mkdir(parents=True)
+    resources_dir.mkdir()
+
+    directories = carla_host.CarlaBackend._dependency_directories_for(bundle)
+
+    resolved = {path for path in directories}
+    assert bundle.parent.resolve() in resolved
+    assert bundle.resolve() in resolved
+    assert (bundle / "Contents").resolve() in resolved
+    assert arch_dir.resolve() in resolved
+    assert resources_dir.resolve() in resolved
+
+
+def test_dependency_directories_for_dll(tmp_path):
+    plugin = tmp_path / "Effect.dll"
+    plugin.write_text("stub")
+
+    directories = carla_host.CarlaBackend._dependency_directories_for(plugin)
+
+    assert directories == [tmp_path.resolve()]
+
+
+def test_register_dependency_directories_tracks_handles(monkeypatch, tmp_path):
+    backend = carla_host.CarlaBackend.__new__(carla_host.CarlaBackend)
+    backend._dll_directories = {}
+    backend.warnings = []
+
+    handles: list[Any] = []
+
+    class _Handle:
+        def __init__(self, path: str) -> None:
+            self.path = path
+            self.closed = False
+
+        def close(self) -> None:
+            self.closed = True
+
+    def fake_add_dll_directory(path: str):
+        handle = _Handle(path)
+        handles.append(handle)
+        return handle
+
+    monkeypatch.setattr(carla_host.os, "add_dll_directory", fake_add_dll_directory, raising=False)
+
+    plugin = tmp_path / "Instrument.dll"
+    plugin.write_text("stub")
+
+    backend._register_dependency_directories = carla_host.CarlaBackend._register_dependency_directories.__get__(backend, carla_host.CarlaBackend)
+    backend._clear_dependency_directories = carla_host.CarlaBackend._clear_dependency_directories.__get__(backend, carla_host.CarlaBackend)
+    backend._enable_dll_registration = True
+
+    backend._register_dependency_directories(plugin)
+
+    assert handles and handles[0].path == str(tmp_path.resolve())
+    assert Path(handles[0].path) in backend._dll_directories
+
+    backend._clear_dependency_directories()
+
+    assert backend._dll_directories == {}
+    assert handles[0].closed is True
 
 
 def test_carla_vst_host_prefers_backend(monkeypatch, tmp_path):
