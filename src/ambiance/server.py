@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import atexit
 import base64
 import json
 from http import HTTPStatus
@@ -15,7 +16,7 @@ from urllib.parse import parse_qs, urlparse
 from .core.engine import AudioEngine
 from .core.registry import registry
 from .integrations.plugins import PluginRackManager
-from .integrations.flutter_vst_host import FlutterVSTHost
+from .integrations.carla_host import CarlaVSTHost
 from .integrations.juce_vst3_host import JuceVST3Host
 from .utils.audio import encode_wav_bytes
 
@@ -66,7 +67,7 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
         directory: str,
         manager: PluginRackManager,
         ui_path: Path,
-        vst_host: FlutterVSTHost,
+        vst_host: CarlaVSTHost,
         juce_host: JuceVST3Host | None,
         **kwargs: Any,
     ) -> None:
@@ -211,7 +212,14 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
                 payload = self._read_json()
                 duration = float(payload.get("duration", 1.5))
                 sample_rate = int(payload.get("sample_rate", 44100))
-                preview = self.vst_host.render_preview(duration=duration, sample_rate=sample_rate)
+                try:
+                    preview = self.vst_host.render_preview(duration=duration, sample_rate=sample_rate)
+                except RuntimeError as exc:
+                    self._send_json(
+                        {"ok": False, "error": str(exc), "status": self.vst_host.status()},
+                        HTTPStatus.BAD_REQUEST,
+                    )
+                    return
                 audio = encode_wav_bytes(preview, sample_rate)
                 encoded = base64.b64encode(audio).decode("ascii")
                 self._send_json(
@@ -251,6 +259,28 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
                         "sample_rate": sample_rate,
                     }
                 )
+                return
+            if path == "/api/vst/editor/open":
+                try:
+                    status = self.vst_host.show_ui()
+                except RuntimeError as exc:
+                    self._send_json(
+                        {"ok": False, "error": str(exc), "status": self.vst_host.status()},
+                        HTTPStatus.BAD_REQUEST,
+                    )
+                    return
+                self._send_json({"ok": True, "status": status})
+                return
+            if path == "/api/vst/editor/close":
+                try:
+                    status = self.vst_host.hide_ui()
+                except RuntimeError as exc:
+                    self._send_json(
+                        {"ok": False, "error": str(exc), "status": self.vst_host.status()},
+                        HTTPStatus.BAD_REQUEST,
+                    )
+                    return
+                self._send_json({"ok": True, "status": status})
                 return
             if path == "/api/juce/open":
                 if not self.juce_host:
@@ -307,8 +337,9 @@ def serve(host: str = "127.0.0.1", port: int = 8000, ui: Path | None = None) -> 
     directory = str(base_dir)
     ui_path = Path(ui) if ui else base_dir / "noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html"
     manager = PluginRackManager(base_dir=base_dir)
-    vst_host = FlutterVSTHost(base_dir=base_dir)
+    vst_host = CarlaVSTHost(base_dir=base_dir)
     juce_host = JuceVST3Host(base_dir=base_dir)
+    atexit.register(vst_host.shutdown)
 
     def handler(*args: Any, **kwargs: Any) -> AmbianceRequestHandler:
         kwargs.setdefault("directory", directory)
