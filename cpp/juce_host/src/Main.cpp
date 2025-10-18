@@ -9,6 +9,8 @@ namespace
 
 constexpr int defaultWidth = 900;
 constexpr int defaultHeight = 600;
+constexpr double defaultSampleRate = 48000.0;
+constexpr int defaultBlockSize = 512;
 
 class PluginComponent : public juce::Component,
                         private juce::Timer
@@ -169,7 +171,7 @@ private:
     {
         extractedTempRoot = resolved.extractionRoot;
 
-        juce::Array<juce::String> errorMessages;
+        juce::StringArray errorMessages;
         for (int i = 0; i < formatManager.getNumFormats(); ++i)
         {
             auto* format = formatManager.getFormat(i);
@@ -179,23 +181,28 @@ private:
             if (!format->fileMightContainThisPluginType(resolved.location.getFullPathName()))
                 continue;
 
-            juce::PluginDescription description;
-            description.fileOrIdentifier = resolved.location.getFullPathName();
-            description.pluginFormatName = format->getName();
-            description.name = resolved.location.getFileNameWithoutExtension();
-            description.descriptiveName = description.name;
-            description.manufacturerName = "Unknown";
+            juce::OwnedArray<juce::PluginDescription> descriptions;
+            format->findAllTypesForFile(descriptions, resolved.location.getFullPathName());
 
-            juce::String error;
-            auto createdInstance = formatManager.createPluginInstance(description, 48000.0, 512, error);
-            if (createdInstance != nullptr)
+            if (descriptions.isEmpty())
             {
-                instance = std::move(createdInstance);
-                return true;
+                errorMessages.add(format->getName() + ": No plugin descriptions found for "
+                                  + resolved.location.getFullPathName());
+                continue;
             }
 
-            if (error.isNotEmpty())
-                errorMessages.add(format->getName() + ": " + error);
+            for (auto* description : descriptions)
+            {
+                if (description == nullptr)
+                    continue;
+
+                juce::String instantiationError;
+                if (tryCreatePluginInstance(*format, *description, instantiationError))
+                    return true;
+
+                if (instantiationError.isNotEmpty())
+                    errorMessages.add(format->getName() + " (" + description->name + "): " + instantiationError);
+            }
         }
 
         if (errorMessages.isEmpty())
@@ -203,6 +210,79 @@ private:
         else
             errorMessage = "Unable to create plugin instance:\n" + errorMessages.joinIntoString("\n");
 
+        return false;
+    }
+
+    bool tryCreatePluginInstance(juce::AudioPluginFormat& format,
+                                 const juce::PluginDescription& description,
+                                 juce::String& failureReason)
+    {
+        if (format.requiresUnblockedMessageThreadDuringCreation(description))
+            return createInstanceAsynchronously(format, description, failureReason);
+
+        juce::String error;
+        auto createdInstance = formatManager.createPluginInstance(description, defaultSampleRate, defaultBlockSize, error);
+        if (createdInstance != nullptr)
+        {
+            instance = std::move(createdInstance);
+            return true;
+        }
+
+        failureReason = error.isNotEmpty() ? error : "Unknown error returned while creating plugin instance.";
+        return false;
+    }
+
+    bool createInstanceAsynchronously(juce::AudioPluginFormat& format,
+                                      const juce::PluginDescription& description,
+                                      juce::String& failureReason)
+    {
+        juce::WaitableEvent finished;
+        juce::String asyncError;
+        std::unique_ptr<juce::AudioPluginInstance> createdInstance;
+
+        format.createPluginInstanceAsync(description,
+                                         defaultSampleRate,
+                                         defaultBlockSize,
+                                         [this, &finished, &asyncError, &createdInstance](std::unique_ptr<juce::AudioPluginInstance> instanceCreated,
+                                                                                           const juce::String& error) mutable {
+                                             if (instanceCreated != nullptr)
+                                                 createdInstance = std::move(instanceCreated);
+
+                                             asyncError = error;
+                                             finished.signal();
+                                         });
+
+        constexpr int pollIntervalMs = 20;
+        constexpr int timeoutMs = 30000;
+        int waitedMs = 0;
+
+        while (!finished.wait(pollIntervalMs))
+        {
+            if (auto* messageManager = juce::MessageManager::getInstanceWithoutCreating(); messageManager != nullptr
+                && messageManager->isThisTheMessageThread())
+            {
+                messageManager->runDispatchLoopUntil(pollIntervalMs);
+            }
+            else
+            {
+                juce::Thread::sleep(pollIntervalMs);
+            }
+
+            waitedMs += pollIntervalMs;
+            if (waitedMs >= timeoutMs)
+            {
+                failureReason = "Timed out while creating plugin instance.";
+                return false;
+            }
+        }
+
+        if (createdInstance != nullptr)
+        {
+            instance = std::move(createdInstance);
+            return true;
+        }
+
+        failureReason = asyncError.isNotEmpty() ? asyncError : "Unknown error returned during asynchronous instantiation.";
         return false;
     }
 
