@@ -79,6 +79,13 @@ lane-based routing, A/B comparisons, and lightweight session management.
    python -m ambiance.cli output.wav --config config.json
    ```
 
+## Carla integration
+
+Ambiance can host VST2 and VST3 plug-ins through an embedded Carla backend. The
+integration automatically falls back to the Flutter shim when the Carla
+runtime is unavailable. Windows users can follow `docs/carla_windows.md` for
+MSYS2 build steps or instructions on reusing the official binary release.
+
 ## Development
 
 - Run tests with `pytest`.
