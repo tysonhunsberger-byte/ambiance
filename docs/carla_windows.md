@@ -57,4 +57,7 @@ necessary DLL directories to `PATH` at runtime.
 
 The Ambiance Carla integration automatically injects the Carla DLL directories
 into the current `PATH`, so no manual environment tweaks are required after the
-first run.
+first run. When the backend starts it enables Carla's Patchbay process mode and
+registers the common VST/VST3 folders (including the directory of the plug-in
+you load), which keeps native editors working even when the binaries live
+outside the default installation tree.

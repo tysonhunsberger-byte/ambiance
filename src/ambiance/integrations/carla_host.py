@@ -22,7 +22,7 @@ import threading
 import time
 from pathlib import Path
 from types import ModuleType
-from typing import Any
+from typing import Any, Iterable
 
 from .flutter_vst_host import FlutterVSTHost
 
@@ -116,6 +116,8 @@ class CarlaBackend:
         self._idle_thread: threading.Thread | None = None
         self._idle_stop: threading.Event | None = None
         self._idle_interval = 1.0 / 120.0
+        self._plugin_search_paths: dict[int, set[Path]] = {}
+        self._process_mode: str | None = None
 
         if not self.root:
             self.warnings.append("Carla source tree not found – set CARLA_ROOT")
@@ -260,6 +262,7 @@ class CarlaBackend:
         driver = self._select_driver()
         if not driver:
             raise CarlaHostError("No usable Carla audio driver found")
+        self._configure_engine(driver)
         if not self.host.engine_init(driver, "AmbianceCarlaHost"):
             message = self.host.get_last_error() if hasattr(self.host, "get_last_error") else "unknown error"
             raise CarlaHostError(f"Failed to initialise Carla engine: {message}")
@@ -318,6 +321,52 @@ class CarlaBackend:
                     return candidate
         return names[0] if names else None
 
+    def _configure_engine(self, driver: str) -> None:
+        if self.host is None or self.module is None:
+            return
+
+        module = self.module
+
+        def _maybe_set(option_name: str, value: int, text: str = "") -> None:
+            option = getattr(module, option_name, None)
+            if option is None:
+                return
+            self._set_engine_option(option, value, text)
+
+        patchbay_mode = getattr(module, "ENGINE_PROCESS_MODE_PATCHBAY", None)
+        if patchbay_mode is not None and getattr(module, "ENGINE_OPTION_PROCESS_MODE", None) is not None:
+            _maybe_set("ENGINE_OPTION_PROCESS_MODE", patchbay_mode, "")
+            self._process_mode = "Patchbay"
+        else:
+            self._process_mode = None
+
+        transport_internal = getattr(module, "ENGINE_TRANSPORT_MODE_INTERNAL", None)
+        if transport_internal is not None:
+            _maybe_set("ENGINE_OPTION_TRANSPORT_MODE", transport_internal, "")
+
+        _maybe_set("ENGINE_OPTION_FORCE_STEREO", 1, "")
+        _maybe_set("ENGINE_OPTION_MAX_PARAMETERS", 512, "")
+        _maybe_set("ENGINE_OPTION_PREFER_PLUGIN_BRIDGES", 0, "")
+        _maybe_set("ENGINE_OPTION_PREFER_UI_BRIDGES", 0, "")
+        _maybe_set("ENGINE_OPTION_PREVENT_BAD_BEHAVIOUR", 1, "")
+        _maybe_set("ENGINE_OPTION_UI_BRIDGES_TIMEOUT", 20000, "")
+        _maybe_set("ENGINE_OPTION_UIS_ALWAYS_ON_TOP", 0, "")
+
+        if driver:
+            _maybe_set("ENGINE_OPTION_AUDIO_DRIVER", 0, driver)
+
+        bin_dir = self.root / "bin" if self.root else None
+        if bin_dir and bin_dir.exists():
+            _maybe_set("ENGINE_OPTION_PATH_BINARIES", 0, str(bin_dir))
+
+        resources_dir = self.root / "resources" if self.root else None
+        if resources_dir and resources_dir.exists():
+            _maybe_set("ENGINE_OPTION_PATH_RESOURCES", 0, str(resources_dir))
+
+        defaults = self._default_plugin_directories()
+        for plugin_type, directories in defaults.items():
+            self._set_plugin_paths(plugin_type, directories)
+
     # ------------------------------------------------------------------
     # Public API
     def can_handle_path(self, plugin_path: Path) -> bool:
@@ -339,6 +388,8 @@ class CarlaBackend:
             }
             if self._driver_name:
                 payload["driver"] = self._driver_name
+            if self._process_mode:
+                payload["process_mode"] = self._process_mode
             payload["capabilities"] = {
                 "editor": bool(self._plugin_id is not None and self._plugin_supports_custom_ui()),
                 "instrument": bool(self._plugin_id is not None and self._plugin_is_instrument()),
@@ -370,6 +421,7 @@ class CarlaBackend:
             plugin_type = self._plugin_type_for(path)
             if plugin_type is None:
                 raise CarlaHostError(f"Unsupported plugin type for {path}")
+            self._register_plugin_search_path(plugin_type, path)
             added = self.host.add_plugin(
                 self.module.BINARY_NATIVE if self.module else 0,
                 plugin_type,
@@ -491,6 +543,134 @@ class CarlaBackend:
 
     # ------------------------------------------------------------------
     # Internal helpers
+    def _set_engine_option(self, option: int, value: int, text: str = "") -> None:
+        if self.host is None:
+            return
+        try:
+            self.host.set_engine_option(int(option), int(value), str(text))
+        except Exception as exc:  # pragma: no cover - depends on host implementation
+            self.warnings.append(f"Failed to set Carla engine option {option}: {exc}")
+
+    def _default_plugin_directories(self) -> dict[int, set[Path]]:
+        if self.module is None:
+            return {}
+
+        mapping: dict[int, set[Path]] = {}
+
+        def _add(plugin_type: int | None, candidates: Iterable[Path]) -> None:
+            if plugin_type is None:
+                return
+            bucket = mapping.setdefault(plugin_type, set())
+            for candidate in candidates:
+                if not candidate:
+                    continue
+                path = Path(candidate).expanduser()
+                if path.exists():
+                    bucket.add(path.resolve())
+
+        module = self.module
+        base_data = self.base_dir / "data"
+        _add(getattr(module, "PLUGIN_VST2", None), [base_data / "vst", base_data / "plugins" / "vst"])
+        _add(getattr(module, "PLUGIN_VST3", None), [base_data / "vst3", base_data / "plugins" / "vst3"])
+
+        def _from_env(env: str, plugin_type: int | None) -> None:
+            if plugin_type is None:
+                return
+            raw = os.environ.get(env)
+            if not raw:
+                return
+            for chunk in raw.split(os.pathsep):
+                if not chunk:
+                    continue
+                _add(plugin_type, [Path(chunk)])
+
+        _from_env("VST_PATH", getattr(module, "PLUGIN_VST2", None))
+        _from_env("VST3_PATH", getattr(module, "PLUGIN_VST3", None))
+
+        if sys.platform.startswith("win"):
+            program_dirs = [
+                os.environ.get("PROGRAMFILES"),
+                os.environ.get("PROGRAMFILES(X86)"),
+                os.environ.get("ProgramW6432"),
+            ]
+            common_dirs = [
+                os.environ.get("COMMONPROGRAMFILES"),
+                os.environ.get("COMMONPROGRAMFILES(X86)"),
+            ]
+            vst2_candidates: list[Path] = []
+            for prefix in program_dirs:
+                if not prefix:
+                    continue
+                root = Path(prefix)
+                vst2_candidates.extend(
+                    [
+                        root / "VstPlugins",
+                        root / "Steinberg" / "VstPlugins",
+                        root / "Common Files" / "VST2",
+                    ]
+                )
+            vst3_candidates: list[Path] = []
+            for prefix in common_dirs:
+                if not prefix:
+                    continue
+                root = Path(prefix)
+                vst3_candidates.append(root / "VST3")
+            _add(getattr(module, "PLUGIN_VST2", None), vst2_candidates)
+            _add(getattr(module, "PLUGIN_VST3", None), vst3_candidates)
+        elif sys.platform == "darwin":
+            vst2_candidates = [
+                Path("/Library/Audio/Plug-Ins/VST"),
+                Path.home() / "Library/Audio/Plug-Ins/VST",
+            ]
+            vst3_candidates = [
+                Path("/Library/Audio/Plug-Ins/VST3"),
+                Path.home() / "Library/Audio/Plug-Ins/VST3",
+            ]
+            _add(getattr(module, "PLUGIN_VST2", None), vst2_candidates)
+            _add(getattr(module, "PLUGIN_VST3", None), vst3_candidates)
+        else:
+            vst2_candidates = [
+                Path.home() / ".vst",
+                Path("/usr/lib/vst"),
+                Path("/usr/local/lib/vst"),
+            ]
+            vst3_candidates = [
+                Path.home() / ".vst3",
+                Path("/usr/lib/vst3"),
+                Path("/usr/local/lib/vst3"),
+            ]
+            _add(getattr(module, "PLUGIN_VST2", None), vst2_candidates)
+            _add(getattr(module, "PLUGIN_VST3", None), vst3_candidates)
+
+        return mapping
+
+    def _set_plugin_paths(self, plugin_type: int, directories: Iterable[Path]) -> None:
+        if self.host is None or self.module is None:
+            return
+        bucket = self._plugin_search_paths.setdefault(plugin_type, set())
+        for directory in directories:
+            if not directory:
+                continue
+            path = Path(directory).expanduser()
+            if path.exists():
+                bucket.add(path.resolve())
+        if not bucket:
+            return
+        ordered = [str(path) for path in sorted(bucket)]
+        text = os.pathsep.join(dict.fromkeys(ordered))
+        option = getattr(self.module, "ENGINE_OPTION_PLUGIN_PATH", None)
+        if option is not None:
+            self._set_engine_option(option, plugin_type, text)
+
+    def _register_plugin_search_path(self, plugin_type: int, plugin_path: Path) -> None:
+        directories: set[Path] = set()
+        if plugin_path.is_dir():
+            directories.add(plugin_path)
+        parent = plugin_path.parent
+        if parent != plugin_path:
+            directories.add(parent)
+        self._set_plugin_paths(plugin_type, directories)
+
     def _plugin_type_for(self, path: Path) -> int | None:
         suffix = path.suffix.lower()
         if suffix == ".vst3":
