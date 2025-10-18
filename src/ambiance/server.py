@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import atexit
 import base64
 import json
 from http import HTTPStatus
@@ -316,6 +317,7 @@ def serve(host: str = "127.0.0.1", port: int = 8000, ui: Path | None = None) -> 
     manager = PluginRackManager(base_dir=base_dir)
     vst_host = CarlaVSTHost(base_dir=base_dir)
     juce_host = JuceVST3Host(base_dir=base_dir)
+    atexit.register(vst_host.shutdown)
 
     def handler(*args: Any, **kwargs: Any) -> AmbianceRequestHandler:
         kwargs.setdefault("directory", directory)

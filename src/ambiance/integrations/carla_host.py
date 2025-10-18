@@ -13,11 +13,13 @@ we fall back to the Flutter shim, ensuring the rest of Ambiance keeps working.
 
 from __future__ import annotations
 
+import atexit
 from dataclasses import dataclass
 import importlib.util
 import os
 import sys
 import threading
+import time
 from pathlib import Path
 from types import ModuleType
 from typing import Any
@@ -110,6 +112,9 @@ class CarlaBackend:
         self._plugin_id: int | None = None
         self._plugin_path: Path | None = None
         self._parameters: list[CarlaParameterSnapshot] = []
+        self._idle_thread: threading.Thread | None = None
+        self._idle_stop: threading.Event | None = None
+        self._idle_interval = 1.0 / 120.0
 
         if not self.root:
             self.warnings.append("Carla source tree not found – set CARLA_ROOT")
@@ -137,6 +142,7 @@ class CarlaBackend:
             return
 
         self.available = True
+        atexit.register(self.close)
 
     # ------------------------------------------------------------------
     # Discovery helpers
@@ -258,6 +264,36 @@ class CarlaBackend:
             raise CarlaHostError(f"Failed to initialise Carla engine: {message}")
         self._driver_name = driver
         self._engine_running = True
+        self._start_idle_thread()
+
+    def _start_idle_thread(self) -> None:
+        if self._idle_thread and self._idle_thread.is_alive():
+            return
+        if self.host is None:
+            return
+
+        stop_event = threading.Event()
+        self._idle_stop = stop_event
+
+        def _idle_loop() -> None:
+            while not stop_event.is_set():
+                try:
+                    self.host.engine_idle()
+                except Exception as exc:  # pragma: no cover - engine specific failures
+                    self.warnings.append(f"Carla engine idle loop stopped: {exc}")
+                    break
+                time.sleep(self._idle_interval)
+
+        self._idle_thread = threading.Thread(name="CarlaEngineIdle", target=_idle_loop, daemon=True)
+        self._idle_thread.start()
+
+    def _stop_idle_thread(self) -> None:
+        if self._idle_stop:
+            self._idle_stop.set()
+        if self._idle_thread and self._idle_thread.is_alive():
+            self._idle_thread.join(timeout=1.0)
+        self._idle_thread = None
+        self._idle_stop = None
 
     def _select_driver(self) -> str | None:
         assert self.host is not None
@@ -355,6 +391,20 @@ class CarlaBackend:
             self._plugin_id = None
             self._plugin_path = None
             self._parameters = []
+
+    def close(self) -> None:
+        with self._lock:
+            if not self.available or self.host is None:
+                return
+            self.unload()
+            self._stop_idle_thread()
+            if self._engine_running:
+                try:
+                    self.host.engine_close()
+                except Exception as exc:  # pragma: no cover - engine specific shutdown
+                    self.warnings.append(f"Failed to close Carla engine: {exc}")
+            self._engine_running = False
+            self._driver_name = None
 
     def set_parameter(self, identifier: int | str, value: float) -> dict[str, Any]:
         with self._lock:
@@ -537,9 +587,14 @@ class CarlaVSTHost:
     def __init__(self, base_dir: Path | None = None) -> None:
         self.base_dir = Path(base_dir) if base_dir else Path(__file__).resolve().parents[2]
         self._backend = CarlaBackend(base_dir=self.base_dir)
-        self._fallback = FlutterVSTHost(base_dir=self.base_dir)
         self._lock = threading.RLock()
+        self._fallback = FlutterVSTHost(base_dir=self.base_dir)
         self._active: str | None = None
+
+    def shutdown(self) -> None:
+        with self._lock:
+            self._backend.close()
+            self._fallback.unload()
 
     # ------------------------------------------------------------------
     def status(self) -> dict[str, Any]:
