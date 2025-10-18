@@ -10,12 +10,15 @@ necessary DLL directories to `PATH` at runtime.
 ## Option 1 – Build with MSYS2
 
 1. Install [MSYS2](https://www.msys2.org/) and launch the *MSYS2 MinGW 64-bit*
-   shell.
-2. Install Carla's build dependencies:
+   shell (or the *MSYS2 UCRT64* shell if you prefer the UCRT toolchain).  Git
+   Bash does **not** ship with `make`, so make sure you are inside an MSYS2
+   shell before continuing.
+2. Install Carla's build dependencies, including `make` itself:
 
    ```bash
    pacman -S --needed \
-       git cmake mingw-w64-x86_64-toolchain mingw-w64-x86_64-qt5 \
+       make git cmake \
+       mingw-w64-x86_64-toolchain mingw-w64-x86_64-qt5 \
        mingw-w64-x86_64-pkg-config mingw-w64-x86_64-fftw \
        mingw-w64-x86_64-liblo mingw-w64-x86_64-ntldd-git \
        mingw-w64-x86_64-fluidsynth mingw-w64-x86_64-dlfcn
