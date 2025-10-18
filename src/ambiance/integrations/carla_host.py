@@ -117,6 +117,7 @@ class CarlaBackend:
 
         try:
             self.library_path = self._locate_library(self.root)
+            self._prepare_environment(self.library_path)
         except FileNotFoundError as exc:  # pragma: no cover - depends on build artefacts
             self.warnings.append(str(exc))
             return
@@ -148,7 +149,21 @@ class CarlaBackend:
             if candidate.exists():
                 return candidate
         default = self.base_dir / "Carla-main"
-        return default if default.exists() else None
+        if default.exists():
+            return default
+        if sys.platform.startswith("win"):
+            program_dirs = [
+                os.environ.get("PROGRAMFILES"),
+                os.environ.get("PROGRAMFILES(X86)"),
+                os.environ.get("ProgramW6432"),
+            ]
+            for prefix in program_dirs:
+                if not prefix:
+                    continue
+                candidate = Path(prefix) / "Carla"
+                if candidate.exists():
+                    return candidate
+        return None
 
     def _locate_library(self, root: Path) -> Path:
         names = (
@@ -167,6 +182,47 @@ class CarlaBackend:
             if matches:
                 return matches[0]
         raise FileNotFoundError("libcarla_standalone2 library not found; build Carla first")
+
+    def _prepare_environment(self, library: Path) -> None:
+        if os.name != "nt":
+            return
+        dll_paths = {library.parent}
+        dll_paths.update(self._windows_dependency_dirs())
+        paths: list[str] = []
+        for directory in dll_paths:
+            if not directory or not directory.exists():
+                continue
+            directory_str = str(directory)
+            paths.append(directory_str)
+            add_dir = getattr(os, "add_dll_directory", None)
+            if add_dir:
+                try:
+                    add_dir(directory_str)
+                except (FileNotFoundError, OSError):  # pragma: no cover - platform specific
+                    continue
+        if paths:
+            existing = os.environ.get("PATH", "")
+            combined = os.pathsep.join(paths + [existing]) if existing else os.pathsep.join(paths)
+            os.environ["PATH"] = combined
+
+    def _windows_dependency_dirs(self) -> set[Path]:
+        if not self.root:
+            return set()
+        candidates = {
+            self.root / "bin",
+            self.root / "build",
+            self.root / "build" / "Release",
+            self.root / "build" / "windows",
+            self.root / "build" / "win64",
+            self.root / "resources",
+            self.root / "resources" / "windows",
+            self.root / "resources" / "windows" / "lib",
+        }
+        # Include parents of the library in case dependencies sit next to it (MSVC builds)
+        if self.library_path:
+            for parent in self.library_path.parents:
+                candidates.add(parent)
+        return {path for path in candidates if path.exists()}
 
     def _load_backend_module(self, root: Path) -> ModuleType:
         frontend = root / "source" / "frontend"
