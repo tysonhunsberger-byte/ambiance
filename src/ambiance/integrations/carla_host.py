@@ -112,6 +112,7 @@ class CarlaBackend:
         self._plugin_id: int | None = None
         self._plugin_path: Path | None = None
         self._parameters: list[CarlaParameterSnapshot] = []
+        self._ui_visible = False
         self._idle_thread: threading.Thread | None = None
         self._idle_stop: threading.Event | None = None
         self._idle_interval = 1.0 / 120.0
@@ -334,9 +335,14 @@ class CarlaBackend:
                 "toolkit_path": str(self.root) if self.root else None,
                 "engine_path": str(self.library_path) if self.library_path else None,
                 "warnings": list(self.warnings),
+                "ui_visible": self._ui_visible,
             }
             if self._driver_name:
                 payload["driver"] = self._driver_name
+            payload["capabilities"] = {
+                "editor": bool(self._plugin_id is not None and self._plugin_supports_custom_ui()),
+                "instrument": bool(self._plugin_id is not None and self._plugin_is_instrument()),
+            }
             if self._plugin_id is None:
                 payload["plugin"] = None
                 payload["parameters"] = []
@@ -345,7 +351,13 @@ class CarlaBackend:
                 payload["parameters"] = [param.to_status_entry() for param in self._parameters]
             return payload
 
-    def load_plugin(self, plugin_path: str | Path, parameters: dict[str, float] | None = None) -> dict[str, Any]:
+    def load_plugin(
+        self,
+        plugin_path: str | Path,
+        parameters: dict[str, float] | None = None,
+        *,
+        show_ui: bool = False,
+    ) -> dict[str, Any]:
         path = Path(plugin_path).expanduser()
         if not path.exists():
             raise FileNotFoundError(f"Plugin not found: {path}")
@@ -374,12 +386,18 @@ class CarlaBackend:
             self._plugin_id = 0
             self._plugin_path = path
             self._parameters = self._collect_parameters()
+            self._ui_visible = False
             if parameters:
                 for key, value in parameters.items():
                     try:
                         self.set_parameter(key, float(value))
                     except CarlaHostError:
                         continue
+            if show_ui:
+                try:
+                    self._show_plugin_ui(True)
+                except CarlaHostError as exc:
+                    self.warnings.append(str(exc))
             return self._plugin_payload()
 
     def unload(self) -> None:
@@ -387,10 +405,15 @@ class CarlaBackend:
             if not self.available or self.host is None:
                 return
             if self._plugin_id is not None:
+                try:
+                    self._show_plugin_ui(False)
+                except CarlaHostError:
+                    pass
                 self.host.remove_all_plugins()
             self._plugin_id = None
             self._plugin_path = None
             self._parameters = []
+            self._ui_visible = False
 
     def close(self) -> None:
         with self._lock:
@@ -432,6 +455,20 @@ class CarlaBackend:
                 "parameters": [param.to_status_entry() for param in self._parameters],
             }
 
+    def show_ui(self) -> dict[str, Any]:
+        with self._lock:
+            if self._plugin_id is None or self.host is None:
+                raise CarlaHostError("No plugin hosted")
+            self._show_plugin_ui(True)
+            return self.status()
+
+    def hide_ui(self) -> dict[str, Any]:
+        with self._lock:
+            if self._plugin_id is None or self.host is None:
+                raise CarlaHostError("No plugin hosted")
+            self._show_plugin_ui(False)
+            return self.status()
+
     def describe_ui(self, plugin_path: str | Path | None = None) -> dict[str, Any]:
         with self._lock:
             if plugin_path is None:
@@ -447,7 +484,7 @@ class CarlaBackend:
 
             state = self._snapshot_state()
             try:
-                self.load_plugin(path)
+                self.load_plugin(path, show_ui=False)
                 return self._build_descriptor()
             finally:
                 self._restore_state(state)
@@ -523,6 +560,10 @@ class CarlaBackend:
             "path": str(self._plugin_path),
             "metadata": metadata,
             "parameters": [param.to_status_entry() for param in self._parameters],
+            "capabilities": {
+                "instrument": self._plugin_is_instrument(),
+                "editor": self._plugin_supports_custom_ui(),
+            },
         }
         return payload
 
@@ -551,6 +592,7 @@ class CarlaBackend:
             "plugin": plugin,
             "capabilities": {
                 "instrument": self._plugin_is_instrument(),
+                "editor": self._plugin_supports_custom_ui(),
             },
         }
         return descriptor
@@ -563,12 +605,36 @@ class CarlaBackend:
         flag = getattr(self.module, "PLUGIN_IS_SYNTH", 0x004) if self.module else 0x004
         return bool(hints & flag)
 
+    def _plugin_supports_custom_ui(self) -> bool:
+        if self.host is None or self._plugin_id is None:
+            return False
+        info = self.host.get_plugin_info(self._plugin_id)
+        hints = int(info.get("hints", 0))
+        flag = getattr(self.module, "PLUGIN_HAS_CUSTOM_UI", 0x008) if self.module else 0x008
+        return bool(hints & flag)
+
+    def _show_plugin_ui(self, visible: bool) -> None:
+        if self.host is None or self._plugin_id is None:
+            self._ui_visible = False
+            if visible:
+                raise CarlaHostError("No plugin hosted")
+            return
+        if visible and not self._plugin_supports_custom_ui():
+            raise CarlaHostError("Plugin does not expose a custom UI")
+        try:
+            self.host.show_custom_ui(self._plugin_id, bool(visible))
+        except Exception as exc:  # pragma: no cover - depends on host implementation
+            action = "show" if visible else "hide"
+            raise CarlaHostError(f"Failed to {action} plugin UI: {exc}") from exc
+        self._ui_visible = bool(visible)
+
     def _snapshot_state(self) -> dict[str, Any] | None:
         if self._plugin_id is None or self._plugin_path is None:
             return None
         return {
             "path": str(self._plugin_path),
             "parameters": {param.identifier: param.value for param in self._parameters},
+            "ui_visible": self._ui_visible,
         }
 
     def _restore_state(self, state: dict[str, Any] | None) -> None:
@@ -576,7 +642,7 @@ class CarlaBackend:
             self.unload()
             return
         try:
-            self.load_plugin(state["path"], state.get("parameters"))
+            self.load_plugin(state["path"], state.get("parameters"), show_ui=bool(state.get("ui_visible")))
         except Exception as exc:  # pragma: no cover - best effort restore
             self.warnings.append(f"Failed to restore Carla plugin state: {exc}")
 
@@ -616,7 +682,7 @@ class CarlaVSTHost:
             path = Path(plugin_path).expanduser()
             if self._backend.available and self._backend.can_handle_path(path):
                 try:
-                    plugin = self._backend.load_plugin(path, parameters)
+                    plugin = self._backend.load_plugin(path, parameters, show_ui=True)
                     self._fallback.unload()
                     self._active = "carla"
                     return plugin
@@ -688,6 +754,24 @@ class CarlaVSTHost:
             if self._active == "flutter":
                 return self._fallback.describe_ui()
             raise RuntimeError("No plugin hosted")
+
+    def show_ui(self) -> dict[str, Any]:
+        with self._lock:
+            if self._active != "carla":
+                raise RuntimeError("Hosted plugin does not expose a native UI")
+            try:
+                return self._backend.show_ui()
+            except CarlaHostError as exc:
+                raise RuntimeError(str(exc)) from exc
+
+    def hide_ui(self) -> dict[str, Any]:
+        with self._lock:
+            if self._active != "carla":
+                raise RuntimeError("Hosted plugin does not expose a native UI")
+            try:
+                return self._backend.hide_ui()
+            except CarlaHostError as exc:
+                raise RuntimeError(str(exc)) from exc
 
 
 __all__ = ["CarlaVSTHost", "CarlaHostError"]

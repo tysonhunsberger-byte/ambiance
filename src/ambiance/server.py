@@ -260,6 +260,28 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
                     }
                 )
                 return
+            if path == "/api/vst/editor/open":
+                try:
+                    status = self.vst_host.show_ui()
+                except RuntimeError as exc:
+                    self._send_json(
+                        {"ok": False, "error": str(exc), "status": self.vst_host.status()},
+                        HTTPStatus.BAD_REQUEST,
+                    )
+                    return
+                self._send_json({"ok": True, "status": status})
+                return
+            if path == "/api/vst/editor/close":
+                try:
+                    status = self.vst_host.hide_ui()
+                except RuntimeError as exc:
+                    self._send_json(
+                        {"ok": False, "error": str(exc), "status": self.vst_host.status()},
+                        HTTPStatus.BAD_REQUEST,
+                    )
+                    return
+                self._send_json({"ok": True, "status": status})
+                return
             if path == "/api/juce/open":
                 if not self.juce_host:
                     self._send_json({"ok": False, "error": "JUCE host not configured"}, HTTPStatus.BAD_REQUEST)
