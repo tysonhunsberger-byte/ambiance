@@ -361,7 +361,8 @@ class FlutterVSTToolkit:
         descriptor["parameters"] = snapshot
         descriptor["plugin"] = metadata.to_dict()
         descriptor["capabilities"] = {
-            "instrument": "instrument" in (metadata.category or "").lower()
+            "instrument": "instrument" in (metadata.category or "").lower(),
+            "editor": False,
         }
         return descriptor
 
@@ -668,6 +669,10 @@ class FlutterVSTInstance(AudioEffect):
             "path": str(self.plugin_path),
             "metadata": self.metadata.to_dict(),
             "parameters": self.parameter_snapshot(),
+            "capabilities": {
+                "instrument": self._is_instrument,
+                "editor": False,
+            },
         }
 
 
@@ -694,13 +699,17 @@ class FlutterVSTHost:
                 "available": self.toolkit.available,
                 "toolkit_path": str(self.toolkit.root) if self.toolkit.root else None,
                 "warnings": self.toolkit.warnings(),
+                "ui_visible": False,
             }
             if self._instance is None:
                 payload["plugin"] = None
                 payload["parameters"] = []
+                payload["capabilities"] = {"editor": False, "instrument": False}
             else:
-                payload["plugin"] = self._instance.to_dict()
-                payload["parameters"] = self._instance.parameter_snapshot()
+                plugin_payload = self._instance.to_dict()
+                payload["plugin"] = plugin_payload
+                payload["parameters"] = plugin_payload.get("parameters", [])
+                payload["capabilities"] = dict(plugin_payload.get("capabilities", {}))
             return payload
 
     def load_plugin(self, plugin_path: str | Path, parameters: dict[str, float] | None = None) -> dict[str, Any]:

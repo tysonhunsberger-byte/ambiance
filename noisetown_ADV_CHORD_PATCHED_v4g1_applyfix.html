@@ -846,11 +846,12 @@ function bootAudio(){
         <header class="host-header">
           <div class="host-title">
             <h3>Live VST Host</h3>
-            <p class="host-subtitle small">Powered by Flutter VST3 toolkit</p>
+            <p class="host-subtitle small">Powered by the embedded Carla engine</p>
           </div>
           <div class="host-actions">
             <button class="btn hostLoad" disabled>⬆️ Load Selected</button>
             <button class="btn hostUnload" disabled>⏏ Unload</button>
+            <button class="btn hostEditor" type="button" disabled hidden>🪟 Show Plugin UI</button>
             <button class="btn hostPreview" disabled>▶️ Preview</button>
           </div>
         </header>
@@ -896,6 +897,7 @@ function bootAudio(){
         <footer class="instrument-footer">
           <div class="instrument-status small">Load an instrument plugin to begin.</div>
           <label class="instrument-velocity small">Velocity <input class="instrument-velocity-slider" type="range" min="0.2" max="1" step="0.05" value="0.85"></label>
+          <button class="btn instrument-open-ui" type="button" hidden>🪟 Show UI</button>
           <button class="btn instrument-preview-note" type="button">🎺 Preview</button>
         </footer>
       </section>
@@ -929,6 +931,7 @@ function bootAudio(){
     const hostLoadBtn = q('.hostLoad');
     const hostUnloadBtn = q('.hostUnload');
     const hostPreviewBtn = q('.hostPreview');
+    const hostEditorBtn = q('.hostEditor');
     const juceHostPanel = q('.juce-host-panel');
     const juceHostStatusBox = q('.juceHostStatus');
     const juceHostLaunchBtn = q('.juceHostLaunch');
@@ -945,6 +948,7 @@ function bootAudio(){
     const instrumentStatus = q('.instrument-status');
     const instrumentVelocitySlider = q('.instrument-velocity-slider');
     const instrumentPreviewBtn = q('.instrument-preview-note');
+    const instrumentOpenUiBtn = q('.instrument-open-ui');
     const instrumentOctaveLabel = q('.instrument-octave-label');
     const instrumentOctDown = q('.instrument-octave-down');
     const instrumentOctUp = q('.instrument-octave-up');
@@ -1157,10 +1161,17 @@ function bootAudio(){
       const plugin = hostState.status && hostState.status.plugin;
       const descriptor = instrumentState.descriptor;
       const isInstrument = descriptor && descriptor.capabilities && descriptor.capabilities.instrument;
+      const statusCaps = hostState.status && hostState.status.capabilities ? hostState.status.capabilities : {};
+      const pluginCaps = plugin && plugin.capabilities ? plugin.capabilities : {};
+      const editorCapable = !!(pluginCaps.editor || statusCaps.editor);
+      const editorVisible = !!(hostState.status && hostState.status.ui_visible);
       if(!plugin || !isInstrument){
         instrumentPanel.hidden = true;
         if(instrumentStatus){
           instrumentStatus.textContent = plugin ? 'This plugin does not expose instrument playback.' : 'Load an instrument plugin to begin.';
+        }
+        if(instrumentOpenUiBtn){
+          instrumentOpenUiBtn.hidden = true;
         }
         return;
       }
@@ -1191,6 +1202,13 @@ function bootAudio(){
       }
       if(instrumentVelocitySlider){
         instrumentVelocitySlider.value = instrumentState.velocity;
+      }
+      if(instrumentOpenUiBtn){
+        instrumentOpenUiBtn.hidden = !editorCapable;
+        instrumentOpenUiBtn.disabled = !editorCapable || hostState.busy;
+        if(editorCapable){
+          instrumentOpenUiBtn.textContent = editorVisible ? '🪟 Hide UI' : '🪟 Show UI';
+        }
       }
     }
 
@@ -1263,17 +1281,21 @@ function bootAudio(){
       const status = hostState.status;
       const available = !!(status && status.available);
       const plugin = status && status.plugin;
+      const statusCaps = status && status.capabilities ? status.capabilities : {};
+      const pluginCaps = plugin && plugin.capabilities ? plugin.capabilities : {};
+      const editorCapable = !!(pluginCaps.editor || statusCaps.editor);
+      const editorVisible = !!(status && status.ui_visible);
       if(hostStatusBox){
         if(!status){
           hostStatusBox.textContent = 'Toolkit status pending…';
         }else if(!available){
-          hostStatusBox.textContent = 'Flutter VST toolkit not detected. Install it to enable realtime hosting.';
+          hostStatusBox.textContent = 'Carla backend not detected. Build Carla to enable realtime hosting.';
         }else if(plugin){
           const name = plugin.metadata && plugin.metadata.name ? plugin.metadata.name : 'Plugin';
           const vendor = plugin.metadata && plugin.metadata.vendor ? ` · ${plugin.metadata.vendor}` : '';
           hostStatusBox.textContent = `Hosting ${name}${vendor}.`;
         }else{
-          hostStatusBox.textContent = 'Toolkit ready. Load a plugin from the library to begin.';
+          hostStatusBox.textContent = 'Host ready. Load a plugin from the library to begin.';
         }
       }
       if(hostWarnings){
@@ -1334,6 +1356,13 @@ function bootAudio(){
       }
       if(hostPreviewBtn){
         hostPreviewBtn.disabled = !available || !plugin || hostState.busy;
+      }
+      if(hostEditorBtn){
+        hostEditorBtn.hidden = !editorCapable;
+        hostEditorBtn.disabled = !available || !plugin || !editorCapable || hostState.busy;
+        if(editorCapable){
+          hostEditorBtn.textContent = editorVisible ? '🪟 Hide Plugin UI' : '🪟 Show Plugin UI';
+        }
       }
       renderInstrumentPanel();
       renderJuceHost();
@@ -1574,6 +1603,45 @@ function bootAudio(){
         })
         .catch((err)=>{
           log('Preview failed: ' + (err && err.message || err));
+        })
+        .finally(()=>{
+          hostState.busy = false;
+          renderHost();
+        });
+    }
+
+    function toggleHostEditor(){
+      const status = hostState.status;
+      const plugin = status && status.plugin;
+      if(!status || !plugin){
+        log('Load a plugin into the host first.');
+        return;
+      }
+      const statusCaps = status.capabilities || {};
+      const pluginCaps = plugin.capabilities || {};
+      const editorCapable = !!(pluginCaps.editor || statusCaps.editor);
+      if(!editorCapable){
+        log('Hosted plugin does not expose a native UI.');
+        return;
+      }
+      const visible = !!status.ui_visible;
+      const endpoint = visible ? '/api/vst/editor/close' : '/api/vst/editor/open';
+      hostState.busy = true;
+      renderHost();
+      fetch(endpoint, { method: 'POST' })
+        .then((res)=>{
+          if(!res.ok) throw new Error('status ' + res.status);
+          return res.json();
+        })
+        .then((payload)=>{
+          if(!payload.ok) throw new Error(payload.error || 'UI toggle failed');
+          hostState.status = payload.status;
+          renderHost();
+          log(visible ? 'Plugin UI hidden.' : 'Plugin UI opened.');
+        })
+        .catch((err)=>{
+          log('Plugin UI toggle failed: ' + (err && err.message || err));
+          refreshHostStatus();
         })
         .finally(()=>{
           hostState.busy = false;
@@ -1947,6 +2015,12 @@ function bootAudio(){
         previewHost();
       });
     }
+    if(hostEditorBtn){
+      hostEditorBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        toggleHostEditor();
+      });
+    }
     if(juceHostLaunchBtn){
       juceHostLaunchBtn.addEventListener('click', (event)=>{
         event.preventDefault();
@@ -1992,6 +2066,12 @@ function bootAudio(){
         event.preventDefault();
         const note = middleInstrumentNote();
         triggerInstrumentPlayback(note, instrumentState.velocity);
+      });
+    }
+    if(instrumentOpenUiBtn){
+      instrumentOpenUiBtn.addEventListener('click', (event)=>{
+        event.preventDefault();
+        toggleHostEditor();
       });
     }
 
