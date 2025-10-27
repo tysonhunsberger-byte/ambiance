@@ -16,6 +16,7 @@ from .core.engine import AudioEngine
 from .core.registry import registry
 from .integrations.plugins import PluginRackManager
 from .integrations.flutter_vst_host import FlutterVSTHost
+from .integrations.carla_host import CarlaHost
 from .integrations.juce_vst3_host import JuceVST3Host
 from .utils.audio import encode_wav_bytes
 
@@ -67,12 +68,14 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
         manager: PluginRackManager,
         ui_path: Path,
         vst_host: FlutterVSTHost,
+        carla_host: CarlaHost,
         juce_host: JuceVST3Host | None,
         **kwargs: Any,
     ) -> None:
         self.manager = manager
         self.ui_path = ui_path
         self.vst_host = vst_host
+        self.carla_host = carla_host
         self.juce_host = juce_host
         super().__init__(*args, directory=directory, **kwargs)
 
@@ -102,6 +105,10 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
             return
         if path == "/api/vst/status":
             status = self.vst_host.status()
+            self._send_json({"ok": True, "status": status})
+            return
+        if path == "/api/carla/status":
+            status = self.carla_host.status().to_dict()
             self._send_json({"ok": True, "status": status})
             return
         if path == "/api/juce/status":
@@ -194,6 +201,28 @@ class AmbianceRequestHandler(SimpleHTTPRequestHandler):
             if path == "/api/vst/unload":
                 self.vst_host.unload()
                 self._send_json({"ok": True, "status": self.vst_host.status()})
+                return
+            if path == "/api/carla/launch":
+                payload = self._read_json()
+                plugin_path = payload.get("path")
+                if not plugin_path:
+                    self._send_json({"ok": False, "error": "Missing 'path'"}, HTTPStatus.BAD_REQUEST)
+                    return
+                plugin_format = payload.get("format")
+                arch = payload.get("arch")
+                label = payload.get("label")
+                status = self.carla_host.launch(
+                    plugin_path,
+                    plugin_format=plugin_format,
+                    arch=arch,
+                    label=label,
+                ).to_dict()
+                http_status = HTTPStatus.OK if status.get("running") else HTTPStatus.BAD_REQUEST
+                self._send_json({"ok": status.get("running", False), "status": status}, http_status)
+                return
+            if path == "/api/carla/terminate":
+                status = self.carla_host.terminate().to_dict()
+                self._send_json({"ok": True, "status": status})
                 return
             if path == "/api/vst/parameter":
                 payload = self._read_json()
@@ -308,6 +337,7 @@ def serve(host: str = "127.0.0.1", port: int = 8000, ui: Path | None = None) -> 
     ui_path = Path(ui) if ui else base_dir / "noisetown_ADV_CHORD_PATCHED_v4g1_applyfix.html"
     manager = PluginRackManager(base_dir=base_dir)
     vst_host = FlutterVSTHost(base_dir=base_dir)
+    carla_host = CarlaHost(base_dir=base_dir)
     juce_host = JuceVST3Host(base_dir=base_dir)
 
     def handler(*args: Any, **kwargs: Any) -> AmbianceRequestHandler:
@@ -315,6 +345,7 @@ def serve(host: str = "127.0.0.1", port: int = 8000, ui: Path | None = None) -> 
         kwargs.setdefault("manager", manager)
         kwargs.setdefault("ui_path", ui_path)
         kwargs.setdefault("vst_host", vst_host)
+        kwargs.setdefault("carla_host", carla_host)
         kwargs.setdefault("juce_host", juce_host)
         return AmbianceRequestHandler(*args, **kwargs)
 

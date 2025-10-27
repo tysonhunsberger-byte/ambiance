@@ -10,6 +10,8 @@ lane-based routing, A/B comparisons, and lightweight session management.
 - **Composable audio engine** – Combine any number of sources and effects.
 - **Plugin rack integration** – Drop plugins into the workspace directory and assign
   them to streams with dedicated A/B lanes.
+- **Carla bridge integration** – Launch Carla's bridge scripts directly from the UI
+  to experiment with VST2 and VST3 plugins without compiling native hosts.
 - **Desktop plugin UI bridge** – Launch a JUCE-based host from the browser to open
   the real plugin editor while keeping the Ambiance routing UI intact.
 - **Bundled Modalys starter** – A Modalys (Max) external is copied into the rack
