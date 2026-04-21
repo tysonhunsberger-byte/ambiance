@@ -4463,6 +4463,32 @@ new MutationObserver(m=> m.forEach(r=> r.addedNodes && r.addedNodes.forEach(n=> 
   });
 })();
 </script>
+
+<section id="strudelRawSequencer" style="margin:12px;border:1px solid #6a7ea6;border-radius:8px;padding:12px;background:#141b2a;color:#e9f0ff;">
+  <h3 style="margin:0 0 8px 0;">Strudel Sequencer (Raw Code)</h3>
+  <p style="margin:0 0 10px 0;font-size:12px;opacity:.9;">
+    Keep this simple: write or paste raw Strudel code directly, then run it in strudel.cc or your Strudel runtime.
+  </p>
+  <label for="strudelRawCode" style="display:block;margin-bottom:6px;font-weight:600;">Raw Strudel code</label>
+  <textarea id="strudelRawCode" spellcheck="false" style="width:100%;min-height:180px;background:#0d1320;color:#f3f7ff;border:1px solid #5f739a;border-radius:6px;padding:8px;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;">// Groove base
+stack(
+  s("bd ~ bd cp").fast(1),
+  s("hh*8").gain(0.45),
+  note("c2 [eb2 g2] bb2").s("sawtooth").slow(2).lpf(900)
+)
+.room(0.28)
+.size(0.9)
+.swingBy(0.1, 0.25)
+
+// Ambient option
+note("<c4 eb4 g4 bb4>")
+  .s("triangle")
+  .slow(3)
+  .room(0.7)
+  .size(1)
+  .sometimesBy(0.2, rev)</textarea>
+</section>
+
 </body>
 </html>
 
